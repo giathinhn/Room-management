@@ -1,0 +1,183 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  admin
+  approver
+  user
+}
+
+enum BookingStatus {
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum Frequency {
+  daily
+  weekly
+  monthly
+}
+
+enum NotificationType {
+  booking_approved
+  booking_rejected
+  booking_cancelled
+  booking_reminder
+  new_booking_pending
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name") @db.VarChar(100)
+  role         Role     @default(user)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  bookings          Booking[]         @relation("UserBookings")
+  approvedBookings  Booking[]         @relation("ApprovedBookings")
+  refreshTokens     RefreshToken[]
+  recurringBookings RecurringBooking[]
+  notifications     Notification[]
+  comments          BookingComment[]
+  templates         BookingTemplate[]
+
+  @@map("users")
+}
+
+model Room {
+  id        String   @id @default(uuid())
+  name      String   @unique @db.VarChar(100)
+  capacity  Int
+  location  String   @db.VarChar(200)
+  equipment String[]
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bookings          Booking[]
+  recurringBookings RecurringBooking[]
+  templates         BookingTemplate[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id              String        @id @default(uuid())
+  roomId          String        @map("room_id")
+  userId          String        @map("user_id")
+  title           String        @db.VarChar(200)
+  startTime       DateTime      @map("start_time")
+  endTime         DateTime      @map("end_time")
+  status          BookingStatus @default(pending)
+  approvedBy      String?       @map("approved_by")
+  approvedAt      DateTime?     @map("approved_at")
+  rejectionReason String?       @map("rejection_reason") @db.Text
+  recurringId     String?       @map("recurring_id")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  room      Room              @relation(fields: [roomId], references: [id])
+  user      User              @relation("UserBookings", fields: [userId], references: [id])
+  approver  User?             @relation("ApprovedBookings", fields: [approvedBy], references: [id])
+  recurring RecurringBooking? @relation(fields: [recurringId], references: [id])
+  comments      BookingComment[]
+  notifications Notification[]
+
+  @@map("bookings")
+}
+
+model RecurringBooking {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  roomId    String    @map("room_id")
+  frequency Frequency
+  startDate DateTime  @map("start_date") @db.Date
+  endDate   DateTime  @map("end_date") @db.Date
+  startTime DateTime  @map("start_time") @db.Time()
+  endTime   DateTime  @map("end_time") @db.Time()
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user     User      @relation(fields: [userId], references: [id])
+  room     Room      @relation(fields: [roomId], references: [id])
+  bookings Booking[]
+
+  @@map("recurring_bookings")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @db.VarChar(500)
+  expiresAt DateTime @map("expires_at")
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  message   String
+  bookingId String?          @map("booking_id")
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+
+  @@map("notifications")
+}
+
+model BookingComment {
+  id        String   @id @default(uuid())
+  bookingId String   @map("booking_id")
+  userId    String   @map("user_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("booking_comments")
+}
+
+model BookingTemplate {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String   @db.VarChar(100)
+  roomId    String?  @map("room_id")
+  title     String   @db.VarChar(200)
+  startTime DateTime @map("start_time") @db.Time()
+  endTime   DateTime @map("end_time") @db.Time()
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User  @relation(fields: [userId], references: [id])
+  room Room? @relation(fields: [roomId], references: [id])
+
+  @@map("booking_templates")
+}

@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - Swagger UI truy cập tại `/api-docs`
 - Tất cả endpoints được document đầy đủ (request/response/auth)
 - Docker Compose chạy production-ready
@@ -66,6 +67,7 @@ module.exports = swaggerJsDoc(options);
 ### 3. Mount Swagger UI
 
 **Thêm vào `src/app.js`**:
+
 ```js
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
@@ -112,13 +114,13 @@ router.post('/login', validate(loginSchema), authController.login);
 
 ### 5. Schemas cần document
 
-| Schema | Properties |
-|--------|------------|
-| User | id, email, fullName, role, isActive, createdAt |
-| Room | id, name, capacity, location, equipment, isActive |
-| Booking | id, roomId, userId, title, startTime, endTime, status, approvedBy, rejectionReason |
-| Pagination | total, page, limit, totalPages |
-| Error | success (false), error: { message, details? } |
+| Schema     | Properties                                                                         |
+| ---------- | ---------------------------------------------------------------------------------- |
+| User       | id, email, fullName, role, isActive, createdAt                                     |
+| Room       | id, name, capacity, location, equipment, isActive                                  |
+| Booking    | id, roomId, userId, title, startTime, endTime, status, approvedBy, rejectionReason |
+| Pagination | total, page, limit, totalPages                                                     |
+| Error      | success (false), error: { message, details? }                                      |
 
 ### 6. Tags (nhóm API)
 
@@ -140,6 +142,7 @@ tags: [
 ### 7. Backend Dockerfile
 
 **`backend/Dockerfile`**:
+
 ```dockerfile
 # Build stage
 FROM node:20-alpine AS builder
@@ -162,6 +165,7 @@ CMD ["node", "src/server.js"]
 ### 8. Frontend Dockerfile
 
 **`frontend/Dockerfile`**:
+
 ```dockerfile
 # Build stage
 FROM node:20-alpine AS builder
@@ -179,6 +183,7 @@ EXPOSE 80
 ```
 
 **`frontend/nginx.conf`**:
+
 ```nginx
 server {
     listen 80;
@@ -207,6 +212,7 @@ server {
 ### 9. Docker Compose (Production)
 
 **`docker-compose.yml`** — cập nhật:
+
 ```yaml
 version: '3.8'
 
@@ -310,12 +316,12 @@ Root:
 
 ## Tiêu chí hoàn thành
 
-- [ ] Swagger UI truy cập tại http://localhost:5000/api-docs
-- [ ] Tất cả endpoints có documentation (request body, responses, auth)
-- [ ] Có thể test API trực tiếp từ Swagger UI
-- [ ] `docker-compose up --build` chạy thành công từ đầu
-- [ ] Frontend accessible tại http://localhost
-- [ ] Backend API accessible tại http://localhost:5000
-- [ ] Database migrate + seed tự động khi khởi chạy
-- [ ] README.md hướng dẫn đầy đủ
-- [ ] Health check cho database trong docker-compose
+- [X] Swagger UI truy cập tại http://localhost:5000/api-docs
+- [X] Tất cả endpoints có documentation (request body, responses, auth)
+- [X] Có thể test API trực tiếp từ Swagger UI
+- [X] `docker-compose up --build` chạy thành công từ đầu
+- [X] Frontend accessible tại http://localhost
+- [X] Backend API accessible tại http://localhost:5000
+- [X] Database migrate + seed tự động khi khởi chạy
+- [X] README.md hướng dẫn đầy đủ
+- [X] Health check cho database trong docker-compose

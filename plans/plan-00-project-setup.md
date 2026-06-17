@@ -377,11 +377,11 @@ EMAIL_FROM=
 
 ## Tiêu chí hoàn thành
 
-- [ ] `docker-compose up` chạy thành công cả 3 service (db, backend, frontend)
-- [ ] `GET /api/health` trả về `{ status: "ok", timestamp: "..." }`
-- [ ] Prisma migrate tạo đúng 8 bảng: `users`, `rooms`, `bookings`, `recurring_bookings`, `refresh_tokens`, `notifications`, `booking_comments`, `booking_templates`
-- [ ] Seed data chạy thành công, có thể xem qua `npx prisma studio`
-- [ ] Frontend hiển thị trang HomePage tại `http://localhost:5173`
-- [ ] Axios instance đã cấu hình proxy tới backend
-- [ ] ESLint + Prettier chạy không lỗi
-- [ ] Global error handler middleware hoạt động (trả JSON error response)
+- [X] `docker-compose up` chạy thành công cả 3 service (db, backend, frontend)
+- [X] `GET /api/health` trả về `{ status: "ok", timestamp: "..." }`
+- [X] Prisma migrate tạo đúng 8 bảng: `users`, `rooms`, `bookings`, `recurring_bookings`, `refresh_tokens`, `notifications`, `booking_comments`, `booking_templates`
+- [X] Seed data chạy thành công, có thể xem qua `npx prisma studio`
+- [X] Frontend hiển thị trang HomePage tại `http://localhost:5173`
+- [X] Axios instance đã cấu hình proxy tới backend
+- [X] ESLint + Prettier chạy không lỗi
+- [X] Global error handler middleware hoạt động (trả JSON error response)

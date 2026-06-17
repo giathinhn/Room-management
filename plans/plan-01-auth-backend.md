@@ -285,13 +285,13 @@ Authorization: Bearer <user-token>
 
 ## Tiêu chí hoàn thành
 
-- [ ] Register tạo user mới, hash password, trả JWT tokens
-- [ ] Login xác thực đúng, trả tokens
-- [ ] Refresh token tạo access token mới
-- [ ] Logout thu hồi refresh token
-- [ ] Middleware `authenticate` chặn request không có token
-- [ ] Middleware `authorize` chặn user không đủ quyền
-- [ ] Validation trả lỗi chi tiết khi input sai format
-- [ ] Profile API hoạt động (xem, sửa, đổi mật khẩu)
-- [ ] Admin user management API hoạt động
-- [ ] Tất cả error trả về JSON format thống nhất: `{ success: false, error: { message, details? } }`
+- [X] Register tạo user mới, hash password, trả JWT tokens
+- [X] Login xác thực đúng, trả tokens
+- [X] Refresh token tạo access token mới
+- [X] Logout thu hồi refresh token
+- [X] Middleware `authenticate` chặn request không có token
+- [X] Middleware `authorize` chặn user không đủ quyền
+- [X] Validation trả lỗi chi tiết khi input sai format
+- [X] Profile API hoạt động (xem, sửa, đổi mật khẩu)
+- [X] Admin user management API hoạt động
+- [X] Tất cả error trả về JSON format thống nhất: `{ success: false, error: { message, details? } }`
