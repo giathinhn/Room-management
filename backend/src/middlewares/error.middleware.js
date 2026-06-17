@@ -61,6 +61,7 @@ const errorMiddleware = (err, req, res, _next) => {
     error: {
       statusCode,
       message,
+      ...(err.details && { details: err.details }),
       ...(isDev && !isOperational && { stack: err.stack }),
     },
   });

@@ -17,15 +17,18 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
     "@prisma/client": "^5.22.0",
-    "dotenv": "^16.4.5"
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "prisma": "^5.22.0",
-    "nodemon": "^3.1.7",
     "eslint": "^8.57.1",
-    "prettier": "^3.3.3"
+    "nodemon": "^3.1.7",
+    "prettier": "^3.3.3",
+    "prisma": "^5.22.0"
   }
 }

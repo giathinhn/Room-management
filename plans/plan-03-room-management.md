@@ -9,6 +9,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành plan này:
+
 - Admin có thể thêm/sửa/xóa (soft-delete) phòng họp
 - Tất cả user có thể xem danh sách phòng + chi tiết phòng
 - Giao diện hiển thị phòng dạng card grid, có filter và search
@@ -22,16 +23,17 @@ Sau khi hoàn thành plan này:
 
 **`src/repositories/room.repository.js`**:
 
-| Method | Mô tả |
-|--------|--------|
-| `findAll(filters)` | Danh sách phòng (phân trang, filter theo capacity, location, equipment, isActive) |
-| `findById(id)` | Chi tiết phòng |
-| `create(data)` | Tạo phòng mới |
-| `update(id, data)` | Cập nhật phòng |
-| `softDelete(id)` | Set `isActive = false` |
+| Method                                          | Mô tả                                                                                            |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `findAll(filters)`                            | Danh sách phòng (phân trang, filter theo capacity, location, equipment, isActive)               |
+| `findById(id)`                                | Chi tiết phòng                                                                                   |
+| `create(data)`                                | Tạo phòng mới                                                                                   |
+| `update(id, data)`                            | Cập nhật phòng                                                                                  |
+| `softDelete(id)`                              | Set `isActive = false`                                                                           |
 | `findAvailable(startTime, endTime, filters?)` | Tìm phòng trống trong khoảng thời gian — LEFT JOIN bookings, loại phòng có booking trùng |
 
 **Query tìm phòng trống (quan trọng):**
+
 ```sql
 -- Phòng trống = phòng KHÔNG CÓ booking nào overlap với [startTime, endTime]
 -- Booking overlap khi: booking.start < endTime AND booking.end > startTime
@@ -50,38 +52,38 @@ AND rooms.id NOT IN (
 
 **`src/validators/room.validator.js`**:
 
-| Schema | Fields | Rules |
-|--------|--------|-------|
-| `createRoomSchema` | name, capacity, location, equipment | name: 1–100 ký tự, capacity: 1–500, location: 1–200, equipment: mảng string |
-| `updateRoomSchema` | name?, capacity?, location?, equipment? | Tất cả optional, rules giống create |
-| `queryRoomSchema` | page?, limit?, capacity?, location?, equipment?, search? | page ≥ 1, limit 1–100, capacity ≥ 1 |
-| `availableRoomSchema` | startTime, endTime, capacity?, equipment? | startTime < endTime, cả hai phải là ISO datetime |
+| Schema                  | Fields                                                   | Rules                                                                             |
+| ----------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `createRoomSchema`    | name, capacity, location, equipment                      | name: 1–100 ký tự, capacity: 1–500, location: 1–200, equipment: mảng string |
+| `updateRoomSchema`    | name?, capacity?, location?, equipment?                  | Tất cả optional, rules giống create                                            |
+| `queryRoomSchema`     | page?, limit?, capacity?, location?, equipment?, search? | page ≥ 1, limit 1–100, capacity ≥ 1                                            |
+| `availableRoomSchema` | startTime, endTime, capacity?, equipment?                | startTime < endTime, cả hai phải là ISO datetime                               |
 
 ### 3. Service Layer
 
 **`src/services/room.service.js`**:
 
-| Method | Logic |
-|--------|-------|
-| `getAll(filters)` | Validate query → Lấy danh sách rooms (chỉ isActive=true cho non-admin) → Trả kèm totalCount cho phân trang |
-| `getById(id)` | Tìm room → Nếu không tồn tại → 404 |
-| `create(data)` | Validate → Kiểm tra tên phòng trùng → Tạo room |
-| `update(id, data)` | Validate → Tìm room → Kiểm tra tên trùng (nếu đổi tên) → Cập nhật |
-| `delete(id)` | Tìm room → Soft-delete (isActive = false) |
-| `findAvailable(startTime, endTime, filters)` | Validate thời gian → Query phòng trống → Filter thêm theo capacity, equipment |
+| Method                                         | Logic                                                                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `getAll(filters)`                            | Validate query → Lấy danh sách rooms (chỉ isActive=true cho non-admin) → Trả kèm totalCount cho phân trang |
+| `getById(id)`                                | Tìm room → Nếu không tồn tại → 404                                                                          |
+| `create(data)`                               | Validate → Kiểm tra tên phòng trùng → Tạo room                                                              |
+| `update(id, data)`                           | Validate → Tìm room → Kiểm tra tên trùng (nếu đổi tên) → Cập nhật                                     |
+| `delete(id)`                                 | Tìm room → Soft-delete (isActive = false)                                                                        |
+| `findAvailable(startTime, endTime, filters)` | Validate thời gian → Query phòng trống → Filter thêm theo capacity, equipment                                |
 
 ### 4. Controller Layer
 
 **`src/controllers/room.controller.js`**:
 
-| Method | Request | Response |
-|--------|---------|----------|
-| `getAll(req, res)` | Query: page, limit, capacity, location, equipment, search | 200: { data: Room[], pagination: { total, page, limit, totalPages } } |
-| `getById(req, res)` | Params: id | 200: { data: Room } |
-| `create(req, res)` | Body: { name, capacity, location, equipment } | 201: { data: Room } |
-| `update(req, res)` | Params: id, Body: { name?, capacity?, location?, equipment? } | 200: { data: Room } |
-| `delete(req, res)` | Params: id | 200: { message: "Room deactivated" } |
-| `findAvailable(req, res)` | Query: startTime, endTime, capacity?, equipment? | 200: { data: Room[] } |
+| Method                      | Request                                                       | Response                                                              |
+| --------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `getAll(req, res)`        | Query: page, limit, capacity, location, equipment, search     | 200: { data: Room[], pagination: { total, page, limit, totalPages } } |
+| `getById(req, res)`       | Params: id                                                    | 200: { data: Room }                                                   |
+| `create(req, res)`        | Body: { name, capacity, location, equipment }                 | 201: { data: Room }                                                   |
+| `update(req, res)`        | Params: id, Body: { name?, capacity?, location?, equipment? } | 200: { data: Room }                                                   |
+| `delete(req, res)`        | Params: id                                                    | 200: { message: "Room deactivated" }                                  |
+| `findAvailable(req, res)` | Query: startTime, endTime, capacity?, equipment?              | 200: { data: Room[] }                                                 |
 
 ### 5. Routes
 
@@ -106,20 +108,21 @@ router.delete('/:id',    authenticate, authorize('admin'), roomController.delete
 
 **`src/services/room.service.js`**:
 
-| Method | API Call |
-|--------|----------|
-| `getRooms(params)` | GET /api/rooms?page=&limit=&capacity=&search= |
-| `getRoom(id)` | GET /api/rooms/:id |
-| `createRoom(data)` | POST /api/rooms |
-| `updateRoom(id, data)` | PUT /api/rooms/:id |
-| `deleteRoom(id)` | DELETE /api/rooms/:id |
-| `getAvailableRooms(params)` | GET /api/rooms/available?startTime=&endTime= |
+| Method                        | API Call                                      |
+| ----------------------------- | --------------------------------------------- |
+| `getRooms(params)`          | GET /api/rooms?page=&limit=&capacity=&search= |
+| `getRoom(id)`               | GET /api/rooms/:id                            |
+| `createRoom(data)`          | POST /api/rooms                               |
+| `updateRoom(id, data)`      | PUT /api/rooms/:id                            |
+| `deleteRoom(id)`            | DELETE /api/rooms/:id                         |
+| `getAvailableRooms(params)` | GET /api/rooms/available?startTime=&endTime=  |
 
 ### 7. Pages
 
 #### `src/pages/RoomsPage.jsx` — Danh sách phòng
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ 🏢 Phòng họp                      [+ Thêm phòng] │  ← Nút chỉ hiện cho Admin
@@ -139,6 +142,7 @@ router.delete('/:id',    authenticate, authorize('admin'), roomController.delete
 ```
 
 **Features:**
+
 - Card grid responsive (3 cols desktop, 2 cols tablet)
 - Mỗi card hiển thị: tên, sức chứa, vị trí, equipment badges
 - Filter: search text, capacity range, equipment checkboxes
@@ -149,6 +153,7 @@ router.delete('/:id',    authenticate, authorize('admin'), roomController.delete
 #### `src/pages/RoomDetailPage.jsx` — Chi tiết phòng
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │ ← Quay lại               [Sửa] [Xóa]           │
@@ -171,12 +176,14 @@ router.delete('/:id',    authenticate, authorize('admin'), roomController.delete
 ### 8. Components
 
 #### `src/components/rooms/RoomCard.jsx`
+
 - Props: room, onEdit, onDelete, isAdmin
 - Hiển thị: tên, capacity badge, location, equipment icons
 - Hover effect: subtle lift + shadow
 - Badges cho equipment: icon + label
 
 #### `src/components/rooms/RoomForm.jsx` (Modal)
+
 - Dùng cho cả Create và Edit (prop: `room?` để prefill)
 - Fields: tên phòng, sức chứa (number input), vị trí (text), thiết bị (checkbox group)
 - Thiết bị options: Máy chiếu, Micro, Bảng trắng, TV, Webcam, Loa, Điều hòa
@@ -184,11 +191,13 @@ router.delete('/:id',    authenticate, authorize('admin'), roomController.delete
 - Hiển thị dạng modal overlay
 
 #### `src/components/rooms/RoomFilter.jsx`
+
 - Search input (debounce 300ms)
 - Capacity dropdown: Tất cả / 1-5 / 6-10 / 11-20 / 20+
 - Equipment multi-select checkboxes
 
 #### `src/components/common/Modal.jsx`
+
 - Reusable modal component
 - Props: isOpen, onClose, title, children
 - Animation: fade-in + scale
@@ -196,15 +205,18 @@ router.delete('/:id',    authenticate, authorize('admin'), roomController.delete
 - Backdrop blur
 
 #### `src/components/common/Pagination.jsx`
+
 - Props: currentPage, totalPages, onPageChange
 - Hiển thị: ◀ 1 ... 4 [5] 6 ... 20 ▶
 - Disable ◀ ở trang 1, ▶ ở trang cuối
 
 #### `src/components/common/Badge.jsx`
+
 - Props: text, variant (info, success, warning, error)
 - Nhỏ gọn, rounded, background nhạt
 
 #### `src/components/common/ConfirmDialog.jsx`
+
 - Props: isOpen, onConfirm, onCancel, title, message
 - Dùng khi xóa phòng: "Bạn có chắc muốn xóa phòng X?"
 
@@ -263,23 +275,25 @@ frontend/src/
 ## Tiêu chí hoàn thành
 
 ### Backend
-- [ ] GET /api/rooms trả danh sách phòng, hỗ trợ phân trang + filter
-- [ ] GET /api/rooms/:id trả chi tiết phòng
-- [ ] POST /api/rooms tạo phòng (chỉ admin) — validation đúng
-- [ ] PUT /api/rooms/:id sửa phòng (chỉ admin)
-- [ ] DELETE /api/rooms/:id soft-delete phòng (chỉ admin)
-- [ ] GET /api/rooms/available trả phòng trống theo thời gian
-- [ ] Tên phòng trùng → 409 Conflict
-- [ ] User thường gọi POST/PUT/DELETE → 403 Forbidden
+
+- [X] GET /api/rooms trả danh sách phòng, hỗ trợ phân trang + filter
+- [X] GET /api/rooms/:id trả chi tiết phòng
+- [X] POST /api/rooms tạo phòng (chỉ admin) — validation đúng
+- [X] PUT /api/rooms/:id sửa phòng (chỉ admin)
+- [X] DELETE /api/rooms/:id soft-delete phòng (chỉ admin)
+- [X] GET /api/rooms/available trả phòng trống theo thời gian
+- [X] Tên phòng trùng → 409 Conflict
+- [X] User thường gọi POST/PUT/DELETE → 403 Forbidden
 
 ### Frontend
-- [ ] Trang danh sách phòng hiển thị card grid, responsive
-- [ ] Filter search hoạt động (debounce)
-- [ ] Filter capacity, equipment hoạt động
-- [ ] Phân trang hoạt động
-- [ ] Admin thấy nút Thêm/Sửa/Xóa
-- [ ] User thường không thấy nút Thêm/Sửa/Xóa
-- [ ] Modal thêm/sửa phòng hoạt động đúng
-- [ ] Confirm dialog khi xóa phòng
-- [ ] Trang chi tiết phòng hiển thị đầy đủ thông tin
-- [ ] Toast notification khi thao tác thành công/thất bại
+
+- [X] Trang danh sách phòng hiển thị card grid, responsive
+- [X] Filter search hoạt động (debounce)
+- [X] Filter capacity, equipment hoạt động
+- [X] Phân trang hoạt động
+- [X] Admin thấy nút Thêm/Sửa/Xóa
+- [X] User thường không thấy nút Thêm/Sửa/Xóa
+- [X] Modal thêm/sửa phòng hoạt động đúng
+- [X] Confirm dialog khi xóa phòng
+- [X] Trang chi tiết phòng hiển thị đầy đủ thông tin
+- [X] Toast notification khi thao tác thành công/thất bại

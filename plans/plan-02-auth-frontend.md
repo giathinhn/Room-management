@@ -9,6 +9,7 @@
 ## Tổng quan
 
 Plan này tập trung **100% frontend**. Sau khi hoàn thành:
+
 - User có thể đăng ký, đăng nhập, đăng xuất qua UI
 - Auth state được quản lý bằng React Context
 - Access token tự động refresh khi hết hạn
@@ -62,6 +63,7 @@ npm install react-router-dom axios react-icons react-hot-toast
 ```
 
 **Thêm Google Font** vào `index.html`:
+
 ```html
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 ```
@@ -69,6 +71,7 @@ npm install react-router-dom axios react-icons react-hot-toast
 ### 3. Axios Instance với Token Interceptor
 
 **`src/services/api.js`**:
+
 ```js
 // Tạo axios instance với baseURL = '/api'
 // Request interceptor: gắn Authorization header từ localStorage
@@ -80,14 +83,14 @@ npm install react-router-dom axios react-icons react-hot-toast
 
 **`src/services/auth.service.js`**:
 
-| Method | Mô tả |
-|--------|--------|
-| `register(email, password, fullName)` | POST /api/auth/register |
-| `login(email, password)` | POST /api/auth/login |
-| `logout(refreshToken)` | POST /api/auth/logout |
-| `refreshToken(refreshToken)` | POST /api/auth/refresh |
-| `getProfile()` | GET /api/profile |
-| `updateProfile(data)` | PUT /api/profile |
+| Method                                       | Mô tả                   |
+| -------------------------------------------- | ------------------------- |
+| `register(email, password, fullName)`      | POST /api/auth/register   |
+| `login(email, password)`                   | POST /api/auth/login      |
+| `logout(refreshToken)`                     | POST /api/auth/logout     |
+| `refreshToken(refreshToken)`               | POST /api/auth/refresh    |
+| `getProfile()`                             | GET /api/profile          |
+| `updateProfile(data)`                      | PUT /api/profile          |
 | `changePassword(oldPassword, newPassword)` | PUT /api/profile/password |
 
 ### 4. Auth Context
@@ -112,12 +115,14 @@ npm install react-router-dom axios react-icons react-hot-toast
 ```
 
 **localStorage keys:**
+
 - `accessToken`
 - `refreshToken`
 
 ### 5. Pages
 
 #### `src/pages/LoginPage.jsx`
+
 - Form: email + password + nút "Đăng nhập"
 - Link: "Chưa có tài khoản? Đăng ký"
 - Design: Centered card, glassmorphism effect, gradient background
@@ -125,6 +130,7 @@ npm install react-router-dom axios react-icons react-hot-toast
 - Sau login thành công → redirect về `/dashboard`
 
 #### `src/pages/RegisterPage.jsx`
+
 - Form: fullName + email + password + confirmPassword + nút "Đăng ký"
 - Link: "Đã có tài khoản? Đăng nhập"
 - Design: Tương tự LoginPage
@@ -132,16 +138,19 @@ npm install react-router-dom axios react-icons react-hot-toast
 - Sau register thành công → redirect về `/dashboard`
 
 #### `src/pages/DashboardPage.jsx` (skeleton)
+
 - Hiển thị: "Xin chào, {fullName}!"
 - Hiển thị role badge
 - Placeholder cho nội dung tương lai (các plan sau sẽ bổ sung)
 
 #### `src/pages/NotFoundPage.jsx`
+
 - Trang 404 đẹp
 
 ### 6. Components
 
 #### `src/components/layout/AppLayout.jsx`
+
 - Layout chung cho trang sau login:
   - **Header**: Logo + tên app + user dropdown (profile, logout)
   - **Sidebar**: Navigation links (thay đổi theo role)
@@ -149,18 +158,20 @@ npm install react-router-dom axios react-icons react-hot-toast
 - Responsive: Sidebar collapse trên tablet
 
 #### `src/components/layout/Sidebar.jsx`
+
 - Navigation items theo role:
 
-| Menu item | Icon | Route | Admin | Approver | User |
-|-----------|------|-------|:-----:|:--------:|:----:|
-| Dashboard | 🏠 | /dashboard | ✅ | ✅ | ✅ |
-| Lịch đặt phòng | 📅 | /calendar | ✅ | ✅ | ✅ |
-| Phòng họp | 🏢 | /rooms | ✅ | ✅ | ✅ |
-| Đặt phòng | ➕ | /bookings/new | ✅ | ✅ | ✅ |
-| Duyệt lịch | ✅ | /bookings/pending | ✅ | ✅ | ❌ |
-| Quản lý users | 👥 | /admin/users | ✅ | ❌ | ❌ |
+| Menu item          | Icon | Route             | Admin | Approver | User |
+| ------------------ | ---- | ----------------- | :---: | :------: | :--: |
+| Dashboard          | 🏠   | /dashboard        |  ✅  |    ✅    |  ✅  |
+| Lịch đặt phòng | 📅   | /calendar         |  ✅  |    ✅    |  ✅  |
+| Phòng họp        | 🏢   | /rooms            |  ✅  |    ✅    |  ✅  |
+| Đặt phòng       | ➕   | /bookings/new     |  ✅  |    ✅    |  ✅  |
+| Duyệt lịch       | ✅   | /bookings/pending |  ✅  |    ✅    |  ❌  |
+| Quản lý users    | 👥   | /admin/users      |  ✅  |    ❌    |  ❌  |
 
 #### `src/components/common/ProtectedRoute.jsx`
+
 ```jsx
 // Nếu chưa login → Navigate to /login
 // Nếu đang loading → hiển thị spinner
@@ -169,16 +180,19 @@ npm install react-router-dom axios react-icons react-hot-toast
 ```
 
 #### `src/components/common/Button.jsx`
+
 - Variants: primary, secondary, danger, ghost
 - States: loading (spinner), disabled
 - Sizes: sm, md, lg
 
 #### `src/components/common/Input.jsx`
+
 - Label + input + error message
 - Types: text, email, password (toggle show/hide)
 - Validation error styling
 
 #### `src/components/common/Toast.jsx`
+
 - Dùng react-hot-toast cho notifications
 - Types: success, error, info
 
@@ -221,6 +235,7 @@ npm install react-router-dom axios react-icons react-hot-toast
 ## Yêu cầu UI/UX
 
 ### Login/Register pages
+
 - **Background**: Gradient tối (dark navy → deep purple)
 - **Card**: Glassmorphism (backdrop-filter: blur, border rgba trắng)
 - **Animation**: Card fade-in slide-up khi load
@@ -229,6 +244,7 @@ npm install react-router-dom axios react-icons react-hot-toast
 - **Password strength**: Real-time indicator (weak/medium/strong)
 
 ### AppLayout
+
 - **Sidebar**: Dark background, neon accent highlights cho active item
 - **Header**: Blur backdrop, subtle border bottom
 - **Transitions**: Smooth page transitions
@@ -274,14 +290,14 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] Trang Login hiển thị đẹp, responsive, có animation
-- [ ] Trang Register hiển thị đẹp, có password strength indicator
-- [ ] Đăng ký thành công → redirect `/dashboard`
-- [ ] Đăng nhập thành công → redirect `/dashboard`
-- [ ] Đăng xuất → redirect `/login`, xóa tokens
-- [ ] Truy cập `/dashboard` khi chưa login → redirect `/login`
-- [ ] Refresh page khi đã login → vẫn giữ session (không bị logout)
-- [ ] Token hết hạn → tự động refresh, không bị logout
-- [ ] Sidebar hiển thị đúng menu theo role
-- [ ] Toast notifications hiển thị khi login/register thành công/thất bại
-- [ ] Error messages hiển thị inline trên form khi validation lỗi
+- [X] Trang Login hiển thị đẹp, responsive, có animation
+- [X] Trang Register hiển thị đẹp, có password strength indicator
+- [X] Đăng ký thành công → redirect `/dashboard`
+- [X] Đăng nhập thành công → redirect `/dashboard`
+- [X] Đăng xuất → redirect `/login`, xóa tokens
+- [X] Truy cập `/dashboard` khi chưa login → redirect `/login`
+- [X] Refresh page khi đã login → vẫn giữ session (không bị logout)
+- [X] Token hết hạn → tự động refresh, không bị logout
+- [X] Sidebar hiển thị đúng menu theo role
+- [X] Toast notifications hiển thị khi login/register thành công/thất bại
+- [X] Error messages hiển thị inline trên form khi validation lỗi

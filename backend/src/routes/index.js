@@ -15,9 +15,14 @@ router.get('/health', (_req, res) => {
   });
 });
 
-// Future routes will be added here:
-// router.use('/auth', require('./auth.routes'));
-// router.use('/rooms', require('./rooms.routes'));
-// router.use('/bookings', require('./bookings.routes'));
+// ─── Auth routes ─────────────────────────────────────────────────────────────
+router.use('/auth', require('./auth.routes'));
+
+// ─── Profile routes ───────────────────────────────────────────────────────────
+router.use('/profile', require('./profile.routes'));
+
+// ─── Admin — user management ──────────────────────────────────────────────────
+router.use('/users', require('./user.routes'));
 
 module.exports = router;
+
