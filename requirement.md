@@ -126,6 +126,66 @@ Xây dựng ứng dụng web cho phép nhân viên đăng ký sử dụng phòng
   - Khoảng thời gian (từ ngày – đến ngày)
 - Tìm kiếm phòng trống theo: ngày/giờ mong muốn, sức chứa tối thiểu, thiết bị cần có.
 
+### 4.8 Dashboard thống kê & Analytics (Admin)
+- **Thống kê tổng quan**: Tổng số booking hôm nay / tuần này / tháng này, tỷ lệ duyệt/từ chối.
+- **Biểu đồ tần suất sử dụng phòng**: Bar chart phòng nào được đặt nhiều nhất.
+- **Heatmap giờ cao điểm**: Ma trận ngày × giờ — màu đậm = cao điểm. Giúp nhân viên biết nên tránh giờ nào.
+- **Top người đặt phòng**: Danh sách người đặt nhiều nhất (phát hiện lạm dụng).
+- **Xu hướng theo thời gian**: Line chart số booking theo tuần/tháng.
+- Chỉ **Admin** được truy cập dashboard.
+
+### 4.9 In-app Notification Center
+- **Bell icon** ở header với badge đếm số thông báo chưa đọc.
+- **Dropdown danh sách thông báo**: booking được duyệt/từ chối/hủy, nhắc lịch, booking mới cần duyệt.
+- Click vào notification → navigate tới booking tương ứng.
+- Đánh dấu đã đọc từng notification hoặc đánh dấu tất cả đã đọc.
+- Sử dụng **Server-Sent Events (SSE)** để push notification real-time (1 chiều server → client).
+- **Loại thông báo**:
+  - `booking_approved` — Booking của bạn đã được duyệt
+  - `booking_rejected` — Booking của bạn bị từ chối
+  - `booking_cancelled` — Booking bị hủy
+  - `booking_reminder` — Cuộc họp sắp bắt đầu (15 phút trước)
+  - `new_booking_pending` — Có booking mới cần duyệt (gửi cho approver)
+
+### 4.10 Ghi chú & Bình luận trên Booking
+- Approver có thể **ghi chú** khi duyệt/từ chối (VD: "Nhớ dọn phòng sau khi họp").
+- Người đặt có thể **bổ sung thông tin** (VD: "Có khách ngoài tham dự, cần 2 micro").
+- **Thread comment** trên mỗi booking — dạng danh sách comment theo thời gian.
+- Mỗi comment hiển thị: avatar, tên, thời gian, nội dung.
+- Hỗ trợ sửa/xóa comment của chính mình (trong 5 phút đầu).
+
+### 4.11 Đề xuất phòng thay thế
+- Khi đặt phòng bị **trùng lịch**, thay vì chỉ báo lỗi, hệ thống đề xuất:
+  - **Phòng khác cùng thời điểm**: Danh sách phòng còn trống cùng khung giờ đó.
+  - **Khung giờ khác cùng phòng**: Các slot trống gần nhất của phòng đó (trước/sau 1-2 giờ).
+- **Smart ranking**: Ưu tiên phòng gần nhất (cùng tầng/tòa), sức chứa tương đương, thiết bị phù hợp.
+- Hiển thị trên UI dạng suggestion cards khi gặp conflict.
+
+### 4.12 Booking Templates (Mẫu đặt phòng)
+- Người dùng **lưu cấu hình đặt phòng** thường xuyên thành template.
+  - VD: "Họp sprint hàng tuần — Phòng A1, 9:00-10:00"
+  - VD: "Standup daily — Phòng nhỏ B3, 8:30-8:45"
+- **Đặt phòng từ template**: 1 click → pre-fill toàn bộ form → chỉ cần chọn ngày → submit.
+- CRUD templates: tạo, sửa, xóa, xem danh sách.
+- Mỗi template lưu: tên template, phòng, tiêu đề cuộc họp, giờ bắt đầu, giờ kết thúc.
+- Tối đa **10 templates** mỗi người dùng.
+
+### 4.13 Đa ngôn ngữ (i18n)
+- Hỗ trợ **2 ngôn ngữ**: Tiếng Việt (mặc định) + English.
+- Toggle chuyển ngôn ngữ ở header (dropdown hoặc icon cờ 🇻🇳/🇬🇧).
+- Sử dụng **react-i18next** cho frontend.
+- Ngôn ngữ được lưu vào `localStorage`, giữ lại khi refresh.
+- Tất cả label, button text, error messages, placeholder, toast đều được dịch.
+- Backend error messages trả về **error code** → frontend tự map sang ngôn ngữ tương ứng.
+
+### 4.14 Smart Booking Suggestions
+- **Gợi ý phòng theo số người**: Khi nhập số người tham dự → gợi ý phòng có sức chứa vừa đủ (không lãng phí phòng lớn).
+  - VD: 5 người → gợi ý phòng 6-8 người, không gợi ý phòng 30 người.
+- **Gợi ý dựa trên lịch sử**: Phân tích booking cũ của user → đề xuất phòng/giờ hay đặt.
+  - VD: "Bạn thường họp T3 lúc 9:00 — Phòng A1 đang trống!"
+- **Gợi ý giờ tối ưu**: Khi chọn phòng đã kín → gợi ý giờ trống gần nhất.
+- Hiển thị dạng suggestion chips/cards trên trang đặt phòng.
+
 ---
 
 ## 5. Chức năng mở rộng (Nice-to-have)
@@ -135,10 +195,10 @@ Xây dựng ứng dụng web cho phép nhân viên đăng ký sử dụng phòng
 | 1  | Gửi email thông báo                   | Gửi email khi lịch đặt được duyệt/từ chối/hủy (Nodemailer + SMTP)    |
 | 2  | Nhắc lịch trước giờ họp               | Gửi email/notification trước 15 phút khi cuộc họp sắp bắt đầu         |
 | 3  | Export Excel                           | Export danh sách lịch đặt theo bộ lọc ra file .xlsx                    |
-| 4  | Dashboard thống kê (Admin)             | Thống kê: tần suất sử dụng phòng, phòng hot nhất, giờ cao điểm        |
-| 5  | OAuth đăng nhập                        | Hỗ trợ đăng nhập bằng Google/Microsoft SSO                            |
-| 6  | Real-time notification                 | Thông báo real-time khi booking được duyệt/từ chối (WebSocket/SSE)    |
-| 7  | Đính kèm file                         | Cho phép đính kèm tài liệu cuộc họp khi đặt phòng                    |
+| 4  | OAuth đăng nhập                        | Hỗ trợ đăng nhập bằng Google/Microsoft SSO                            |
+| 5  | Đính kèm file                         | Cho phép đính kèm tài liệu cuộc họp khi đặt phòng                    |
+| 6  | Check-in / Check-out phòng            | Quét QR hoặc click check-in, tự hủy nếu 15 phút không check-in        |
+| 7  | Floor Map — Bản đồ sơ đồ tầng        | Hiển thị sơ đồ mặt bằng với trạng thái phòng real-time                |
 
 ---
 
@@ -213,20 +273,66 @@ Xây dựng ứng dụng web cho phép nhân viên đăng ký sử dụng phòng
 | is_revoked     | BOOLEAN            | Đã bị thu hồi chưa                          |
 | created_at     | TIMESTAMP          | Ngày tạo                                    |
 
-### 6.6 Sơ đồ quan hệ
+### 6.6 Bảng `notifications`
+
+| Cột            | Kiểu dữ liệu     | Mô tả                                      |
+| -------------- | ------------------ | ------------------------------------------- |
+| id             | UUID (PK)          | Khóa chính                                  |
+| user_id        | UUID (FK → users)  | Người nhận thông báo                         |
+| type           | ENUM               | `booking_approved`, `booking_rejected`, `booking_cancelled`, `booking_reminder`, `new_booking_pending` |
+| title          | VARCHAR(200)       | Tiêu đề thông báo                           |
+| message        | TEXT               | Nội dung chi tiết                            |
+| booking_id     | UUID (FK → bookings) | Booking liên quan (nullable)               |
+| is_read        | BOOLEAN            | Đã đọc chưa                                 |
+| created_at     | TIMESTAMP          | Ngày tạo                                    |
+
+### 6.7 Bảng `booking_comments`
+
+| Cột            | Kiểu dữ liệu     | Mô tả                                      |
+| -------------- | ------------------ | ------------------------------------------- |
+| id             | UUID (PK)          | Khóa chính                                  |
+| booking_id     | UUID (FK → bookings) | Booking liên quan                          |
+| user_id        | UUID (FK → users)  | Người bình luận                              |
+| content        | TEXT               | Nội dung comment                             |
+| created_at     | TIMESTAMP          | Ngày tạo                                    |
+| updated_at     | TIMESTAMP          | Ngày cập nhật                               |
+
+### 6.8 Bảng `booking_templates`
+
+| Cột            | Kiểu dữ liệu     | Mô tả                                      |
+| -------------- | ------------------ | ------------------------------------------- |
+| id             | UUID (PK)          | Khóa chính                                  |
+| user_id        | UUID (FK → users)  | Người tạo template                           |
+| name           | VARCHAR(100)       | Tên template (VD: "Họp sprint hàng tuần")   |
+| room_id        | UUID (FK → rooms)  | Phòng mặc định (nullable)                   |
+| title          | VARCHAR(200)       | Tiêu đề cuộc họp mặc định                   |
+| start_time     | TIME               | Giờ bắt đầu mặc định                        |
+| end_time       | TIME               | Giờ kết thúc mặc định                        |
+| created_at     | TIMESTAMP          | Ngày tạo                                    |
+| updated_at     | TIMESTAMP          | Ngày cập nhật                               |
+
+### 6.9 Sơ đồ quan hệ
 
 ```
 users ──< bookings >── rooms
-  │            │
-  │            └── recurring_bookings
+  │         │  │
+  │         │  └── booking_comments ──< users
+  │         │
+  │         └── recurring_bookings
+  │         └── notifications
   │
-  └──< refresh_tokens
+  ├──< refresh_tokens
+  └──< booking_templates >── rooms
 ```
 
 - `users` 1:N `bookings` (một user đặt nhiều booking)
 - `rooms` 1:N `bookings` (một phòng có nhiều booking)
 - `users` 1:N `refresh_tokens` (một user có nhiều token trên nhiều thiết bị)
 - `recurring_bookings` 1:N `bookings` (một chuỗi đặt định kỳ sinh ra nhiều booking)
+- `users` 1:N `notifications` (một user có nhiều thông báo)
+- `bookings` 1:N `booking_comments` (một booking có nhiều comment)
+- `users` 1:N `booking_comments` (một user có nhiều comment)
+- `users` 1:N `booking_templates` (một user có nhiều template, tối đa 10)
 
 ---
 
@@ -407,3 +513,44 @@ Mini_Project/
 | GET    | `/api/profile`        | Xem profile bản thân       | ✅    |
 | PUT    | `/api/profile`        | Cập nhật profile            | ✅    |
 | PUT    | `/api/profile/password` | Đổi mật khẩu             | ✅    |
+
+### Dashboard (Admin)
+| Method | Endpoint                        | Mô tả                           | Auth  |
+| ------ | ------------------------------- | -------------------------------- | ----- |
+| GET    | `/api/dashboard/overview`       | Thống kê tổng quan (booking count, tỷ lệ) | Admin |
+| GET    | `/api/dashboard/room-usage`     | Tần suất sử dụng từng phòng      | Admin |
+| GET    | `/api/dashboard/peak-hours`     | Heatmap giờ cao điểm              | Admin |
+| GET    | `/api/dashboard/top-users`      | Top người đặt phòng              | Admin |
+| GET    | `/api/dashboard/trends`         | Xu hướng booking theo thời gian   | Admin |
+
+### Notifications
+| Method | Endpoint                           | Mô tả                          | Auth |
+| ------ | ---------------------------------- | ------------------------------- | ---- |
+| GET    | `/api/notifications`               | Danh sách thông báo (phân trang)| ✅   |
+| GET    | `/api/notifications/unread-count`  | Đếm số thông báo chưa đọc       | ✅   |
+| PATCH  | `/api/notifications/:id/read`      | Đánh dấu đã đọc                 | ✅   |
+| PATCH  | `/api/notifications/read-all`      | Đánh dấu tất cả đã đọc          | ✅   |
+| GET    | `/api/notifications/stream`        | SSE stream (real-time)           | ✅   |
+
+### Booking Comments
+| Method | Endpoint                              | Mô tả                    | Auth |
+| ------ | ------------------------------------- | ------------------------- | ---- |
+| GET    | `/api/bookings/:id/comments`          | Danh sách comment          | ✅   |
+| POST   | `/api/bookings/:id/comments`          | Thêm comment               | ✅   |
+| PUT    | `/api/bookings/:id/comments/:cid`     | Sửa comment (trong 5 phút) | ✅   |
+| DELETE | `/api/bookings/:id/comments/:cid`     | Xóa comment (trong 5 phút) | ✅   |
+
+### Booking Templates
+| Method | Endpoint                 | Mô tả                          | Auth |
+| ------ | ------------------------ | ------------------------------- | ---- |
+| GET    | `/api/templates`         | Danh sách templates của user     | ✅   |
+| POST   | `/api/templates`         | Tạo template mới (max 10)       | ✅   |
+| PUT    | `/api/templates/:id`     | Sửa template                    | ✅   |
+| DELETE | `/api/templates/:id`     | Xóa template                    | ✅   |
+
+### Suggestions
+| Method | Endpoint                           | Mô tả                              | Auth |
+| ------ | ---------------------------------- | ----------------------------------- | ---- |
+| GET    | `/api/suggestions/rooms`           | Gợi ý phòng theo số người + thiết bị| ✅   |
+| GET    | `/api/suggestions/alternatives`    | Phòng/giờ thay thế khi bị trùng     | ✅   |
+| GET    | `/api/suggestions/smart`           | Gợi ý dựa trên lịch sử cá nhân     | ✅   |

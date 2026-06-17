@@ -124,6 +124,9 @@ model User {
   approvedBookings  Booking[]       @relation("ApprovedBookings")
   refreshTokens     RefreshToken[]
   recurringBookings RecurringBooking[]
+  notifications     Notification[]
+  comments          BookingComment[]
+  templates         BookingTemplate[]
 
   @@map("users")
 }
@@ -140,6 +143,7 @@ model Room {
 
   bookings          Booking[]
   recurringBookings RecurringBooking[]
+  templates         BookingTemplate[]
 
   @@map("rooms")
 }
@@ -163,6 +167,8 @@ model Booking {
   user      User              @relation("UserBookings", fields: [userId], references: [id])
   approver  User?             @relation("ApprovedBookings", fields: [approvedBy], references: [id])
   recurring RecurringBooking? @relation(fields: [recurringId], references: [id])
+  comments      BookingComment[]
+  notifications Notification[]
 
   @@map("bookings")
 }
@@ -196,6 +202,61 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id])
 
   @@map("refresh_tokens")
+}
+
+enum NotificationType {
+  booking_approved
+  booking_rejected
+  booking_cancelled
+  booking_reminder
+  new_booking_pending
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  message   String
+  bookingId String?          @map("booking_id")
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+
+  @@map("notifications")
+}
+
+model BookingComment {
+  id        String   @id @default(uuid())
+  bookingId String   @map("booking_id")
+  userId    String   @map("user_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("booking_comments")
+}
+
+model BookingTemplate {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String   @db.VarChar(100)
+  roomId    String?  @map("room_id")
+  title     String   @db.VarChar(200)
+  startTime DateTime @map("start_time") @db.Time()
+  endTime   DateTime @map("end_time") @db.Time()
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User  @relation(fields: [userId], references: [id])
+  room Room? @relation(fields: [roomId], references: [id])
+
+  @@map("booking_templates")
 }
 ```
 
@@ -318,7 +379,7 @@ EMAIL_FROM=
 
 - [ ] `docker-compose up` chạy thành công cả 3 service (db, backend, frontend)
 - [ ] `GET /api/health` trả về `{ status: "ok", timestamp: "..." }`
-- [ ] Prisma migrate tạo đúng 5 bảng: `users`, `rooms`, `bookings`, `recurring_bookings`, `refresh_tokens`
+- [ ] Prisma migrate tạo đúng 8 bảng: `users`, `rooms`, `bookings`, `recurring_bookings`, `refresh_tokens`, `notifications`, `booking_comments`, `booking_templates`
 - [ ] Seed data chạy thành công, có thể xem qua `npx prisma studio`
 - [ ] Frontend hiển thị trang HomePage tại `http://localhost:5173`
 - [ ] Axios instance đã cấu hình proxy tới backend
