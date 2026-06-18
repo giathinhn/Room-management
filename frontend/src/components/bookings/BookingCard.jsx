@@ -1,5 +1,6 @@
 import React from 'react';
 import StatusBadge from '../common/StatusBadge';
+import RecurringBadge from './RecurringBadge';
 import './BookingCard.css';
 
 /**
@@ -42,7 +43,7 @@ function formatDuration(startTime, endTime) {
  * }} props
  */
 function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onClick }) {
-  const { id, title, status, startTime, endTime, room, user } = booking;
+  const { id, title, status, startTime, endTime, room, user, recurringId, recurring } = booking;
 
   const isOwner = currentUser?.id === booking.userId;
   const isAdmin = currentUser?.role === 'admin';
@@ -64,7 +65,14 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
           <StatusBadge status={status} />
           <h3 className="booking-card__title">{title}</h3>
         </div>
-        <span className="booking-card__duration">{formatDuration(startTime, endTime)}</span>
+        <div className="booking-card__header-right">
+          {recurringId && (
+            <RecurringBadge
+              frequency={recurring?.frequency}
+            />
+          )}
+          <span className="booking-card__duration">{formatDuration(startTime, endTime)}</span>
+        </div>
       </div>
 
       <div className="booking-card__body">

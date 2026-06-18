@@ -66,6 +66,45 @@ const bookingService = {
     const { data } = await api.patch(`/bookings/${id}/cancel`);
     return data;
   },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // RECURRING BOOKING
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Preview recurring slots — returns okSlots and conflictSlots without saving.
+   * @param {{ roomId, title, startDate, endDate, startTime, endTime, frequency }} params
+   */
+  async previewRecurring(params) {
+    const { data } = await api.post('/bookings/recurring/preview', params);
+    return data;
+  },
+
+  /**
+   * Confirm and create a recurring booking series.
+   * @param {{ roomId, title, startDate, endDate, startTime, endTime, frequency, confirmedSlots? }} params
+   */
+  async createRecurring(params) {
+    const { data } = await api.post('/bookings/recurring', params);
+    return data;
+  },
+
+  /**
+   * Cancel all pending/approved bookings in a recurring series.
+   * @param {string} recurringId
+   */
+  async cancelRecurringSeries(recurringId) {
+    const { data } = await api.delete(`/bookings/recurring/${recurringId}`);
+    return data;
+  },
+
+  /**
+   * Get all recurring series for the current user.
+   */
+  async getMyRecurring() {
+    const { data } = await api.get('/bookings/recurring');
+    return data;
+  },
 };
 
 export default bookingService;

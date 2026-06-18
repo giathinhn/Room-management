@@ -1,5 +1,7 @@
 const bookingService = require('../services/booking.service');
+const recurringService = require('../services/recurring.service');
 const { createBookingSchema, rejectBookingSchema, queryBookingSchema } = require('../validators/booking.validator');
+const { createRecurringSchema } = require('../validators/recurring.validator');
 const { validate } = require('../middlewares/validate.middleware');
 
 /**
@@ -149,6 +151,106 @@ const bookingController = {
         success: true,
         message: 'Booking cancelled',
         data: booking,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // RECURRING BOOKING ENDPOINTS
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * POST /api/bookings/recurring/preview
+   * Preview recurring slots — returns okSlots and conflictSlots without saving.
+   */
+  async previewRecurring(req, res, next) {
+    try {
+      const parsed = createRecurringSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: parsed.error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        });
+      }
+
+      const result = await recurringService.preview(req.user.id, parsed.data);
+      return res.json({
+        success: true,
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * POST /api/bookings/recurring
+   * Confirm and create a recurring booking series.
+   */
+  async createRecurring(req, res, next) {
+    try {
+      const parsed = createRecurringSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: parsed.error.errors.map((e) => ({
+            field: e.path.join('.'),
+            message: e.message,
+          })),
+        });
+      }
+
+      const result = await recurringService.create(req.user.id, parsed.data);
+      return res.status(201).json({
+        success: true,
+        message: `Recurring booking created: ${result.bookings.length} bookings`,
+        data: result,
+      });
+    } catch (err) {
+      if (err.statusCode === 409) {
+        return res.status(409).json({
+          success: false,
+          message: err.message,
+        });
+      }
+      next(err);
+    }
+  },
+
+  /**
+   * DELETE /api/bookings/recurring/:id
+   * Cancel all pending/approved bookings in a recurring series.
+   */
+  async cancelRecurring(req, res, next) {
+    try {
+      const result = await recurringService.cancelAll(req.params.id, req.user);
+      return res.json({
+        success: true,
+        message: result.message,
+        cancelledCount: result.cancelledCount,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * GET /api/bookings/recurring
+   * Get all recurring series for the current user.
+   */
+  async getMyRecurring(req, res, next) {
+    try {
+      const series = await recurringService.getByUser(req.user.id);
+      return res.json({
+        success: true,
+        data: series,
       });
     } catch (err) {
       next(err);

@@ -45,6 +45,9 @@ const bookingRepository = {
           approver: {
             select: { id: true, fullName: true, email: true },
           },
+          recurring: {
+            select: { id: true, frequency: true },
+          },
         },
       }),
       prisma.booking.count({ where }),
@@ -77,6 +80,9 @@ const bookingRepository = {
         },
         approver: {
           select: { id: true, fullName: true, email: true },
+        },
+        recurring: {
+          select: { id: true, frequency: true },
         },
       },
     });
@@ -166,6 +172,29 @@ const bookingRepository = {
     if (filters.status) where.status = filters.status;
 
     return prisma.booking.count({ where });
+  },
+
+  /**
+   * Create multiple bookings at once (for recurring booking).
+   * @param {Array<{ userId, roomId, title, startTime, endTime, status, recurringId }>} bookings
+   */
+  async createMany(bookings) {
+    return prisma.booking.createMany({ data: bookings });
+  },
+
+  /**
+   * Cancel all pending/approved bookings belonging to a recurring series.
+   * @param {string} recurringId
+   * @returns {{ count: number }}
+   */
+  async cancelByRecurringId(recurringId) {
+    return prisma.booking.updateMany({
+      where: {
+        recurringId,
+        status: { in: ['pending', 'approved'] },
+      },
+      data: { status: 'cancelled' },
+    });
   },
 };
 
