@@ -24,5 +24,8 @@ router.use('/profile', require('./profile.routes'));
 // ─── Admin — user management ──────────────────────────────────────────────────
 router.use('/users', require('./user.routes'));
 
+// ─── Room management ──────────────────────────────────────────────────────────
+router.use('/rooms', require('./room.routes'));
+
 module.exports = router;
 

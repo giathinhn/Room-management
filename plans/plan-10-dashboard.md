@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - Admin có trang Dashboard với 5 biểu đồ/thống kê
 - Dữ liệu aggregate từ bookings table
 - Charts sử dụng **Recharts** (hoặc Chart.js)
@@ -23,39 +24,40 @@ Sau khi hoàn thành:
 
 **`src/repositories/dashboard.repository.js`**:
 
-| Method | Mô tả | Query |
-|--------|--------|-------|
-| `getOverview(startDate, endDate)` | Tổng quan | COUNT bookings GROUP BY status, COUNT theo ngày |
-| `getRoomUsage(startDate, endDate)` | Tần suất phòng | COUNT bookings GROUP BY room_id, JOIN rooms |
-| `getPeakHours(startDate, endDate)` | Giờ cao điểm | COUNT bookings GROUP BY EXTRACT(dow, hour) |
-| `getTopUsers(startDate, endDate, limit)` | Top người đặt | COUNT bookings GROUP BY user_id, ORDER DESC, LIMIT |
-| `getTrends(startDate, endDate, granularity)` | Xu hướng | COUNT bookings GROUP BY DATE_TRUNC(week/month) |
+| Method                                         | Mô tả           | Query                                              |
+| ---------------------------------------------- | ----------------- | -------------------------------------------------- |
+| `getOverview(startDate, endDate)`            | Tổng quan        | COUNT bookings GROUP BY status, COUNT theo ngày   |
+| `getRoomUsage(startDate, endDate)`           | Tần suất phòng | COUNT bookings GROUP BY room_id, JOIN rooms        |
+| `getPeakHours(startDate, endDate)`           | Giờ cao điểm   | COUNT bookings GROUP BY EXTRACT(dow, hour)         |
+| `getTopUsers(startDate, endDate, limit)`     | Top người đặt | COUNT bookings GROUP BY user_id, ORDER DESC, LIMIT |
+| `getTrends(startDate, endDate, granularity)` | Xu hướng        | COUNT bookings GROUP BY DATE_TRUNC(week/month)     |
 
 ### 2. Service Layer
 
 **`src/services/dashboard.service.js`**:
 
-| Method | Logic |
-|--------|-------|
-| `getOverview(dateRange)` | Trả về: totalBookings, approved, rejected, cancelled, pending, approvalRate (%), bookingsToday, bookingsThisWeek |
-| `getRoomUsage(dateRange)` | Trả về: [{ roomId, roomName, bookingCount, totalHours }] sắp xếp giảm dần |
-| `getPeakHours(dateRange)` | Trả về: matrix 7×16 (7 ngày × 16 giờ từ 07:00-22:00), value = booking count |
-| `getTopUsers(dateRange, limit=10)` | Trả về: [{ userId, fullName, email, bookingCount, totalHours }] |
-| `getTrends(dateRange, granularity)` | Trả về: [{ period: "2026-W25", total, approved, rejected }] |
+| Method                                | Logic                                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `getOverview(dateRange)`            | Trả về: totalBookings, approved, rejected, cancelled, pending, approvalRate (%), bookingsToday, bookingsThisWeek |
+| `getRoomUsage(dateRange)`           | Trả về: [{ roomId, roomName, bookingCount, totalHours }] sắp xếp giảm dần                                    |
+| `getPeakHours(dateRange)`           | Trả về: matrix 7×16 (7 ngày × 16 giờ từ 07:00-22:00), value = booking count                                 |
+| `getTopUsers(dateRange, limit=10)`  | Trả về: [{ userId, fullName, email, bookingCount, totalHours }]                                                  |
+| `getTrends(dateRange, granularity)` | Trả về: [{ period: "2026-W25", total, approved, rejected }]                                                      |
 
 ### 3. Controller & Routes
 
 **`src/controllers/dashboard.controller.js`**:
 
-| Method | Endpoint | Query Params | Response |
-|--------|----------|-------------|----------|
-| `getOverview` | GET `/api/dashboard/overview` | startDate, endDate | { totalBookings, approved, rejected, ... } |
-| `getRoomUsage` | GET `/api/dashboard/room-usage` | startDate, endDate | { data: RoomUsage[] } |
-| `getPeakHours` | GET `/api/dashboard/peak-hours` | startDate, endDate | { data: number[][] } (7×16 matrix) |
-| `getTopUsers` | GET `/api/dashboard/top-users` | startDate, endDate, limit | { data: TopUser[] } |
-| `getTrends` | GET `/api/dashboard/trends` | startDate, endDate, granularity(week/month) | { data: Trend[] } |
+| Method           | Endpoint                          | Query Params                                | Response                                   |
+| ---------------- | --------------------------------- | ------------------------------------------- | ------------------------------------------ |
+| `getOverview`  | GET `/api/dashboard/overview`   | startDate, endDate                          | { totalBookings, approved, rejected, ... } |
+| `getRoomUsage` | GET `/api/dashboard/room-usage` | startDate, endDate                          | { data: RoomUsage[] }                      |
+| `getPeakHours` | GET `/api/dashboard/peak-hours` | startDate, endDate                          | { data: number[][] } (7×16 matrix)        |
+| `getTopUsers`  | GET `/api/dashboard/top-users`  | startDate, endDate, limit                   | { data: TopUser[] }                        |
+| `getTrends`    | GET `/api/dashboard/trends`     | startDate, endDate, granularity(week/month) | { data: Trend[] }                          |
 
 **Routes** — tất cả require `authenticate` + `authorize('admin')`:
+
 ```js
 router.get('/overview',   authenticate, authorize('admin'), dashboardController.getOverview);
 router.get('/room-usage', authenticate, authorize('admin'), dashboardController.getRoomUsage);
@@ -115,34 +117,40 @@ npm install recharts date-fns
 ### 6. Components
 
 #### `src/components/dashboard/StatCard.jsx`
+
 - Props: icon, label, value, percentage, color
 - Glassmorphism card, số lớn ở giữa, percentage nhỏ ở dưới
 - Hover: subtle glow effect
 
 #### `src/components/dashboard/RoomUsageChart.jsx`
+
 - Horizontal bar chart (Recharts `BarChart`)
 - Mỗi bar = 1 phòng, chiều dài = booking count
 - Tooltip: hiện booking count + total hours
 - Gradient fill bars
 
 #### `src/components/dashboard/PeakHoursHeatmap.jsx`
+
 - Grid 7 cột (T2-CN) × 16 hàng (07:00-22:00)
 - Mỗi ô màu từ nhạt → đậm tùy booking count
 - Color scale: trắng → vàng → cam → đỏ
 - Tooltip khi hover: "Thứ 3, 09:00: 12 bookings"
 
 #### `src/components/dashboard/TopUsersTable.jsx`
+
 - Table top 10: STT, Tên, Email, Số lượt đặt, Tổng giờ
 - Highlight hàng đầu tiên
 - Avatar placeholder
 
 #### `src/components/dashboard/TrendChart.jsx`
+
 - Line chart (Recharts `LineChart`)
 - 3 lines: Total (xanh), Approved (xanh lá), Rejected (đỏ)
 - X-axis: tuần/tháng, Y-axis: booking count
 - Tooltip + dots on hover
 
 #### `src/components/dashboard/DateRangeFilter.jsx`
+
 - Quick buttons: 7 ngày, 30 ngày, 3 tháng
 - Custom range: date picker từ – đến
 - Active button highlighted
@@ -179,16 +187,16 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] API overview trả đúng thống kê tổng quan
-- [ ] API room-usage trả đúng tần suất sử dụng từng phòng
-- [ ] API peak-hours trả đúng heatmap data
-- [ ] API top-users trả đúng top N người đặt
-- [ ] API trends trả đúng xu hướng theo week/month
-- [ ] 4 stat cards hiển thị đúng số liệu
-- [ ] Bar chart phòng hiển thị đúng
-- [ ] Heatmap giờ cao điểm hiển thị đúng, có tooltip
-- [ ] Top users table hiển thị đúng
-- [ ] Trend line chart hiển thị đúng
-- [ ] Date range filter thay đổi → tất cả charts cập nhật
-- [ ] Chỉ admin truy cập được dashboard
-- [ ] Responsive trên tablet
+- [X] API overview trả đúng thống kê tổng quan
+- [X] API room-usage trả đúng tần suất sử dụng từng phòng
+- [X] API peak-hours trả đúng heatmap data
+- [X] API top-users trả đúng top N người đặt
+- [X] API trends trả đúng xu hướng theo week/month
+- [X] 4 stat cards hiển thị đúng số liệu
+- [X] Bar chart phòng hiển thị đúng
+- [X] Heatmap giờ cao điểm hiển thị đúng, có tooltip
+- [X] Top users table hiển thị đúng
+- [X] Trend line chart hiển thị đúng
+- [X] Date range filter thay đổi → tất cả charts cập nhật
+- [X] Chỉ admin truy cập được dashboard
+- [X] Responsive trên tablet

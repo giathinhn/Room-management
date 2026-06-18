@@ -8,7 +8,10 @@ import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import RoomsPage from './pages/RoomsPage';
+import RoomDetailPage from './pages/RoomDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
+
 
 import './App.css';
 
@@ -25,7 +28,8 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
-              {/* Routes for plan-03 onward will be added here */}
+              <Route path="/rooms"     element={<RoomsPage />} />
+              <Route path="/rooms/:id" element={<RoomDetailPage />} />
             </Route>
           </Route>
 

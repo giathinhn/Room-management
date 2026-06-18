@@ -1,0 +1,256 @@
+/* ─── Page Layout ────────────────────────────────────────────────────────────── */
+.rooms-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────────── */
+.rooms-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.rooms-page__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary, #f1f5f9);
+  letter-spacing: -0.02em;
+}
+
+.rooms-page__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* ─── Grid ───────────────────────────────────────────────────────────────────── */
+.rooms-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .rooms-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .rooms-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Loading & Empty ────────────────────────────────────────────────────────── */
+.rooms-page__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.rooms-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--text-secondary, #94a3b8);
+  text-align: center;
+}
+
+.rooms-page__empty-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+/* ─── Pagination ─────────────────────────────────────────────────────────────── */
+.rooms-page__pagination {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+/* ─── Room Filter (layout) ───────────────────────────────────────────────────── */
+.room-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Search */
+.room-filter__search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+}
+
+.room-filter__search-icon {
+  position: absolute;
+  left: 0.75rem;
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.room-filter__search {
+  width: 100%;
+  padding: 0.6rem 2.25rem 0.6rem 2.25rem;
+  background: var(--surface, #1e1e35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text-primary, #f1f5f9);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.room-filter__search::placeholder {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.room-filter__search:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.room-filter__search-clear {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Capacity select */
+.room-filter__select {
+  padding: 0.6rem 0.85rem;
+  background: var(--surface, #1e1e35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text-primary, #f1f5f9);
+  font-size: 0.875rem;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.room-filter__select:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Equipment dropdown */
+.room-filter__equip-wrapper {
+  position: relative;
+}
+
+.room-filter__equip-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface, #1e1e35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.18s, color 0.18s;
+  white-space: nowrap;
+}
+
+.room-filter__equip-btn.active {
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+}
+
+.room-filter__equip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: rgba(139, 92, 246, 0.6);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.room-filter__equip-chevron {
+  font-size: 0.6rem;
+  margin-left: 2px;
+}
+
+.room-filter__equip-dropdown {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 200;
+  min-width: 200px;
+  padding: 0.5rem;
+  background: #16163a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.room-filter__equip-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #94a3b8);
+  transition: background 0.15s;
+}
+
+.room-filter__equip-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.room-filter__equip-option.selected {
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.room-filter__equip-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ─── Spinner ────────────────────────────────────────────────────────────────── */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

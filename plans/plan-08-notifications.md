@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - Gửi email tự động khi booking được duyệt, từ chối, hoặc hủy
 - Gửi email nhắc lịch trước 15 phút khi cuộc họp sắp bắt đầu
 - Email template HTML đẹp, có branding
@@ -28,6 +29,7 @@ npm install nodemailer node-cron
 ### 2. Email Config
 
 **`.env` — thêm:**
+
 ```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -39,6 +41,7 @@ EMAIL_FROM="Meeting Room System <noreply@company.com>"
 > 💡 **Tip cho dev**: Dùng [Ethereal](https://ethereal.email/) hoặc [Mailtrap](https://mailtrap.io/) để test email miễn phí, không cần SMTP thật.
 
 **`src/config/email.js`**:
+
 ```js
 const nodemailer = require('nodemailer');
 
@@ -60,15 +63,16 @@ module.exports = transporter;
 
 Tạo hàm sinh HTML email cho từng loại:
 
-| Template | Khi nào gửi | Nội dung |
-|----------|-------------|----------|
-| `bookingApproved(booking)` | Booking được duyệt | "Lịch đặt phòng đã được duyệt" + chi tiết phòng/thời gian |
-| `bookingRejected(booking)` | Booking bị từ chối | "Lịch đặt phòng bị từ chối" + lý do từ chối |
-| `bookingCancelled(booking)` | Booking bị hủy | "Lịch đặt phòng đã bị hủy" |
-| `bookingReminder(booking)` | 15 phút trước giờ họp | "Nhắc nhở: Cuộc họp sắp bắt đầu trong 15 phút" |
-| `newBookingForApprover(booking)` | Booking mới được tạo | "Có lịch đặt phòng mới cần duyệt" |
+| Template                           | Khi nào gửi              | Nội dung                                                              |
+| ---------------------------------- | -------------------------- | ---------------------------------------------------------------------- |
+| `bookingApproved(booking)`       | Booking được duyệt     | "Lịch đặt phòng đã được duyệt" + chi tiết phòng/thời gian |
+| `bookingRejected(booking)`       | Booking bị từ chối      | "Lịch đặt phòng bị từ chối" + lý do từ chối                  |
+| `bookingCancelled(booking)`      | Booking bị hủy           | "Lịch đặt phòng đã bị hủy"                                     |
+| `bookingReminder(booking)`       | 15 phút trước giờ họp | "Nhắc nhở: Cuộc họp sắp bắt đầu trong 15 phút"                |
+| `newBookingForApprover(booking)` | Booking mới được tạo  | "Có lịch đặt phòng mới cần duyệt"                              |
 
 **HTML template mẫu (bookingApproved):**
+
 ```html
 <!-- Responsive email template -->
 <div style="max-width: 600px; margin: 0 auto; font-family: 'Inter', Arial, sans-serif;">
@@ -116,13 +120,13 @@ Tạo hàm sinh HTML email cho từng loại:
 
 **`src/services/email.service.js`**:
 
-| Method | Mô tả |
-|--------|--------|
-| `sendBookingApproved(booking)` | Gửi email cho người đặt khi booking được duyệt |
-| `sendBookingRejected(booking)` | Gửi email cho người đặt khi booking bị từ chối |
-| `sendBookingCancelled(booking)` | Gửi email cho người đặt khi booking bị hủy |
-| `sendBookingReminder(booking)` | Gửi email nhắc lịch cho người đặt |
-| `sendNewBookingNotification(booking)` | Gửi email cho approvers khi có booking mới |
+| Method                                  | Mô tả                                                 |
+| --------------------------------------- | ------------------------------------------------------- |
+| `sendBookingApproved(booking)`        | Gửi email cho người đặt khi booking được duyệt |
+| `sendBookingRejected(booking)`        | Gửi email cho người đặt khi booking bị từ chối  |
+| `sendBookingCancelled(booking)`       | Gửi email cho người đặt khi booking bị hủy       |
+| `sendBookingReminder(booking)`        | Gửi email nhắc lịch cho người đặt                |
+| `sendNewBookingNotification(booking)` | Gửi email cho approvers khi có booking mới           |
 
 ```js
 async function sendBookingApproved(booking) {
@@ -181,6 +185,7 @@ cron.schedule('*/5 * * * *', async () => {
 ```
 
 **Database change** — thêm cột vào bảng `bookings`:
+
 ```prisma
 model Booking {
   // ... existing fields
@@ -191,6 +196,7 @@ model Booking {
 > 🔧 Chạy migration: `npx prisma migrate dev --name add_reminder_sent`
 
 **Khởi chạy cron** — thêm vào `src/server.js`:
+
 ```js
 // Chỉ chạy cron trong production hoặc khi có SMTP config
 if (process.env.SMTP_HOST) {
@@ -202,6 +208,7 @@ if (process.env.SMTP_HOST) {
 ### 7. Logging
 
 **`src/utils/logger.js`** (nếu chưa có):
+
 ```js
 // Simple logger wrapper
 // Log email send success/failure
@@ -232,6 +239,7 @@ backend/.env.example                  (sửa — thêm SMTP vars)
 ## Test
 
 ### Test gửi email (dùng Ethereal):
+
 ```js
 // 1. Tạo test account: https://ethereal.email/create
 // 2. Cấu hình .env:
@@ -243,6 +251,7 @@ SMTP_PASS=xxx
 ```
 
 ### Test cron job:
+
 ```js
 // Tạm thời đổi cron thành chạy mỗi 1 phút: '* * * * *'
 // Tạo booking approved có start_time = now + 16 phút
@@ -253,13 +262,13 @@ SMTP_PASS=xxx
 
 ## Tiêu chí hoàn thành
 
-- [ ] Email gửi thành công khi booking được duyệt
-- [ ] Email gửi thành công khi booking bị từ chối (kèm lý do)
-- [ ] Email gửi thành công khi booking bị hủy
-- [ ] Email thông báo cho approver khi có booking mới
-- [ ] Email nhắc lịch gửi trước 15 phút khi họp
-- [ ] Cron job chạy mỗi 5 phút, không gửi trùng (reminderSent flag)
-- [ ] Email template HTML đẹp, responsive
-- [ ] Gửi email không block API response (fire-and-forget)
-- [ ] Email failure không gây crash server (có try-catch + log)
-- [ ] Test thành công với Ethereal/Mailtrap
+- [X] Email gửi thành công khi booking được duyệt
+- [X] Email gửi thành công khi booking bị từ chối (kèm lý do)
+- [X] Email gửi thành công khi booking bị hủy
+- [X] Email thông báo cho approver khi có booking mới
+- [X] Email nhắc lịch gửi trước 15 phút khi họp
+- [X] Cron job chạy mỗi 5 phút, không gửi trùng (reminderSent flag)
+- [X] Email template HTML đẹp, responsive
+- [X] Gửi email không block API response (fire-and-forget)
+- [X] Email failure không gây crash server (có try-catch + log)
+- [X] Test thành công với Ethereal/Mailtrap

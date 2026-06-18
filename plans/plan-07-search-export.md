@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - Tìm kiếm phòng trống nâng cao (theo thời gian + sức chứa + thiết bị)
 - Filter booking đa tiêu chí
 - Export danh sách booking đã lọc ra file .xlsx
@@ -23,15 +24,16 @@ Sau khi hoàn thành:
 
 API `GET /api/rooms/available` (đã có ở Plan 03) — bổ sung filter:
 
-| Param | Mô tả |
-|-------|--------|
-| `startTime` | ISO datetime (bắt buộc) |
-| `endTime` | ISO datetime (bắt buộc) |
-| `minCapacity` | Sức chứa tối thiểu |
-| `equipment` | Danh sách thiết bị cần có (comma-separated: "Máy chiếu,Micro") |
-| `location` | Vị trí (text search) |
+| Param           | Mô tả                                                               |
+| --------------- | --------------------------------------------------------------------- |
+| `startTime`   | ISO datetime (bắt buộc)                                             |
+| `endTime`     | ISO datetime (bắt buộc)                                             |
+| `minCapacity` | Sức chứa tối thiểu                                                |
+| `equipment`   | Danh sách thiết bị cần có (comma-separated: "Máy chiếu,Micro") |
+| `location`    | Vị trí (text search)                                                |
 
 **Prisma query:**
+
 ```js
 const rooms = await prisma.room.findMany({
   where: {
@@ -57,19 +59,20 @@ const rooms = await prisma.room.findMany({
 ### 2. Export Excel API
 
 **Cài dependency:**
+
 ```bash
 npm install exceljs
 ```
 
 **`GET /api/export/bookings`**
 
-| Param | Mô tả |
-|-------|--------|
-| `roomId` | Filter theo phòng (optional) |
-| `status` | Filter theo trạng thái (optional) |
-| `startDate` | Từ ngày (optional) |
-| `endDate` | Đến ngày (optional) |
-| `userId` | Filter theo người đặt (optional, chỉ admin) |
+| Param         | Mô tả                                          |
+| ------------- | ------------------------------------------------ |
+| `roomId`    | Filter theo phòng (optional)                    |
+| `status`    | Filter theo trạng thái (optional)              |
+| `startDate` | Từ ngày (optional)                             |
+| `endDate`   | Đến ngày (optional)                           |
+| `userId`    | Filter theo người đặt (optional, chỉ admin) |
 
 **Response**: File `.xlsx` download trực tiếp.
 
@@ -110,6 +113,7 @@ async function exportBookingsToExcel(filters) {
 ```
 
 **`src/controllers/export.controller.js`**:
+
 ```js
 async function exportBookings(req, res) {
   const buffer = await exportService.exportBookingsToExcel(req.query);
@@ -120,6 +124,7 @@ async function exportBookings(req, res) {
 ```
 
 **Route:**
+
 ```js
 // src/routes/export.routes.js
 router.get('/bookings', authenticate, authorize('admin', 'approver'), exportController.exportBookings);
@@ -177,6 +182,7 @@ Thêm nút Export vào trang danh sách booking (BookingsPage từ Plan 04):
 ```
 
 **Logic frontend:**
+
 ```js
 async function handleExport() {
   // 1. Lấy current filters từ state
@@ -195,6 +201,7 @@ async function handleExport() {
 ### 5. Components
 
 #### `src/components/search/RoomSearchForm.jsx`
+
 - Date + time pickers
 - Capacity number input
 - Location text input
@@ -202,6 +209,7 @@ async function handleExport() {
 - Submit button
 
 #### `src/components/search/AvailableRoomCard.jsx`
+
 - Compact room card cho kết quả tìm kiếm
 - Hiển thị: name, location, capacity, equipment
 - Nút "Đặt phòng" với pre-filled params
@@ -236,12 +244,12 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] API tìm phòng trống: filter capacity + equipment + location hoạt động
-- [ ] API export trả file .xlsx đúng format
-- [ ] File Excel có header styled, auto-width, color-coded status
-- [ ] File Excel có title + subtitle + footer với timestamp
-- [ ] Frontend trang tìm phòng trống hoạt động
-- [ ] Click "Đặt phòng" → pre-fill form đặt phòng
-- [ ] Nút Export trên BookingsPage chỉ hiện cho Admin/Approver
-- [ ] Download file Excel thành công qua browser
-- [ ] Export theo bộ lọc hiện tại (không phải tất cả)
+- [X] API tìm phòng trống: filter capacity + equipment + location hoạt động
+- [X] API export trả file .xlsx đúng format
+- [X] File Excel có header styled, auto-width, color-coded status
+- [X] File Excel có title + subtitle + footer với timestamp
+- [X] Frontend trang tìm phòng trống hoạt động
+- [X] Click "Đặt phòng" → pre-fill form đặt phòng
+- [X] Nút Export trên BookingsPage chỉ hiện cho Admin/Approver
+- [X] Download file Excel thành công qua browser
+- [X] Export theo bộ lọc hiện tại (không phải tất cả)
