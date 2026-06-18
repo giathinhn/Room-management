@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - Toggle 🇻🇳/🇬🇧 ở header để chuyển ngôn ngữ
 - Tất cả text trên UI đều thay đổi theo ngôn ngữ
 - Ngôn ngữ lưu vào localStorage, giữ lại khi refresh
@@ -76,6 +77,7 @@ module.exports = {
 ```
 
 **Sửa error.middleware.js** — format error response:
+
 ```js
 res.status(err.statusCode).json({
   success: false,
@@ -130,6 +132,7 @@ export default i18n;
 ```
 
 **Import vào `src/main.jsx`**:
+
 ```js
 import './i18n';
 ```
@@ -368,6 +371,7 @@ import './i18n';
 ### 5. Sử dụng trong Components
 
 **Cách dùng:**
+
 ```jsx
 import { useTranslation } from 'react-i18next';
 
@@ -387,6 +391,7 @@ function LoginPage() {
 ```
 
 **Error handling:**
+
 ```jsx
 // Trong API interceptor hoặc catch block:
 function handleApiError(error) {
@@ -427,11 +432,13 @@ Thêm vào Header, bên trái NotificationBell.
 ### 7. Quá trình migration
 
 **Chiến lược thay thế text:**
+
 1. Liệt kê tất cả files chứa hardcoded Vietnamese text
 2. Với mỗi file: thay text bằng `t('key')` tương ứng
 3. Đảm bảo keys có trong cả 2 file vi.json và en.json
 
 **Files cần sửa (ước tính):**
+
 - Tất cả pages: LoginPage, RegisterPage, DashboardPage, RoomsPage, BookingsPage, CalendarPage, NotificationsPage, TemplatesPage...
 - Tất cả components: Sidebar, Header, BookingCard, RoomCard, StatusBadge, modals, forms...
 - Toast messages trong services
@@ -465,15 +472,15 @@ backend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] i18n config hoạt động, detect ngôn ngữ từ localStorage
-- [ ] File vi.json chứa tất cả translation keys
-- [ ] File en.json chứa tất cả translation keys
-- [ ] LanguageSwitcher hiển thị ở header
-- [ ] Chuyển ngôn ngữ → toàn bộ UI text thay đổi
-- [ ] Refresh page → giữ nguyên ngôn ngữ đã chọn
-- [ ] Error messages từ API → hiển thị đúng ngôn ngữ
-- [ ] Toast notifications hiển thị đúng ngôn ngữ
-- [ ] Validation messages hiển thị đúng ngôn ngữ
-- [ ] Calendar labels (tên thứ, tháng) thay đổi theo ngôn ngữ
-- [ ] Không còn hardcoded Vietnamese text trong code
-- [ ] Backend trả error codes thay vì text messages
+- [X] i18n config hoạt động, detect ngôn ngữ từ localStorage
+- [X] File vi.json chứa tất cả translation keys
+- [X] File en.json chứa tất cả translation keys
+- [X] LanguageSwitcher hiển thị ở header
+- [X] Chuyển ngôn ngữ → toàn bộ UI text thay đổi
+- [X] Refresh page → giữ nguyên ngôn ngữ đã chọn
+- [X] Error messages từ API → hiển thị đúng ngôn ngữ
+- [X] Toast notifications hiển thị đúng ngôn ngữ
+- [X] Validation messages hiển thị đúng ngôn ngữ
+- [X] Calendar labels (tên thứ, tháng) thay đổi theo ngôn ngữ
+- [X] Không còn hardcoded Vietnamese text trong code
+- [X] Backend trả error codes thay vì text messages

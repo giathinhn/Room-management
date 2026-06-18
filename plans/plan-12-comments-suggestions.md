@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Plan này gộp **2 feature nhỏ** liên quan đến booking:
+
 - **Comments**: Thread bình luận trên mỗi booking
 - **Room Suggestions**: Đề xuất phòng/giờ thay thế khi conflict
 
@@ -23,26 +24,27 @@ Plan này gộp **2 feature nhỏ** liên quan đến booking:
 
 **`src/repositories/comment.repository.js`**:
 
-| Method | Mô tả |
-|--------|--------|
+| Method                         | Mô tả                                                                           |
+| ------------------------------ | --------------------------------------------------------------------------------- |
 | `findByBookingId(bookingId)` | Danh sách comments theo booking, include user info, sắp xếp theo createdAt ASC |
-| `findById(id)` | Chi tiết comment |
-| `create(data)` | Tạo comment mới |
-| `update(id, content)` | Sửa nội dung comment |
-| `delete(id)` | Xóa comment |
+| `findById(id)`               | Chi tiết comment                                                                 |
+| `create(data)`               | Tạo comment mới                                                                 |
+| `update(id, content)`        | Sửa nội dung comment                                                            |
+| `delete(id)`                 | Xóa comment                                                                      |
 
 #### 2. Service
 
 **`src/services/comment.service.js`**:
 
-| Method | Logic |
-|--------|-------|
-| `getByBooking(bookingId)` | Kiểm tra booking tồn tại → Lấy comments |
-| `create(bookingId, userId, content)` | Kiểm tra booking tồn tại → Kiểm tra user có quyền xem booking → Tạo comment |
+| Method                                 | Logic                                                                                     |
+| -------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `getByBooking(bookingId)`            | Kiểm tra booking tồn tại → Lấy comments                                              |
+| `create(bookingId, userId, content)` | Kiểm tra booking tồn tại → Kiểm tra user có quyền xem booking → Tạo comment      |
 | `update(commentId, userId, content)` | Kiểm tra ownership → Kiểm tra thời gian (chỉ sửa trong 5 phút đầu) → Cập nhật |
-| `delete(commentId, userId)` | Kiểm tra ownership → Kiểm tra thời gian (chỉ xóa trong 5 phút đầu) → Xóa |
+| `delete(commentId, userId)`          | Kiểm tra ownership → Kiểm tra thời gian (chỉ xóa trong 5 phút đầu) → Xóa       |
 
 **Business rules:**
+
 - Chỉ người liên quan đến booking mới được comment: chủ booking, approver, admin
 - Sửa/xóa chỉ được trong **5 phút** kể từ khi tạo
 - Content: 1–1000 ký tự
@@ -85,12 +87,14 @@ router.delete('/:id/comments/:cid', authenticate, commentController.delete);
 ```
 
 **`src/components/bookings/CommentItem.jsx`**:
+
 - Avatar (chữ cái đầu) + tên + role badge + time ago
 - Content text
 - Edit/Delete buttons (chỉ hiện nếu là owner + trong 5 phút)
 - Edit mode: textarea replace content + Save/Cancel buttons
 
 **`src/components/bookings/CommentInput.jsx`**:
+
 - Textarea + gửi button
 - Validation: không được trống, max 1000 ký tự
 - Auto-resize textarea
@@ -110,13 +114,14 @@ Thêm `<CommentSection bookingId={id} />` vào `BookingDetailPage.jsx`
 
 **`src/services/suggestion.service.js`**:
 
-| Method | Logic |
-|--------|-------|
-| `getAlternativeRooms(roomId, startTime, endTime, minCapacity?)` | Tìm phòng khác **còn trống** cùng khung giờ → Sắp xếp: cùng tầng trước, capacity gần nhất trước |
-| `getAlternativeSlots(roomId, date, preferredStartTime)` | Tìm **slot trống** gần nhất của cùng phòng đó trong ngày → Trả 3 slot trước + 3 slot sau |
-| `getSmartSuggestions(userId)` | Phân tích booking history → Tìm pattern (phòng hay đặt, giờ hay đặt) → Đề xuất booking mới |
+| Method                                                            | Logic                                                                                                                  |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `getAlternativeRooms(roomId, startTime, endTime, minCapacity?)` | Tìm phòng khác**còn trống** cùng khung giờ → Sắp xếp: cùng tầng trước, capacity gần nhất trước |
+| `getAlternativeSlots(roomId, date, preferredStartTime)`         | Tìm**slot trống** gần nhất của cùng phòng đó trong ngày → Trả 3 slot trước + 3 slot sau            |
+| `getSmartSuggestions(userId)`                                   | Phân tích booking history → Tìm pattern (phòng hay đặt, giờ hay đặt) → Đề xuất booking mới              |
 
 **getAlternativeRooms algorithm:**
+
 ```js
 // 1. Lấy thông tin phòng gốc (location, capacity)
 // 2. Tìm tất cả phòng trống cùng thời gian (reuse findAvailable)
@@ -129,6 +134,7 @@ Thêm `<CommentSection bookingId={id} />` vào `BookingDetailPage.jsx`
 ```
 
 **getAlternativeSlots algorithm:**
+
 ```js
 // 1. Lấy tất cả bookings (pending/approved) của phòng trong ngày
 // 2. Tính gaps (khoảng trống) giữa các bookings
@@ -140,6 +146,7 @@ Thêm `<CommentSection bookingId={id} />` vào `BookingDetailPage.jsx`
 ```
 
 **getSmartSuggestions algorithm:**
+
 ```js
 // 1. Lấy 30 bookings gần nhất của user (approved)
 // 2. Phân tích pattern:
@@ -238,17 +245,19 @@ frontend/src/
 ## Tiêu chí hoàn thành
 
 ### Comments
-- [ ] API CRUD comment hoạt động
-- [ ] Chỉ người liên quan booking mới comment được
-- [ ] Sửa/xóa chỉ trong 5 phút đầu
-- [ ] Comment section hiển thị trên booking detail
-- [ ] Thêm comment → hiển thị ngay không cần refresh
-- [ ] Avatar + tên + role badge + time ago
+
+- [X] API CRUD comment hoạt động
+- [X] Chỉ người liên quan booking mới comment được
+- [X] Sửa/xóa chỉ trong 5 phút đầu
+- [X] Comment section hiển thị trên booking detail
+- [X] Thêm comment → hiển thị ngay không cần refresh
+- [X] Avatar + tên + role badge + time ago
 
 ### Suggestions
-- [ ] API alternative rooms trả phòng trống, ranked theo relevance
-- [ ] API alternative slots trả giờ trống gần nhất
-- [ ] API smart suggestions trả gợi ý dựa trên history
-- [ ] Conflict alert hiển thị phòng + giờ thay thế
-- [ ] Click "Chọn" → pre-fill form với suggestion
-- [ ] Smart suggestions hiển thị trên booking create page
+
+- [X] API alternative rooms trả phòng trống, ranked theo relevance
+- [X] API alternative slots trả giờ trống gần nhất
+- [X] API smart suggestions trả gợi ý dựa trên history
+- [X] Conflict alert hiển thị phòng + giờ thay thế
+- [X] Click "Chọn" → pre-fill form với suggestion
+- [X] Smart suggestions hiển thị trên booking create page

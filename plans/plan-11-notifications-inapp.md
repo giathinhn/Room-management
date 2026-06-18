@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - Mỗi action booking (tạo/duyệt/từ chối/hủy) tạo notification trong DB
 - Bell icon ở header hiển thị badge unread count
 - Dropdown hiển thị danh sách notifications
@@ -24,25 +25,25 @@ Sau khi hoàn thành:
 
 **`src/repositories/notification.repository.js`**:
 
-| Method | Mô tả |
-|--------|--------|
-| `create(data)` | Tạo notification mới |
+| Method                                | Mô tả                                                              |
+| ------------------------------------- | -------------------------------------------------------------------- |
+| `create(data)`                      | Tạo notification mới                                               |
 | `findByUserId(userId, page, limit)` | Danh sách notifications của user (phân trang, mới nhất trước) |
-| `countUnread(userId)` | Đếm số notification chưa đọc |
-| `markAsRead(id, userId)` | Đánh dấu 1 notification đã đọc (kiểm tra ownership) |
-| `markAllAsRead(userId)` | Đánh dấu tất cả đã đọc |
+| `countUnread(userId)`               | Đếm số notification chưa đọc                                   |
+| `markAsRead(id, userId)`            | Đánh dấu 1 notification đã đọc (kiểm tra ownership)          |
+| `markAllAsRead(userId)`             | Đánh dấu tất cả đã đọc                                      |
 
 ### 2. Service Layer
 
 **`src/services/notification.service.js`**:
 
-| Method | Logic |
-|--------|-------|
+| Method                                                           | Logic                                                    |
+| ---------------------------------------------------------------- | -------------------------------------------------------- |
 | `createNotification(userId, type, title, message, bookingId?)` | Tạo notification → Push qua SSE nếu user đang online |
-| `getNotifications(userId, page, limit)` | Lấy danh sách + unread count |
-| `getUnreadCount(userId)` | Trả về { count: number } |
-| `markAsRead(id, userId)` | Kiểm tra ownership → đánh dấu đã đọc |
-| `markAllAsRead(userId)` | Đánh dấu tất cả |
+| `getNotifications(userId, page, limit)`                        | Lấy danh sách + unread count                           |
+| `getUnreadCount(userId)`                                       | Trả về { count: number }                               |
+| `markAsRead(id, userId)`                                       | Kiểm tra ownership → đánh dấu đã đọc            |
+| `markAllAsRead(userId)`                                        | Đánh dấu tất cả                                     |
 
 ### 3. SSE Manager
 
@@ -159,13 +160,13 @@ await notificationService.createNotification(
 
 **`src/controllers/notification.controller.js`**:
 
-| Method | Endpoint | Response |
-|--------|----------|----------|
-| `getAll` | GET `/api/notifications?page=1&limit=20` | { data: Notification[], unreadCount, pagination } |
-| `getUnreadCount` | GET `/api/notifications/unread-count` | { count: number } |
-| `markAsRead` | PATCH `/api/notifications/:id/read` | { data: Notification } |
-| `markAllAsRead` | PATCH `/api/notifications/read-all` | { message: "All marked as read" } |
-| `stream` | GET `/api/notifications/stream` | SSE stream |
+| Method             | Endpoint                                   | Response                                          |
+| ------------------ | ------------------------------------------ | ------------------------------------------------- |
+| `getAll`         | GET `/api/notifications?page=1&limit=20` | { data: Notification[], unreadCount, pagination } |
+| `getUnreadCount` | GET `/api/notifications/unread-count`    | { count: number }                                 |
+| `markAsRead`     | PATCH `/api/notifications/:id/read`      | { data: Notification }                            |
+| `markAllAsRead`  | PATCH `/api/notifications/read-all`      | { message: "All marked as read" }                 |
+| `stream`         | GET `/api/notifications/stream`          | SSE stream                                        |
 
 ---
 
@@ -207,6 +208,7 @@ function useNotifications() {
 ```
 
 > ⚠️ **SSE + JWT**: `EventSource` không hỗ trợ custom headers. Giải pháp:
+>
 > - Option A: Gửi token qua query param: `/api/notifications/stream?token=xxx`
 > - Option B: Dùng `fetch` + `ReadableStream` thay `EventSource`
 > - **Khuyến nghị Option A** cho đơn giản, token ngắn hạn (15 phút)
@@ -214,16 +216,19 @@ function useNotifications() {
 ### 8. Components
 
 #### `src/components/notifications/NotificationBell.jsx`
+
 ```
 ┌──────┐
 │ 🔔   │ ← Bell icon
 │  (3) │ ← Badge đỏ với unread count (ẩn nếu 0)
 └──────┘
 ```
+
 - Click → toggle dropdown
 - Badge animation: scale pulse khi có notification mới
 
 #### `src/components/notifications/NotificationDropdown.jsx`
+
 ```
 ┌──────────────────────────────────────────┐
 │ Thông báo                [Đọc tất cả]   │
@@ -242,6 +247,7 @@ function useNotifications() {
 ```
 
 **Features:**
+
 - Max 5 notifications gần nhất trong dropdown
 - Unread: background nhạt + dot indicator
 - Relative time: "2 phút", "1 giờ", "Hôm qua"
@@ -250,6 +256,7 @@ function useNotifications() {
 - "Xem tất cả" → navigate tới /notifications page
 
 #### `src/components/notifications/NotificationItem.jsx`
+
 - Props: notification, onRead, onClick
 - Icon theo type: 🟢 approved, 🔴 rejected, ⚪ cancelled, ⏰ reminder, 📋 pending
 - Unread styling: left border accent + bolder text
@@ -258,6 +265,7 @@ function useNotifications() {
 ### 9. NotificationsPage (full list)
 
 **`src/pages/NotificationsPage.jsx`**:
+
 - Danh sách tất cả notifications, phân trang
 - Nút "Đánh dấu tất cả đã đọc"
 - Click → navigate tới booking
@@ -266,6 +274,7 @@ function useNotifications() {
 ### 10. Tích hợp vào Header
 
 **Sửa `src/components/layout/Header.jsx`**:
+
 - Thêm `<NotificationBell />` vào header, bên trái user dropdown
 - Inject `useNotifications` hook
 
@@ -305,15 +314,15 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] Tạo booking → notification gửi tới approvers
-- [ ] Duyệt booking → notification gửi tới người đặt
-- [ ] Từ chối booking → notification gửi tới người đặt
-- [ ] Hủy booking → notification gửi tới liên quan
-- [ ] Bell icon hiển thị unread count đúng
-- [ ] Dropdown hiển thị 5 notifications gần nhất
-- [ ] Click notification → navigate tới booking + mark as read
-- [ ] "Đọc tất cả" hoạt động
-- [ ] SSE push notification real-time (không cần refresh)
-- [ ] Notification mới → toast hiển thị + badge cập nhật
-- [ ] Trang /notifications hiển thị danh sách đầy đủ
-- [ ] SSE reconnect tự động khi mất connection
+- [X] Tạo booking → notification gửi tới approvers
+- [X] Duyệt booking → notification gửi tới người đặt
+- [X] Từ chối booking → notification gửi tới người đặt
+- [X] Hủy booking → notification gửi tới liên quan
+- [X] Bell icon hiển thị unread count đúng
+- [X] Dropdown hiển thị 5 notifications gần nhất
+- [X] Click notification → navigate tới booking + mark as read
+- [X] "Đọc tất cả" hoạt động
+- [X] SSE push notification real-time (không cần refresh)
+- [X] Notification mới → toast hiển thị + badge cập nhật
+- [X] Trang /notifications hiển thị danh sách đầy đủ
+- [X] SSE reconnect tự động khi mất connection

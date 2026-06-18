@@ -1,0 +1,79 @@
+.booking-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.booking-filter__select {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  min-width: 160px;
+}
+.booking-filter__select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.booking-filter__select option {
+  background: var(--color-bg-card);
+}
+
+.booking-filter__date-range {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.booking-filter__date {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+.booking-filter__date:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.booking-filter__date::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+.booking-filter__date-sep {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: 0 2px;
+}
+
+.booking-filter__reset {
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+.booking-filter__reset:hover {
+  background: rgba(239, 68, 68, 0.18);
+}

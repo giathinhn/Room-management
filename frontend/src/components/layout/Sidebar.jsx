@@ -4,7 +4,6 @@ import {
   FiCalendar,
   FiGrid,
   FiPlusSquare,
-  FiCheckSquare,
   FiUsers,
   FiChevronLeft,
 } from 'react-icons/fi';
@@ -21,7 +20,7 @@ const NAV_ITEMS = [
   {
     label: 'Lịch đặt phòng',
     icon: <FiCalendar />,
-    to: '/calendar',
+    to: '/bookings',
     roles: ['admin', 'approver', 'user'],
   },
   {
@@ -31,16 +30,10 @@ const NAV_ITEMS = [
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Đặt phòng',
+    label: 'Đặt phòng mới',
     icon: <FiPlusSquare />,
     to: '/bookings/new',
     roles: ['admin', 'approver', 'user'],
-  },
-  {
-    label: 'Duyệt lịch',
-    icon: <FiCheckSquare />,
-    to: '/bookings/pending',
-    roles: ['admin', 'approver'],
   },
   {
     label: 'Quản lý users',

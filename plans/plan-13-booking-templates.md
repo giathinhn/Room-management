@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - User tạo/sửa/xóa booking templates (tối đa 10)
 - Đặt phòng từ template: chọn template → chọn ngày → submit
 - Lưu booking hiện tại thành template ("Save as template")
@@ -23,35 +24,35 @@ Sau khi hoàn thành:
 
 **`src/repositories/template.repository.js`**:
 
-| Method | Mô tả |
-|--------|--------|
-| `findByUserId(userId)` | Danh sách templates của user, include room info |
-| `findById(id)` | Chi tiết template |
-| `create(data)` | Tạo template mới |
-| `update(id, data)` | Sửa template |
-| `delete(id)` | Xóa template |
-| `countByUserId(userId)` | Đếm số templates (kiểm tra giới hạn 10) |
+| Method                    | Mô tả                                           |
+| ------------------------- | ------------------------------------------------- |
+| `findByUserId(userId)`  | Danh sách templates của user, include room info |
+| `findById(id)`          | Chi tiết template                                |
+| `create(data)`          | Tạo template mới                                |
+| `update(id, data)`      | Sửa template                                     |
+| `delete(id)`            | Xóa template                                     |
+| `countByUserId(userId)` | Đếm số templates (kiểm tra giới hạn 10)     |
 
 ### 2. Validation
 
 **`src/validators/template.validator.js`**:
 
-| Schema | Fields | Rules |
-|--------|--------|-------|
-| `createTemplateSchema` | name, roomId?, title, startTime, endTime | name: 1-100 ký tự, title: 1-200 ký tự, startTime/endTime: HH:mm format |
-| `updateTemplateSchema` | name?, roomId?, title?, startTime?, endTime? | Tất cả optional |
+| Schema                   | Fields                                       | Rules                                                                      |
+| ------------------------ | -------------------------------------------- | -------------------------------------------------------------------------- |
+| `createTemplateSchema` | name, roomId?, title, startTime, endTime     | name: 1-100 ký tự, title: 1-200 ký tự, startTime/endTime: HH:mm format |
+| `updateTemplateSchema` | name?, roomId?, title?, startTime?, endTime? | Tất cả optional                                                          |
 
 ### 3. Service
 
 **`src/services/template.service.js`**:
 
-| Method | Logic |
-|--------|-------|
-| `getByUser(userId)` | Lấy danh sách templates, include room name |
-| `create(userId, data)` | Kiểm tra giới hạn 10 → Validate → Kiểm tra room (nếu có roomId) → Tạo |
-| `update(id, userId, data)` | Kiểm tra ownership → Validate → Cập nhật |
-| `delete(id, userId)` | Kiểm tra ownership → Xóa |
-| `createFromBooking(userId, booking, name)` | Từ booking → tạo template tự động |
+| Method                                       | Logic                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `getByUser(userId)`                        | Lấy danh sách templates, include room name                                    |
+| `create(userId, data)`                     | Kiểm tra giới hạn 10 → Validate → Kiểm tra room (nếu có roomId) → Tạo |
+| `update(id, userId, data)`                 | Kiểm tra ownership → Validate → Cập nhật                                   |
+| `delete(id, userId)`                       | Kiểm tra ownership → Xóa                                                     |
+| `createFromBooking(userId, booking, name)` | Từ booking → tạo template tự động                                         |
 
 ### 4. Controller & Routes
 
@@ -95,33 +96,39 @@ router.delete('/:id', authenticate, templateController.delete);
 ```
 
 #### `src/components/templates/TemplateCard.jsx`
+
 - Props: template, onUse, onEdit, onDelete
 - Hiển thị: name, room name, time range
 - Hover effect
 - "Đặt ngay" → navigate BookingCreatePage với pre-fill
 
 #### `src/components/templates/TemplateForm.jsx` (Modal)
+
 - Dùng cho Create + Edit
 - Fields: tên template, chọn phòng (dropdown), tiêu đề cuộc họp, giờ bắt đầu, giờ kết thúc
 - Validation inline
 
 #### `src/components/templates/SaveAsTemplate.jsx`
+
 - Nút "💾 Lưu làm mẫu" trên BookingDetailPage (cho booking approved)
 - Click → modal nhập tên template → auto-fill từ booking info → save
 
 ### 6. Tích hợp
 
 **BookingCreatePage:**
+
 - Thêm section "📋 Đặt từ mẫu" phía trên form
 - Hiển thị template cards ngang (carousel nếu > 3)
 - Click template → pre-fill: roomId, title, startTime, endTime → user chỉ cần chọn ngày
 
 **Sidebar:**
+
 - Thêm menu item "📋 Mẫu đặt phòng" → /templates
 
 ### 7. TemplatesPage
 
 **`src/pages/TemplatesPage.jsx`**:
+
 - Danh sách templates dạng card grid
 - Nút tạo mới (disabled nếu đã đạt 10)
 - CRUD modal
@@ -160,13 +167,13 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] CRUD templates API hoạt động
-- [ ] Giới hạn 10 templates/user → 400 khi vượt quá
-- [ ] Chỉ owner mới sửa/xóa template
-- [ ] Trang templates hiển thị danh sách
-- [ ] Tạo/sửa template qua modal
-- [ ] Xóa template có confirm dialog
-- [ ] Click "Đặt ngay" → BookingCreatePage pre-filled
-- [ ] Templates hiển thị trên BookingCreatePage
-- [ ] "Lưu làm mẫu" trên BookingDetailPage hoạt động
-- [ ] Counter "3/10" hiển thị đúng
+- [X] CRUD templates API hoạt động
+- [X] Giới hạn 10 templates/user → 400 khi vượt quá
+- [X] Chỉ owner mới sửa/xóa template
+- [X] Trang templates hiển thị danh sách
+- [X] Tạo/sửa template qua modal
+- [X] Xóa template có confirm dialog
+- [X] Click "Đặt ngay" → BookingCreatePage pre-filled
+- [X] Templates hiển thị trên BookingCreatePage
+- [X] "Lưu làm mẫu" trên BookingDetailPage hoạt động
+- [X] Counter "3/10" hiển thị đúng

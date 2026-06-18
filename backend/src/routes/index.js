@@ -27,5 +27,8 @@ router.use('/users', require('./user.routes'));
 // ─── Room management ──────────────────────────────────────────────────────────
 router.use('/rooms', require('./room.routes'));
 
+// ─── Booking system ───────────────────────────────────────────────────────────
+router.use('/bookings', require('./booking.routes'));
+
 module.exports = router;
 
