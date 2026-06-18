@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copy package files first for better layer caching
@@ -16,4 +18,4 @@ RUN npx prisma generate
 
 EXPOSE 5000
 
-CMD ["node", "src/server.js"]
+CMD ["sh", "-c", "npx prisma generate && node src/server.js"]

@@ -8,23 +8,17 @@
 
 const { PrismaClient } = require('@prisma/client');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Simple hash for seed purposes only.
- * NOTE: In production (Plan 01), bcrypt will be used.
- * This hash is intentionally simple so we can seed without bcrypt installed yet.
+ * Hash password dynamically using bcryptjs.
  */
 function hashPassword(password) {
-  // We'll use a static bcrypt hash for "Password123!" generated externally
-  // $2b$10$... format. For seeding without bcrypt dependency, use a known hash.
-  // Password: Password123!
-  // Generated with bcrypt rounds=10
-  return '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'; // "password" — placeholder
-  // After Plan 01 adds bcrypt, update this to proper hash
+  return bcrypt.hashSync(password, 10);
 }
 
 /**

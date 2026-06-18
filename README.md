@@ -1,99 +1,163 @@
-# RoomSync - Hệ Thống Quản Lý Phòng Họp (Room Management)
+# 🏢 RoomSync - Hệ thống Quản lý Phòng họp (Meeting Room Management System)
 
-RoomSync là ứng dụng hỗ trợ đặt phòng họp, quản lý phòng và duyệt yêu cầu đặt phòng. Dự án được chia làm hai phần chính: **Backend** (Node.js + Express + Prisma) và **Frontend** (Vite + React).
-
----
-
-## 🛠️ Yêu Cầu Hệ Thống (Prerequisites)
-
-Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đặt các công cụ sau:
-* **Node.js** (Phiên bản khuyến nghị: v18 trở lên)
-* **Docker & Docker Desktop** (Dùng để chạy cơ sở dữ liệu PostgreSQL)
+RoomSync là ứng dụng hỗ trợ quản lý phòng họp, đặt phòng họp (booking), quản lý thiết bị, kiểm tra trạng thái phòng trống, duyệt yêu cầu đặt phòng và báo cáo thống kê. Dự án sử dụng **React (Vite)** cho Frontend, **Express** & **Prisma (PostgreSQL)** cho Backend.
 
 ---
 
-## 🚀 Hướng Dẫn Khởi Chạy Dự Án
+## 🛠️ Yêu cầu hệ thống
 
-Bạn có thể chạy dự án bằng cách kết hợp chạy database qua Docker và ứng dụng qua node cục bộ trên máy.
-
-### Bước 1: Khởi động Database bằng Docker
-1. Mở ứng dụng **Docker Desktop** trên máy tính của bạn.
-2. Mở Terminal tại thư mục gốc của dự án (`Room-management`) và chạy lệnh sau để khởi động container PostgreSQL:
-   ```bash
-   docker compose up -d db
-   ```
-
-> [!WARNING]
-> **Lỗi trùng cổng 5432 (Nếu gặp phải):**  
-> Nếu bạn cài PostgreSQL cục bộ trên Windows, dịch vụ Windows Service của nó sẽ chiếm cổng `5432` khiến Docker không chạy được hoặc Prisma kết nối sai database.  
-> * **Cách sửa:** Mở PowerShell với quyền Admin và chạy lệnh sau trước khi bật Docker:
->   ```powershell
->   Stop-Service -Name postgresql-x64-18
-   Set-Service -Name postgresql-x64-18 -StartupType Manual
->   ```
-
-### Bước 2: Thiết Lập và Chạy Backend
-1. Di chuyển vào thư mục `backend`:
-   ```bash
-   cd backend
-   ```
-2. Cài đặt các thư viện phụ thuộc:
-   ```bash
-   npm install
-   ```
-3. Chạy di chuyển cấu trúc cơ sở dữ liệu (Database Migration):
-   ```bash
-   npm run db:migrate
-   ```
-   *Nhập tên cho bản migration khi được yêu cầu (ví dụ: `init`).*
-4. Nạp dữ liệu mẫu (Seed Database):
-   ```bash
-   npm run db:seed
-   ```
-5. Khởi chạy Server Backend dưới chế độ phát triển (Development Mode):
-   ```bash
-   npm run dev
-   ```
-   Server backend sẽ chạy tại địa chỉ: **[http://localhost:5000](http://localhost:5000)**
-
-### Bước 3: Thiết Lập và Chạy Frontend
-1. Mở một Terminal mới và di chuyển vào thư mục `frontend`:
-   ```bash
-   cd frontend
-   ```
-2. Cài đặt các thư viện phụ thuộc:
-   ```bash
-   npm install
-   ```
-3. Khởi chạy ứng dụng Frontend:
-   ```bash
-   npm run dev
-   ```
-   Ứng dụng frontend sẽ chạy tại địa chỉ: **[http://localhost:5173](http://localhost:5173)**
+Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đặt:
+*   [Node.js](https://nodejs.org/) (Khuyên dùng phiên bản **LTS v20 trở lên**)
+*   [Docker](https://www.docker.com/) & **Docker Compose** (Để chạy nhanh toàn bộ môi trường hoặc cơ sở dữ liệu)
+*   **PostgreSQL** (Nếu bạn chọn chạy cơ sở dữ liệu trực tiếp trên máy thay vì dùng Docker)
 
 ---
 
-## 🔑 Tài Khoản Đăng Nhập Mẫu (Mặc định sau khi Seed)
+## 🚀 Hướng dẫn khởi chạy dự án
 
-Sau khi chạy lệnh `npm run db:seed`, hệ thống sẽ có sẵn các tài khoản thử nghiệm sau (tất cả dùng chung mật khẩu **`Password123!`**):
+Có 2 cách để khởi chạy dự án: **Chạy nhanh bằng Docker (Khuyên dùng)** hoặc **Chạy thủ công từng phần**.
 
-| Email | Vai trò (Role) | Mô tả |
-| :--- | :--- | :--- |
-| `admin@company.com` | **Admin** | Quản lý hệ thống, quản lý phòng |
-| `approver@company.com` | **Approver** | Người phê duyệt yêu cầu đặt phòng |
-| `user1@company.com` | **User** | Nhân viên đặt phòng |
-| `user2@company.com` | **User** | Nhân viên đặt phòng |
+### 🐳 Cách 1: Sử dụng Docker & Docker Compose (Khuyên dùng)
+
+Cách này sẽ tự động thiết lập và chạy cơ sở dữ liệu PostgreSQL, Backend API và Frontend React trong các container Docker.
+
+**Bước 1:** Khởi chạy các dịch vụ Docker (chạy ở chế độ background):
+```bash
+docker compose up -d
+```
+
+**Bước 2:** Chạy migrations để khởi tạo cấu trúc cơ sở dữ liệu và seed dữ liệu mẫu:
+```bash
+# Tạo cấu trúc các bảng dữ liệu
+docker exec -it roomsync_backend npx prisma migrate deploy
+
+# Khởi tạo dữ liệu mẫu (Tài khoản, Phòng họp mẫu, v.v...)
+docker exec -it roomsync_backend npx prisma db seed
+```
+
+**Bước 3:** Truy cập ứng dụng:
+*   **Giao diện người dùng (Frontend):** [http://localhost:5173](http://localhost:5173)
+*   **Cổng API Backend:** [http://localhost:5000](http://localhost:5000)
+
+**Bước 4:** Để dừng các dịch vụ:
+```bash
+docker compose down
+```
 
 ---
 
-## 🛑 Cách Tắt Dự Án Khi Dùng Xong
+### 💻 Cách 2: Chạy thủ công từng phần (Dành cho lập trình viên)
 
-Khi muốn dừng chạy ứng dụng để giải phóng tài nguyên máy tính:
+Cách này phù hợp khi bạn cần chỉnh sửa code liên tục ở Frontend/Backend và muốn theo dõi logs trực tiếp ở máy cá nhân.
 
-1. **Dừng Backend & Frontend:** Nhấn tổ hợp phím **`Ctrl + C`** tại các màn hình terminal tương ứng (nhấn `Y` nếu có hỏi xác nhận).
-2. **Dừng Database Docker:** Tại thư mục gốc của dự án, chạy lệnh:
-   ```bash
-   docker compose down
-   ```
-   *Lệnh này sẽ tắt container database sạch sẽ mà không làm mất dữ liệu đã lưu trữ.*
-3. **Tắt Docker Desktop:** Nhấp chuột phải vào biểu tượng Docker ở khay hệ thống (System Tray) và chọn **Quit Docker Desktop**.
+#### 1. Khởi chạy nhanh Cơ sở dữ liệu (PostgreSQL) bằng Docker
+Nếu không muốn cài đặt PostgreSQL thủ công trên máy, bạn có thể chạy chỉ riêng cơ sở dữ liệu từ file `docker-compose.yml`:
+```bash
+docker compose up -d db
+```
+*Cơ sở dữ liệu sẽ chạy tại cổng mặc định `5432`.*
+
+#### 2. Cài đặt và khởi chạy Backend
+**Bước 2.1:** Di chuyển vào thư mục backend:
+```bash
+cd backend
+```
+
+**Bước 2.2:** Tạo file cấu hình môi trường `.env` từ file mẫu:
+```bash
+cp .env.example .env
+```
+*(Trên Windows PowerShell, sử dụng lệnh: `copy .env.example .env`)*
+
+**Bước 2.3:** Cài đặt các thư viện phụ thuộc:
+```bash
+npm install
+```
+
+**Bước 2.4:** Khởi chạy Prisma client, migration và seed dữ liệu mẫu:
+```bash
+# Tạo prisma client dựa trên schema
+npx prisma generate
+
+# Tạo các bảng cơ sở dữ liệu
+npx prisma migrate dev --name init
+
+# Gieo dữ liệu mẫu (Seed data)
+npx prisma db seed
+```
+
+**Bước 2.5:** Khởi động Backend API ở chế độ phát triển:
+```bash
+npm run dev
+```
+*API Backend sẽ chạy tại: [http://localhost:5000](http://localhost:5000)*
+
+#### 3. Cài đặt và khởi chạy Frontend
+Mở một terminal mới tại thư mục gốc của dự án.
+
+**Bước 3.1:** Di chuyển vào thư mục frontend:
+```bash
+cd frontend
+```
+
+**Bước 3.2:** Cài đặt các thư viện phụ thuộc:
+```bash
+npm install
+```
+
+**Bước 3.3:** Khởi động ứng dụng React + Vite:
+```bash
+npm run dev
+```
+*Giao diện Frontend sẽ chạy tại: [http://localhost:5173](http://localhost:5173)*
+
+---
+
+## 🔑 Tài khoản đăng nhập dùng thử (Seed Data)
+
+Hệ thống đi kèm dữ liệu mẫu được khởi tạo sẵn với các phân quyền khác nhau. Tất cả tài khoản sử dụng chung một mật khẩu:
+
+*   **Mật khẩu mặc định:** `Password123!`
+
+| Vai trò (Role) | Email đăng nhập | Tên người dùng | Quyền hạn chính |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@company.com` | Admin User | Quản lý phòng họp, cấu hình hệ thống, xem dashboard |
+| **Approver** | `approver@company.com` | Approver User | Duyệt/Từ chối yêu cầu đặt phòng họp |
+| **User** | `user1@company.com` | Nguyễn Văn A | Đặt phòng họp, xem lịch phòng, quản lý templates cá nhân |
+| **User** | `user2@company.com` | Trần Thị B | Đặt phòng họp, xem lịch phòng, quản lý templates cá nhân |
+
+---
+
+## 📂 Cấu trúc thư mục chính
+
+```text
+Room-management/
+├── backend/               # Mã nguồn API (NodeJS/Express)
+│   ├── prisma/            # Schema và Seed script của Prisma ORM
+│   └── src/               # Thư mục chứa controllers, routes, middlewares
+├── frontend/              # Giao diện người dùng (ReactJS / Vite)
+│   ├── src/               # Components, pages, contexts, hooks, assets
+│   └── index.html
+├── plans/                 # Các tài liệu thiết kế và kế hoạch phát triển dự án
+├── docker-compose.yml     # File cấu hình Docker Compose (DB + BE + FE)
+└── README.md              # File hướng dẫn này
+```
+
+---
+
+## 🛠️ Một số lệnh hữu ích cho Developer
+
+*   **Xem Prisma Studio** (Trình giao diện quản lý DB trực quan):
+    ```bash
+    cd backend
+    npx prisma studio
+    ```
+*   **Format code bằng Prettier** (Backend):
+    ```bash
+    cd backend
+    npm run format
+    ```
+*   **Kiểm tra lỗi Lint** (Frontend & Backend):
+    ```bash
+    npm run lint
+    ```
