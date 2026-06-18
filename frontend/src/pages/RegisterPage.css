@@ -1,0 +1,50 @@
+/* Password strength indicator */
+.pw-strength {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pw-strength__bar {
+  display: flex;
+  gap: 5px;
+}
+
+.pw-strength__segment {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+}
+
+.pw-strength__label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  align-self: flex-end;
+  margin-top: -6px;
+}
+
+/* Password checklist */
+.pw-checklist {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.pw-checklist__item {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pw-checklist__item--ok {
+  color: #22c55e;
+}

@@ -1,7 +1,4 @@
-/* App-level component styles */
-
-.app-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* App-level layout resets — component styles are co-located */
+#root {
+  isolation: isolate;
 }

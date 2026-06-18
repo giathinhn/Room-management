@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành:
+
 - User chọn tần suất (daily/weekly/monthly) + ngày kết thúc → hệ thống sinh ra N bookings
 - Mỗi booking được kiểm tra trùng lịch riêng
 - Nếu có slots trùng → hiển thị danh sách, cho phép đặt slots OK
@@ -55,39 +56,41 @@ Sau khi hoàn thành:
 
 **`src/validators/recurring.validator.js`**:
 
-| Schema | Fields | Rules |
-|--------|--------|-------|
+| Schema                    | Fields                                                           | Rules                                                                                                                                       |
+| ------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `createRecurringSchema` | roomId, title, startDate, endDate, startTime, endTime, frequency | frequency: daily/weekly/monthly, endDate > startDate, endDate ≤ startDate + 6 tháng, startTime/endTime: HH:mm format, startTime < endTime |
 
 ### 3. Repository Layer
 
 **`src/repositories/recurring.repository.js`**:
 
-| Method | Mô tả |
-|--------|--------|
-| `create(data)` | Tạo recurring_booking record |
-| `findById(id)` | Lấy recurring_booking kèm bookings |
-| `findByUserId(userId)` | Danh sách recurring của user |
-| `delete(id)` | Xóa recurring_booking record |
+| Method                   | Mô tả                              |
+| ------------------------ | ------------------------------------ |
+| `create(data)`         | Tạo recurring_booking record        |
+| `findById(id)`         | Lấy recurring_booking kèm bookings |
+| `findByUserId(userId)` | Danh sách recurring của user       |
+| `delete(id)`           | Xóa recurring_booking record        |
 
 Dùng lại `booking.repository.js`:
-| Method | Mô tả |
-|--------|--------|
-| `createMany(bookings[])` | Tạo nhiều bookings cùng lúc (prisma.booking.createMany) |
+
+| Method                               | Mô tả                                                        |
+| ------------------------------------ | -------------------------------------------------------------- |
+| `createMany(bookings[])`           | Tạo nhiều bookings cùng lúc (prisma.booking.createMany)    |
 | `cancelByRecurringId(recurringId)` | Hủy tất cả bookings thuộc 1 chuỗi (chỉ pending/approved) |
 
 ### 4. Service Layer
 
 **`src/services/recurring.service.js`**:
 
-| Method | Logic |
-|--------|-------|
-| `create(userId, data)` | Validate → Kiểm tra room → **Sinh slots** → **Kiểm tra trùng từng slot** → Phân loại: OK slots vs Conflict slots → Return { okSlots, conflictSlots } |
-| `confirm(userId, data, confirmedSlots)` | Tạo recurring_booking record → Tạo bookings cho confirmed slots (status=pending) → Return { recurring, bookings } |
-| `cancelAll(recurringId, userId)` | Kiểm tra ownership → Hủy tất cả booking pending/approved thuộc chuỗi |
-| `getByUser(userId)` | Danh sách chuỗi recurring của user, kèm thống kê (bao nhiêu đã duyệt, pending, cancelled) |
+| Method                                    | Logic                                                                                                                                                                      |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create(userId, data)`                  | Validate → Kiểm tra room →**Sinh slots** → **Kiểm tra trùng từng slot** → Phân loại: OK slots vs Conflict slots → Return { okSlots, conflictSlots } |
+| `confirm(userId, data, confirmedSlots)` | Tạo recurring_booking record → Tạo bookings cho confirmed slots (status=pending) → Return { recurring, bookings }                                                      |
+| `cancelAll(recurringId, userId)`        | Kiểm tra ownership → Hủy tất cả booking pending/approved thuộc chuỗi                                                                                                |
+| `getByUser(userId)`                     | Danh sách chuỗi recurring của user, kèm thống kê (bao nhiêu đã duyệt, pending, cancelled)                                                                        |
 
 **Luồng 2 bước:**
+
 ```
 Bước 1 (preview):
   POST /api/bookings/recurring/preview
@@ -104,13 +107,14 @@ Bước 2 (confirm):
 
 **Thêm vào `src/controllers/booking.controller.js`** (hoặc tạo file mới):
 
-| Method | Request | Response |
-|--------|---------|----------|
-| `previewRecurring` | Body: { roomId, title, startDate, endDate, startTime, endTime, frequency } | 200: { okSlots: Slot[], conflictSlots: Slot[] } |
-| `createRecurring` | Body: { roomId, title, startDate, endDate, startTime, endTime, frequency, confirmedSlots? } | 201: { recurring, bookings: Booking[] } |
-| `cancelRecurring` | Params: recurringId | 200: { message, cancelledCount } |
+| Method               | Request                                                                                     | Response                                        |
+| -------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `previewRecurring` | Body: { roomId, title, startDate, endDate, startTime, endTime, frequency }                  | 200: { okSlots: Slot[], conflictSlots: Slot[] } |
+| `createRecurring`  | Body: { roomId, title, startDate, endDate, startTime, endTime, frequency, confirmedSlots? } | 201: { recurring, bookings: Booking[] }         |
+| `cancelRecurring`  | Params: recurringId                                                                         | 200: { message, cancelledCount }                |
 
 **Routes:**
+
 ```js
 // Thêm vào booking.routes.js
 router.post('/recurring/preview', authenticate, bookingController.previewRecurring);
@@ -157,11 +161,13 @@ Thêm toggle **"Đặt định kỳ"** vào form đặt phòng hiện có:
 ### 7. Components mới
 
 #### `src/components/bookings/RecurringForm.jsx`
+
 - Frequency selector: 3 radio buttons (daily/weekly/monthly)
 - Date range: startDate + endDate
 - Nút "Xem trước slots" → gọi API preview
 
 #### `src/components/bookings/SlotPreview.jsx`
+
 - Hiển thị danh sách slots từ API preview
 - Mỗi slot: ngày + thứ + giờ + trạng thái (OK / Conflict)
 - Slot OK: màu xanh, checkbox checked
@@ -169,6 +175,7 @@ Thêm toggle **"Đặt định kỳ"** vào form đặt phòng hiện có:
 - Tổng kết: "X/Y slots có thể đặt"
 
 #### `src/components/bookings/RecurringBadge.jsx`
+
 - Badge nhỏ hiển thị trên BookingCard nếu booking thuộc chuỗi
 - Icon 🔄 + "Hàng tuần" / "Hàng ngày" / "Hàng tháng"
 - Click → xem toàn bộ chuỗi
@@ -202,13 +209,13 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] Hàm generateSlots sinh đúng slots cho daily/weekly/monthly
-- [ ] API preview trả đúng okSlots + conflictSlots
-- [ ] API create tạo recurring_booking + N bookings
-- [ ] Kiểm tra trùng lịch từng slot độc lập
-- [ ] API cancel hủy toàn bộ chuỗi (chỉ pending/approved)
-- [ ] Frontend toggle đặt định kỳ hoạt động
-- [ ] Slot preview hiển thị rõ OK/Conflict
-- [ ] User có thể đặt chỉ các slots OK
-- [ ] RecurringBadge hiển thị trên BookingCard
-- [ ] Edge case: tháng 31 → xử lý đúng cho monthly
+- [X] Hàm generateSlots sinh đúng slots cho daily/weekly/monthly
+- [X] API preview trả đúng okSlots + conflictSlots
+- [X] API create tạo recurring_booking + N bookings
+- [X] Kiểm tra trùng lịch từng slot độc lập
+- [X] API cancel hủy toàn bộ chuỗi (chỉ pending/approved)
+- [X] Frontend toggle đặt định kỳ hoạt động
+- [X] Slot preview hiển thị rõ OK/Conflict
+- [X] User có thể đặt chỉ các slots OK
+- [X] RecurringBadge hiển thị trên BookingCard
+- [X] Edge case: tháng 31 → xử lý đúng cho monthly

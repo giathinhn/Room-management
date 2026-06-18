@@ -1,0 +1,194 @@
+/* ── Sidebar container ────────────────────────────────────────────────────── */
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width var(--transition-base);
+  position: relative;
+  z-index: 40;
+}
+
+.sidebar--collapsed {
+  width: 64px;
+}
+
+/* ── Brand / Logo ─────────────────────────────────────────────────────────── */
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  height: 60px;
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+}
+
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebar__brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #c4b5fd, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* ── Toggle button ────────────────────────────────────────────────────────── */
+.sidebar__toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.sidebar__toggle-btn:hover {
+  color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.sidebar__toggle-icon {
+  transition: transform var(--transition-base);
+}
+
+.sidebar__toggle-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* ── Nav ─────────────────────────────────────────────────────────────────── */
+.sidebar__nav {
+  flex: 1;
+  padding: 12px 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar__nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Nav link ────────────────────────────────────────────────────────────── */
+.sidebar__nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar__nav-link:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar__nav-link--active {
+  color: var(--color-primary-light);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.sidebar__nav-link--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-primary);
+}
+
+.sidebar__nav-icon {
+  display: flex;
+  align-items: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.sidebar__nav-label {
+  flex: 1;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.sidebar__footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.sidebar__role-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.sidebar__role-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
+  flex-shrink: 0;
+}
+
+/* ── Mobile: full-screen overlay sidebar ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 240px !important;
+    transform: translateX(-100%);
+    transition: transform var(--transition-base);
+    z-index: 40;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  .sidebar--collapsed {
+    transform: translateX(-100%);
+  }
+
+  .sidebar__toggle-btn {
+    display: none;
+  }
+}
