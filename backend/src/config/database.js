@@ -1,8 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 
-// Singleton pattern — reuse client across modules
-let prisma;
-
 if (!global.__prisma) {
   global.__prisma = new PrismaClient({
     log:
@@ -12,6 +9,6 @@ if (!global.__prisma) {
   });
 }
 
-prisma = global.__prisma;
+const prisma = global.__prisma;
 
 module.exports = prisma;

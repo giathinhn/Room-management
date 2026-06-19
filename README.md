@@ -50,6 +50,19 @@ docker compose down
 
 Cách này phù hợp khi bạn cần chỉnh sửa code liên tục ở Frontend/Backend và muốn theo dõi logs trực tiếp ở máy cá nhân.
 
+#### ⚡ Mẹo chạy nhanh từ Thư mục gốc (Root)
+Tại thư mục gốc của dự án, bạn có thể cài đặt và khởi chạy cả Backend và Frontend đồng thời:
+*   **Cài đặt thư viện cho cả hai:**
+    ```bash
+    npm run install:all
+    ```
+*   **Khởi chạy song song cả hai:**
+    ```bash
+    npm run dev
+    ```
+
+---
+
 #### 1. Khởi chạy nhanh Cơ sở dữ liệu (PostgreSQL) bằng Docker
 Nếu không muốn cài đặt PostgreSQL thủ công trên máy, bạn có thể chạy chỉ riêng cơ sở dữ liệu từ file `docker-compose.yml`:
 ```bash

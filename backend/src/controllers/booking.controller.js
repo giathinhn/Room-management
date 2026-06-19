@@ -2,7 +2,6 @@ const bookingService = require('../services/booking.service');
 const recurringService = require('../services/recurring.service');
 const { createBookingSchema, rejectBookingSchema, queryBookingSchema } = require('../validators/booking.validator');
 const { createRecurringSchema } = require('../validators/recurring.validator');
-const { validate } = require('../middlewares/validate.middleware');
 
 /**
  * Booking controller — handles HTTP request/response for booking endpoints.
@@ -251,6 +250,62 @@ const bookingController = {
       return res.json({
         success: true,
         data: series,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * GET /api/bookings/calendar
+   * Return bookings within a date range formatted for FullCalendar.
+   * Query params: start (ISO), end (ISO), roomId? (optional UUID)
+   */
+  async getCalendarEvents(req, res, next) {
+    try {
+      const { start, end, roomId } = req.query;
+
+      if (!start || !end) {
+        return res.status(400).json({
+          success: false,
+          message: 'Query params "start" and "end" are required.',
+        });
+      }
+
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid "start" or "end" date format.',
+        });
+      }
+
+      const bookingRepository = require('../repositories/booking.repository');
+      const bookings = await bookingRepository.findByDateRange(
+        startDate,
+        endDate,
+        roomId || undefined
+      );
+
+      // Map to FullCalendar event format
+      const events = bookings.map((b) => ({
+        id: b.id,
+        title: b.title,
+        start: b.startTime,
+        end: b.endTime,
+        status: b.status,
+        roomId: b.room?.id,
+        roomName: b.room?.name,
+        userId: b.user?.id,
+        userName: b.user?.fullName,
+        isRecurring: !!b.recurring,
+      }));
+
+      return res.json({
+        success: true,
+        data: events,
       });
     } catch (err) {
       next(err);

@@ -105,6 +105,20 @@ const bookingService = {
     const { data } = await api.get('/bookings/recurring');
     return data;
   },
+
+  /**
+   * Get bookings formatted for calendar display (FullCalendar events).
+   * @param {{ start: string, end: string, roomId?: string }} params
+   */
+  async getCalendarEvents(params = {}) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      searchParams.append(key, value);
+    });
+    const { data } = await api.get(`/bookings/calendar?${searchParams.toString()}`);
+    return data;
+  },
 };
 
 export default bookingService;

@@ -1,0 +1,138 @@
+/* ── EventPopover ──────────────────────────────────────────────────────────── */
+.ep-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+}
+
+.ep {
+  position: fixed;
+  z-index: 1200;
+  width: 300px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-hover);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.15);
+  animation: ep-pop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  overflow: hidden;
+}
+
+@keyframes ep-pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Header */
+.ep__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ep__status-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+}
+
+.ep__status-dot[data-status='approved'] { background: #22c55e; box-shadow: 0 0 6px #22c55e80; }
+.ep__status-dot[data-status='pending']  { background: #f59e0b; box-shadow: 0 0 6px #f59e0b80; }
+.ep__status-dot[data-status='cancelled']{ background: #64748b; }
+.ep__status-dot[data-status='rejected'] { background: #ef4444; }
+
+.ep__title {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.ep__close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ep__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+}
+
+/* Body */
+.ep__body {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ep__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.ep__row-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-primary-light);
+  font-size: 0.875rem;
+}
+
+.ep__status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.ep__recurring-badge {
+  font-size: 0.7rem;
+}
+
+/* Actions */
+.ep__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.ep__action-btn {
+  flex: 1;
+  min-width: 80px;
+  font-size: 0.78rem;
+  padding: 6px 10px;
+}
+
+.ep__action-btn--approve {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.ep__action-btn--approve:hover {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.5);
+}

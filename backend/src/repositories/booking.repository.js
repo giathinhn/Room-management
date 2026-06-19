@@ -196,6 +196,40 @@ const bookingRepository = {
       data: { status: 'cancelled' },
     });
   },
+
+  /**
+   * Find bookings within a date range, optimized for calendar display.
+   * Only returns pending and approved bookings.
+   * @param {Date} start — range start
+   * @param {Date} end   — range end
+   * @param {string} [roomId] — optional room filter
+   */
+  async findByDateRange(start, end, roomId) {
+    const where = {
+      status: { in: ['pending', 'approved'] },
+      // Overlap: booking.startTime < range.end AND booking.endTime > range.start
+      startTime: { lt: end },
+      endTime: { gt: start },
+    };
+
+    if (roomId) where.roomId = roomId;
+
+    return prisma.booking.findMany({
+      where,
+      orderBy: { startTime: 'asc' },
+      include: {
+        room: {
+          select: { id: true, name: true },
+        },
+        user: {
+          select: { id: true, fullName: true },
+        },
+        recurring: {
+          select: { id: true },
+        },
+      },
+    });
+  },
 };
 
 module.exports = bookingRepository;

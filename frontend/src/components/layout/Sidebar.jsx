@@ -5,6 +5,7 @@ import {
   FiGrid,
   FiPlusSquare,
   FiUsers,
+  FiLayout,
   FiChevronLeft,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +22,12 @@ const NAV_ITEMS = [
     label: 'Lịch đặt phòng',
     icon: <FiCalendar />,
     to: '/bookings',
+    roles: ['admin', 'approver', 'user'],
+  },
+  {
+    label: 'Xem lịch',
+    icon: <FiLayout />,
+    to: '/calendar',
     roles: ['admin', 'approver', 'user'],
   },
   {

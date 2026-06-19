@@ -26,6 +26,10 @@ router.post('/recurring', authenticate, bookingController.createRecurring);
 // Cancel all bookings in a recurring series
 router.delete('/recurring/:id', authenticate, bookingController.cancelRecurring);
 
+// ── Calendar route (must come BEFORE /:id routes) ────────────────────────────
+// Get bookings in a date range for calendar display
+router.get('/calendar', authenticate, bookingController.getCalendarEvents);
+
 // ── Single booking routes ─────────────────────────────────────────────────────
 // Get single booking
 router.get('/:id', authenticate, bookingController.getById);
