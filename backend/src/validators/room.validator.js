@@ -109,6 +109,7 @@ const availableRoomSchema = z
         if (!v) return undefined;
         return Array.isArray(v) ? v : [v];
       }),
+    location: z.string().optional(),
   })
   .refine((data) => new Date(data.startTime) < new Date(data.endTime), {
     message: 'startTime must be before endTime',

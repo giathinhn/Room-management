@@ -30,5 +30,8 @@ router.use('/rooms', require('./room.routes'));
 // ─── Booking system ───────────────────────────────────────────────────────────
 router.use('/bookings', require('./booking.routes'));
 
+// ─── Export (Excel download) ──────────────────────────────────────────────────
+router.use('/export', require('./export.routes'));
+
 module.exports = router;
 

@@ -120,12 +120,12 @@ const roomService = {
       throw ApiError.badRequest(parsed.error.errors[0].message);
     }
 
-    const { startTime, endTime, capacity, equipment } = parsed.data;
+    const { startTime, endTime, capacity, equipment, location } = parsed.data;
 
     const rooms = await roomRepository.findAvailable(
       new Date(startTime),
       new Date(endTime),
-      { capacity, equipment }
+      { capacity, equipment, location }
     );
 
     return rooms;

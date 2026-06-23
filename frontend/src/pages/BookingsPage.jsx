@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import bookingService from '../services/booking.service';
 import roomService from '../services/room.service';
+import exportService from '../services/export.service';
 import BookingCard from '../components/bookings/BookingCard';
 import BookingFilter from '../components/bookings/BookingFilter';
 import RejectModal from '../components/bookings/RejectModal';
@@ -27,6 +28,9 @@ function BookingsPage() {
   const [filters, setFilters] = useState({
     roomId: '', status: '', startDate: '', endDate: '', page: 1,
   });
+
+  // Export
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Reject modal
   const [rejectModal, setRejectModal] = useState({ open: false, bookingId: null });
@@ -114,6 +118,27 @@ function BookingsPage() {
     setFilters((f) => ({ ...f, page: newPage }));
   };
 
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      // Pass the current filters (exclude page/limit — we want ALL matching bookings)
+      const exportFilters = {
+        roomId:    filters.roomId    || undefined,
+        status:    filters.status    || undefined,
+        startDate: filters.startDate || undefined,
+        endDate:   filters.endDate   || undefined,
+      };
+      await exportService.exportBookings(exportFilters);
+      toast.success('Đã tải xuống file Excel thành công!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Xuất Excel thất bại');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const canExport = user && (user.role === 'admin' || user.role === 'approver');
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="bookings-page">
@@ -127,13 +152,31 @@ function BookingsPage() {
               : 'Quản lý lịch đặt phòng của bạn'}
           </p>
         </div>
-        <button
-          id="new-booking-btn"
-          className="bookings-page__new-btn"
-          onClick={() => navigate('/bookings/new')}
-        >
-          ➕ Đặt phòng mới
-        </button>
+        <div className="bookings-page__header-actions">
+          {canExport && (
+            <button
+              id="export-bookings-btn"
+              className="bookings-page__export-btn"
+              onClick={handleExport}
+              disabled={exportLoading}
+              title="Xuất danh sách booking ra Excel"
+            >
+              {exportLoading ? (
+                <span className="bookings-page__export-spinner" />
+              ) : (
+                '📥'
+              )}
+              {exportLoading ? 'Đang xuất...' : 'Export Excel'}
+            </button>
+          )}
+          <button
+            id="new-booking-btn"
+            className="bookings-page__new-btn"
+            onClick={() => navigate('/bookings/new')}
+          >
+            ➕ Đặt phòng mới
+          </button>
+        </div>
       </div>
 
       {/* Filter */}

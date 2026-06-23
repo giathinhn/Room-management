@@ -113,9 +113,9 @@ const roomRepository = {
    *
    * @param {Date} startTime
    * @param {Date} endTime
-   * @param {{ capacity?: number, equipment?: string[] }} filters
+   * @param {{ capacity?: number, equipment?: string[], location?: string }} filters
    */
-  async findAvailable(startTime, endTime, { capacity, equipment } = {}) {
+  async findAvailable(startTime, endTime, { capacity, equipment, location } = {}) {
     const where = {
       isActive: true,
       // Exclude rooms that have overlapping bookings
@@ -134,6 +134,10 @@ const roomRepository = {
 
     if (equipment && equipment.length > 0) {
       where.equipment = { hasEvery: equipment };
+    }
+
+    if (location) {
+      where.location = { contains: location, mode: 'insensitive' };
     }
 
     return prisma.room.findMany({

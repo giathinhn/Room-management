@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import BookingForm from '../components/bookings/BookingForm';
 import RecurringForm from '../components/bookings/RecurringForm';
@@ -13,6 +13,17 @@ import './BookingCreatePage.css';
  */
 function BookingCreatePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Read pre-filled values from URL query params (set by RoomSearchPage)
+  const initialValues = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return {
+      roomId:    params.get('roomId')    || '',
+      startTime: params.get('startTime') || '',
+      endTime:   params.get('endTime')   || '',
+    };
+  }, [location.search]);
 
   // ── Single booking state ──────────────────────────────────────────────────
   const [isLoading, setIsLoading] = useState(false);
@@ -160,6 +171,7 @@ function BookingCreatePage() {
             isLoading={isLoading}
             conflicts={conflicts}
             onClearConflicts={() => setConflicts([])}
+            initialValues={initialValues}
           />
         ) : (
           /* Recurring booking flow */

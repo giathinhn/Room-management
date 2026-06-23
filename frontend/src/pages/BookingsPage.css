@@ -57,6 +57,57 @@
   transform: translateY(-1px);
 }
 
+/* ── Header actions group ────────────────────────────────────────────────── */
+.bookings-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* ── Export button ────────────────────────────────────────────────────────── */
+.bookings-page__export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--color-primary-light);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+.bookings-page__export-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 1px var(--color-primary);
+  transform: translateY(-1px);
+}
+.bookings-page__export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Export spinner ───────────────────────────────────────────────────────── */
+.bookings-page__export-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-top-color: var(--color-primary-light);
+  border-radius: 50%;
+  animation: bp-spin 0.7s linear infinite;
+}
+
+@keyframes bp-spin {
+  to { transform: rotate(360deg); }
+}
+
+
 /* ── Content ────────────────────────────────────────────────────────────────── */
 .bookings-page__content {
   min-height: 200px;

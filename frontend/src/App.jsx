@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import RoomsPage from './pages/RoomsPage';
 import RoomDetailPage from './pages/RoomDetailPage';
+import RoomSearchPage from './pages/RoomSearchPage';
 import BookingsPage from './pages/BookingsPage';
 import BookingCreatePage from './pages/BookingCreatePage';
 import BookingDetailPage from './pages/BookingDetailPage';
@@ -31,13 +32,14 @@ function App() {
           {/* ── Protected routes (all authenticated users) ────────── */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route path="/dashboard"     element={<DashboardPage />} />
-              <Route path="/rooms"         element={<RoomsPage />} />
-              <Route path="/rooms/:id"     element={<RoomDetailPage />} />
-              <Route path="/bookings"      element={<BookingsPage />} />
-              <Route path="/bookings/new"  element={<BookingCreatePage />} />
-              <Route path="/bookings/:id"  element={<BookingDetailPage />} />
-              <Route path="/calendar"      element={<CalendarPage />} />
+              <Route path="/dashboard"          element={<DashboardPage />} />
+              <Route path="/rooms"              element={<RoomsPage />} />
+              <Route path="/rooms/search"       element={<RoomSearchPage />} />
+              <Route path="/rooms/:id"          element={<RoomDetailPage />} />
+              <Route path="/bookings"           element={<BookingsPage />} />
+              <Route path="/bookings/new"       element={<BookingCreatePage />} />
+              <Route path="/bookings/:id"       element={<BookingDetailPage />} />
+              <Route path="/calendar"           element={<CalendarPage />} />
             </Route>
           </Route>
 

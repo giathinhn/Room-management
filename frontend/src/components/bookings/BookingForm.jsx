@@ -38,14 +38,28 @@ function calcDuration(startISO, endISO) {
  *   isLoading: boolean,
  *   conflicts: Array,
  *   onClearConflicts: () => void,
+ *   initialValues?: { roomId?: string, startTime?: string, endTime?: string },
  * }} props
  */
-function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts }) {
+function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initialValues = {} }) {
+  // ── Helper: extract date / time parts from ISO string ────────────────────
+  const extractDate = (iso) => {
+    if (!iso) return '';
+    try { return new Date(iso).toISOString().slice(0, 10); } catch { return ''; }
+  };
+  const extractTime = (iso) => {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    } catch { return ''; }
+  };
+
   // ── State ─────────────────────────────────────────────────────────────────
-  const [date, setDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [selectedRoomId, setSelectedRoomId] = useState('');
+  const [date, setDate] = useState(extractDate(initialValues.startTime) || '');
+  const [startTime, setStartTime] = useState(extractTime(initialValues.startTime) || '');
+  const [endTime, setEndTime] = useState(extractTime(initialValues.endTime) || '');
+  const [selectedRoomId, setSelectedRoomId] = useState(initialValues.roomId || '');
   const [title, setTitle] = useState('');
 
   const [availableRooms, setAvailableRooms] = useState([]);
@@ -68,7 +82,10 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts }) {
 
     setRoomsLoading(true);
     setRoomsLoaded(false);
-    setSelectedRoomId('');
+    // Only clear selectedRoomId if there was no pre-filled value
+    if (!initialValues.roomId) {
+      setSelectedRoomId('');
+    }
     onClearConflicts?.();
 
     try {
@@ -81,7 +98,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts }) {
     } finally {
       setRoomsLoading(false);
     }
-  }, [startISO, endISO, canSearch]);
+  }, [startISO, endISO, canSearch, initialValues.roomId]);
 
   // ── Validation ────────────────────────────────────────────────────────────
   function validate() {
