@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiMenu, FiBell, FiChevronDown, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
+import { FiMenu, FiChevronDown, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import useNotifications from '../../hooks/useNotifications';
+import NotificationBell from '../notifications/NotificationBell';
 import './Header.css';
 
 const Header = ({ onMenuToggle, sidebarOpen }) => {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -53,10 +56,12 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
       {/* Right: actions */}
       <div className="app-header__right">
         {/* Notification bell */}
-        <button className="app-header__icon-btn" aria-label="Thông báo" id="header-notifications">
-          <FiBell />
-          <span className="app-header__badge">3</span>
-        </button>
+        <NotificationBell
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+        />
 
         {/* User dropdown */}
         <div className="user-dropdown" ref={dropdownRef}>

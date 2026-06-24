@@ -1,6 +1,8 @@
 const bookingRepository = require('../repositories/booking.repository');
 const roomRepository = require('../repositories/room.repository');
+const userRepository = require('../repositories/user.repository');
 const emailService = require('./email.service');
+const notificationService = require('./notification.service');
 const logger = require('../utils/logger');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -113,6 +115,35 @@ const bookingService = {
       .sendNewBookingNotification(booking)
       .catch((err) => logger.error('[BookingService] Failed to send new booking notification:', err.message));
 
+    // 11. In-app notifications: notify all approvers + admins (fire-and-forget)
+    Promise.resolve().then(async () => {
+      try {
+        const startLabel = new Intl.DateTimeFormat('vi-VN', {
+          dateStyle: 'short', timeStyle: 'short',
+        }).format(startTime);
+        const notifyRoles = await Promise.all([
+          userRepository.findByRole('approver'),
+          userRepository.findByRole('admin'),
+        ]);
+        const recipients = [...notifyRoles[0], ...notifyRoles[1]];
+        // Deduplicate by id
+        const seen = new Set();
+        for (const u of recipients) {
+          if (seen.has(u.id)) continue;
+          seen.add(u.id);
+          await notificationService.createNotification(
+            u.id,
+            'new_booking_pending',
+            'Có booking mới cần duyệt',
+            `${booking.user?.fullName || 'Một người dùng'} đặt phòng ${booking.room?.name || ''} lúc ${startLabel}`,
+            booking.id
+          );
+        }
+      } catch (err) {
+        logger.error('[BookingService] Failed to send in-app notifications to approvers:', err.message);
+      }
+    });
+
     return booking;
   },
 
@@ -198,6 +229,24 @@ const bookingService = {
       .sendBookingApproved(updatedBooking)
       .catch((err) => logger.error('[BookingService] Failed to send approval email:', err.message));
 
+    // In-app notification to booker (fire-and-forget)
+    Promise.resolve().then(async () => {
+      try {
+        const startLabel = new Intl.DateTimeFormat('vi-VN', {
+          dateStyle: 'short', timeStyle: 'short',
+        }).format(new Date(updatedBooking.startTime));
+        await notificationService.createNotification(
+          updatedBooking.userId,
+          'booking_approved',
+          'Booking đã được duyệt',
+          `Phòng ${updatedBooking.room?.name || ''} lúc ${startLabel} đã được duyệt`,
+          updatedBooking.id
+        );
+      } catch (err) {
+        logger.error('[BookingService] Failed to send in-app approval notification:', err.message);
+      }
+    });
+
     return updatedBooking;
   },
 
@@ -232,6 +281,24 @@ const bookingService = {
     emailService
       .sendBookingRejected(updatedBooking)
       .catch((err) => logger.error('[BookingService] Failed to send rejection email:', err.message));
+
+    // In-app notification to booker (fire-and-forget)
+    Promise.resolve().then(async () => {
+      try {
+        const startLabel = new Intl.DateTimeFormat('vi-VN', {
+          dateStyle: 'short', timeStyle: 'short',
+        }).format(new Date(updatedBooking.startTime));
+        await notificationService.createNotification(
+          updatedBooking.userId,
+          'booking_rejected',
+          'Booking bị từ chối',
+          `Phòng ${updatedBooking.room?.name || ''} lúc ${startLabel} bị từ chối. Lý do: ${rejectionReason || 'Không có lý do'}`,
+          updatedBooking.id
+        );
+      } catch (err) {
+        logger.error('[BookingService] Failed to send in-app rejection notification:', err.message);
+      }
+    });
 
     return updatedBooking;
   },
@@ -273,6 +340,28 @@ const bookingService = {
     emailService
       .sendBookingCancelled(updatedBooking)
       .catch((err) => logger.error('[BookingService] Failed to send cancellation email:', err.message));
+
+    // In-app notification: notify booker (and approvers/admins if cancelled by admin) (fire-and-forget)
+    Promise.resolve().then(async () => {
+      try {
+        const startLabel = new Intl.DateTimeFormat('vi-VN', {
+          dateStyle: 'short', timeStyle: 'short',
+        }).format(new Date(updatedBooking.startTime));
+
+        // Always notify the booker
+        if (updatedBooking.userId !== userId) {
+          await notificationService.createNotification(
+            updatedBooking.userId,
+            'booking_cancelled',
+            'Booking đã bị hủy',
+            `Phòng ${updatedBooking.room?.name || ''} lúc ${startLabel} đã bị hủy bởi quản trị viên`,
+            updatedBooking.id
+          );
+        }
+      } catch (err) {
+        logger.error('[BookingService] Failed to send in-app cancellation notification:', err.message);
+      }
+    });
 
     return updatedBooking;
   },

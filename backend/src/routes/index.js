@@ -33,5 +33,8 @@ router.use('/bookings', require('./booking.routes'));
 // ─── Export (Excel download) ──────────────────────────────────────────────────
 router.use('/export', require('./export.routes'));
 
+// ─── Notifications ────────────────────────────────────────────────────────────
+router.use('/notifications', require('./notification.routes'));
+
 module.exports = router;
 

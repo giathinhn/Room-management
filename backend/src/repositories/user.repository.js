@@ -136,6 +136,18 @@ const userRepository = {
       },
     });
   },
+
+  /**
+   * Find all active users with a specific role.
+   * Used by notification service to notify approvers / admins.
+   * @param {'admin'|'approver'|'user'} role
+   */
+  async findByRole(role) {
+    return prisma.user.findMany({
+      where: { role, isActive: true },
+      select: { id: true, email: true, fullName: true, role: true },
+    });
+  },
 };
 
 module.exports = userRepository;
