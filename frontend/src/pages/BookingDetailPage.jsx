@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import bookingService from '../services/booking.service';
 import StatusBadge from '../components/common/StatusBadge';
 import RejectModal from '../components/bookings/RejectModal';
+import CommentSection from '../components/bookings/CommentSection';
 import './BookingDetailPage.css';
 
 /**
@@ -300,6 +301,9 @@ function BookingDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Comment section */}
+      <CommentSection bookingId={id} />
 
       {/* Reject Modal */}
       <RejectModal

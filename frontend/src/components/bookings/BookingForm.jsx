@@ -128,7 +128,26 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
     <form className="booking-form" onSubmit={handleSubmit} noValidate>
       {/* ── Conflict Alert ─────────────────────────────────────────────── */}
       {conflicts && conflicts.length > 0 && (
-        <ConflictAlert conflicts={conflicts} onDismiss={onClearConflicts} />
+        <ConflictAlert
+          conflicts={conflicts}
+          roomId={selectedRoomId}
+          startTime={startISO}
+          endTime={endISO}
+          onDismiss={onClearConflicts}
+          onSelectRoom={(room) => {
+            setSelectedRoomId(room.id);
+            onClearConflicts?.();
+          }}
+          onSelectSlot={(slot) => {
+            // slot has startTime / endTime ISO strings
+            const st = new Date(slot.startTime);
+            const et = new Date(slot.endTime);
+            setDate(st.toISOString().slice(0, 10));
+            setStartTime(`${String(st.getHours()).padStart(2,'0')}:${String(st.getMinutes()).padStart(2,'0')}`);
+            setEndTime(`${String(et.getHours()).padStart(2,'0')}:${String(et.getMinutes()).padStart(2,'0')}`);
+            onClearConflicts?.();
+          }}
+        />
       )}
 
       {/* ── Step 1: Time Selection ─────────────────────────────────────── */}

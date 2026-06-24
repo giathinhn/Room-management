@@ -36,5 +36,8 @@ router.use('/export', require('./export.routes'));
 // ─── Notifications ────────────────────────────────────────────────────────────
 router.use('/notifications', require('./notification.routes'));
 
+// ─── Suggestions (alternative rooms/slots + smart suggestions) ────────────────
+router.use('/suggestions', require('./suggestion.routes'));
+
 module.exports = router;
 

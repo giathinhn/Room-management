@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const bookingController = require('../controllers/booking.controller');
+const commentController = require('../controllers/comment.controller');
 const authenticate = require('../middlewares/auth.middleware');
 const authorize = require('../middlewares/role.middleware');
 
@@ -45,5 +46,18 @@ router.patch('/:id/reject', authenticate, authorize('admin', 'approver'), bookin
 
 // Cancel a booking (owner or admin — enforced in service)
 router.patch('/:id/cancel', authenticate, bookingController.cancel);
+
+// ── Comment routes (nested under bookings) ───────────────────────────────────
+// List comments for a booking
+router.get('/:id/comments', authenticate, commentController.getByBooking);
+
+// Add a comment to a booking
+router.post('/:id/comments', authenticate, commentController.create);
+
+// Update a comment
+router.put('/:id/comments/:cid', authenticate, commentController.update);
+
+// Delete a comment
+router.delete('/:id/comments/:cid', authenticate, commentController.delete);
 
 module.exports = router;

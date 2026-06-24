@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import BookingForm from '../components/bookings/BookingForm';
 import RecurringForm from '../components/bookings/RecurringForm';
 import SlotPreview from '../components/bookings/SlotPreview';
+import SmartSuggestions from '../components/bookings/SmartSuggestions';
 import bookingService from '../services/booking.service';
 import './BookingCreatePage.css';
 
@@ -166,13 +167,26 @@ function BookingCreatePage() {
       <div className="create-page__content">
         {mode === 'single' ? (
           /* Single booking form */
-          <BookingForm
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-            conflicts={conflicts}
-            onClearConflicts={() => setConflicts([])}
-            initialValues={initialValues}
-          />
+          <>
+            <SmartSuggestions
+              onSelect={(s) => {
+                // Navigate with pre-filled params from suggestion
+                const params = new URLSearchParams({
+                  roomId:    s.room.id,
+                  startTime: s.startTime,
+                  endTime:   s.endTime,
+                });
+                navigate(`/bookings/new?${params.toString()}`);
+              }}
+            />
+            <BookingForm
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+              conflicts={conflicts}
+              onClearConflicts={() => setConflicts([])}
+              initialValues={initialValues}
+            />
+          </>
         ) : (
           /* Recurring booking flow */
           <div className="create-page__recurring">
