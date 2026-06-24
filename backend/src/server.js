@@ -39,6 +39,15 @@ async function start() {
       console.log(`[Server] Environment: ${env.NODE_ENV}`);
       console.log(`[Server] Health check: http://localhost:${PORT}/api/health`);
     });
+
+    // Start email reminder cron job only when SMTP is configured
+    if (env.SMTP_HOST) {
+      const { startReminderJob } = require('./jobs/reminder.job');
+      startReminderJob();
+      console.log('[Server] 📧 Reminder cron job started.');
+    } else {
+      console.log('[Server] ⚠️  SMTP not configured — reminder cron job skipped.');
+    }
   } catch (error) {
     console.error('[Server] Failed to start:', error);
     process.exit(1);

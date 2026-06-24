@@ -1,5 +1,7 @@
 const bookingRepository = require('../repositories/booking.repository');
 const roomRepository = require('../repositories/room.repository');
+const emailService = require('./email.service');
+const logger = require('../utils/logger');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BUSINESS_HOUR_START = 7;   // 07:00
@@ -97,7 +99,7 @@ const bookingService = {
     }
 
     // 9. Create the booking with status=pending
-    return bookingRepository.create({
+    const booking = await bookingRepository.create({
       userId,
       roomId,
       title,
@@ -105,6 +107,13 @@ const bookingService = {
       endTime,
       status: 'pending',
     });
+
+    // 10. Notify approvers about new pending booking (fire-and-forget)
+    emailService
+      .sendNewBookingNotification(booking)
+      .catch((err) => logger.error('[BookingService] Failed to send new booking notification:', err.message));
+
+    return booking;
   },
 
   /**
@@ -179,10 +188,17 @@ const bookingService = {
       throw err;
     }
 
-    return bookingRepository.updateStatus(id, 'approved', {
+    const updatedBooking = await bookingRepository.updateStatus(id, 'approved', {
       approvedBy: approverId,
       approvedAt: new Date(),
     });
+
+    // Notify booker of approval (fire-and-forget)
+    emailService
+      .sendBookingApproved(updatedBooking)
+      .catch((err) => logger.error('[BookingService] Failed to send approval email:', err.message));
+
+    return updatedBooking;
   },
 
   /**
@@ -206,11 +222,18 @@ const bookingService = {
       throw err;
     }
 
-    return bookingRepository.updateStatus(id, 'rejected', {
+    const updatedBooking = await bookingRepository.updateStatus(id, 'rejected', {
       approvedBy: approverId,
       approvedAt: new Date(),
       rejectionReason,
     });
+
+    // Notify booker of rejection (fire-and-forget)
+    emailService
+      .sendBookingRejected(updatedBooking)
+      .catch((err) => logger.error('[BookingService] Failed to send rejection email:', err.message));
+
+    return updatedBooking;
   },
 
   /**
@@ -244,7 +267,14 @@ const bookingService = {
       throw err;
     }
 
-    return bookingRepository.updateStatus(id, 'cancelled');
+    const updatedBooking = await bookingRepository.updateStatus(id, 'cancelled');
+
+    // Notify booker of cancellation (fire-and-forget)
+    emailService
+      .sendBookingCancelled(updatedBooking)
+      .catch((err) => logger.error('[BookingService] Failed to send cancellation email:', err.message));
+
+    return updatedBooking;
   },
 };
 
