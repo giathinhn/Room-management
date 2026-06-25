@@ -39,5 +39,8 @@ router.use('/notifications', require('./notification.routes'));
 // ─── Suggestions (alternative rooms/slots + smart suggestions) ────────────────
 router.use('/suggestions', require('./suggestion.routes'));
 
+// ─── Dashboard & Analytics (admin only) ───────────────────────────────────────
+router.use('/dashboard', require('./dashboard.routes'));
+
 module.exports = router;
 

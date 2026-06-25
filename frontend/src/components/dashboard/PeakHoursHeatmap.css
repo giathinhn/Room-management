@@ -1,0 +1,124 @@
+.heatmap {
+  position: relative;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.heatmap__row {
+  display: grid;
+  grid-template-columns: 54px repeat(7, 1fr);
+  gap: 3px;
+  margin-bottom: 3px;
+}
+
+.heatmap__header {
+  margin-bottom: 6px;
+}
+
+.heatmap__hour-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.heatmap__day-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 2px 0;
+  letter-spacing: 0.04em;
+}
+
+.heatmap__cell {
+  height: 22px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: default;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+
+.heatmap__cell--active {
+  cursor: pointer;
+}
+
+.heatmap__cell--active:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+  z-index: 2;
+  position: relative;
+}
+
+/* Floating tooltip */
+.heatmap__tooltip {
+  position: fixed;
+  background: var(--color-bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--color-text-primary);
+  pointer-events: none;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Legend */
+.heatmap__legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
+.heatmap__legend-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.heatmap__legend-scale {
+  width: 120px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    rgba(99, 102, 241, 0.15),
+    rgba(245, 158, 11, 0.7),
+    rgba(234, 88, 12, 0.9),
+    rgba(239, 68, 68, 1)
+  );
+}
+
+/* Skeleton */
+.heatmap-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.heatmap-skeleton__row {
+  display: flex;
+  gap: 4px;
+}
+
+.heatmap-skeleton__cell {
+  height: 22px;
+  flex: 1;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
