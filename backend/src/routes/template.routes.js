@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const templateController = require('../controllers/template.controller');
-const { authenticate } = require('../middlewares/auth.middleware');
+const authenticate = require('../middlewares/auth.middleware');
 
 /**
  * All template routes require authentication.

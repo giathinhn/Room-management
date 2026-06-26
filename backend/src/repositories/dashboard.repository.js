@@ -66,13 +66,13 @@ const dashboardRepository = {
         r.location      AS "location",
         COUNT(b.id)     AS "bookingCount",
         COALESCE(
-          SUM(EXTRACT(EPOCH FROM (b."endTime" - b."startTime")) / 3600),
+          SUM(EXTRACT(EPOCH FROM (b.end_time - b.start_time)) / 3600),
           0
         )               AS "totalHours"
       FROM bookings b
-      JOIN rooms r ON r.id = b."roomId"
-      WHERE b."startTime" >= ${startDate}
-        AND b."startTime" <= ${endDate}
+      JOIN rooms r ON r.id = b.room_id
+      WHERE b.start_time >= ${startDate}
+        AND b.start_time <= ${endDate}
         AND b.status IN ('approved', 'pending')
       GROUP BY r.id, r.name, r.location
       ORDER BY "bookingCount" DESC
@@ -89,12 +89,12 @@ const dashboardRepository = {
   async getPeakHours(startDate, endDate) {
     const results = await prisma.$queryRaw`
       SELECT
-        EXTRACT(DOW FROM b."startTime" AT TIME ZONE 'UTC')   AS dow,
-        EXTRACT(HOUR FROM b."startTime" AT TIME ZONE 'UTC')  AS hour,
+        EXTRACT(DOW FROM b.start_time AT TIME ZONE 'UTC')   AS dow,
+        EXTRACT(HOUR FROM b.start_time AT TIME ZONE 'UTC')  AS hour,
         COUNT(b.id)                                          AS count
       FROM bookings b
-      WHERE b."startTime" >= ${startDate}
-        AND b."startTime" <= ${endDate}
+      WHERE b.start_time >= ${startDate}
+        AND b.start_time <= ${endDate}
         AND b.status IN ('approved', 'pending')
       GROUP BY dow, hour
       ORDER BY dow, hour
@@ -112,18 +112,18 @@ const dashboardRepository = {
     const results = await prisma.$queryRaw`
       SELECT
         u.id            AS "userId",
-        u."fullName"    AS "fullName",
+        u.full_name     AS "fullName",
         u.email         AS email,
         COUNT(b.id)     AS "bookingCount",
         COALESCE(
-          SUM(EXTRACT(EPOCH FROM (b."endTime" - b."startTime")) / 3600),
+          SUM(EXTRACT(EPOCH FROM (b.end_time - b.start_time)) / 3600),
           0
         )               AS "totalHours"
       FROM bookings b
-      JOIN users u ON u.id = b."userId"
-      WHERE b."startTime" >= ${startDate}
-        AND b."startTime" <= ${endDate}
-      GROUP BY u.id, u."fullName", u.email
+      JOIN users u ON u.id = b.user_id
+      WHERE b.start_time >= ${startDate}
+        AND b.start_time <= ${endDate}
+      GROUP BY u.id, u.full_name, u.email
       ORDER BY "bookingCount" DESC
       LIMIT ${limit}
     `;
@@ -140,15 +140,15 @@ const dashboardRepository = {
     const trunc = granularity === 'month' ? 'month' : 'week';
     const results = await prisma.$queryRaw`
       SELECT
-        DATE_TRUNC(${trunc}, b."startTime") AS period,
+        DATE_TRUNC(${trunc}, b.start_time) AS period,
         COUNT(b.id)                          AS total,
         COUNT(b.id) FILTER (WHERE b.status = 'approved')  AS approved,
         COUNT(b.id) FILTER (WHERE b.status = 'rejected')  AS rejected,
         COUNT(b.id) FILTER (WHERE b.status = 'pending')   AS pending,
         COUNT(b.id) FILTER (WHERE b.status = 'cancelled') AS cancelled
       FROM bookings b
-      WHERE b."startTime" >= ${startDate}
-        AND b."startTime" <= ${endDate}
+      WHERE b.start_time >= ${startDate}
+        AND b.start_time <= ${endDate}
       GROUP BY period
       ORDER BY period ASC
     `;
