@@ -17,7 +17,7 @@ import BookingDetailPage from './pages/BookingDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CalendarPage from './pages/CalendarPage';
 import NotificationsPage from './pages/NotificationsPage';
-
+import TemplatesPage from './pages/TemplatesPage';
 
 import './App.css';
 
@@ -42,6 +42,7 @@ function App() {
               <Route path="/bookings/:id"       element={<BookingDetailPage />} />
               <Route path="/calendar"           element={<CalendarPage />} />
               <Route path="/notifications"      element={<NotificationsPage />} />
+              <Route path="/templates"          element={<TemplatesPage />} />
             </Route>
           </Route>
 

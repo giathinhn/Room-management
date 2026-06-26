@@ -6,6 +6,7 @@ import bookingService from '../services/booking.service';
 import StatusBadge from '../components/common/StatusBadge';
 import RejectModal from '../components/bookings/RejectModal';
 import CommentSection from '../components/bookings/CommentSection';
+import SaveAsTemplate from '../components/templates/SaveAsTemplate';
 import './BookingDetailPage.css';
 
 /**
@@ -297,6 +298,10 @@ function BookingDetailPage() {
               >
                 {actionLoading ? 'Đang xử lý...' : 'Hủy booking'}
               </button>
+            )}
+            {/* Save as template — shown for approved bookings owned by user */}
+            {isOwner && booking.status === 'approved' && (
+              <SaveAsTemplate booking={booking} />
             )}
           </div>
         )}

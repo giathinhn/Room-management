@@ -149,3 +149,112 @@
   border-color: var(--color-primary-light);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
+
+/* ─── Template Quick-Use Section ─────────────────────────────────────────────── */
+.create-page__templates {
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.create-page__templates-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.create-page__templates-icon {
+  font-size: 1rem;
+}
+
+.create-page__templates-label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: #a5b4fc;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex: 1;
+}
+
+.create-page__templates-link {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-family);
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+
+.create-page__templates-link:hover {
+  color: var(--color-primary-light);
+}
+
+.create-page__templates-scroll {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+.create-page__templates-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.create-page__templates-scroll::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 2px;
+}
+
+.create-page__tpl-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  font-family: var(--font-family);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.create-page__tpl-chip:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.create-page__tpl-chip-icon {
+  font-size: 0.85rem;
+}
+
+.create-page__tpl-chip-name {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.create-page__tpl-chip-room {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.create-page__tpl-chip-time {
+  color: #a5b4fc;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+

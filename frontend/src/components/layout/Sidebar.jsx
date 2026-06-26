@@ -7,6 +7,7 @@ import {
   FiUsers,
   FiLayout,
   FiSearch,
+  FiBookmark,
   FiChevronLeft,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
@@ -47,6 +48,12 @@ const NAV_ITEMS = [
     label: 'Đặt phòng mới',
     icon: <FiPlusSquare />,
     to: '/bookings/new',
+    roles: ['admin', 'approver', 'user'],
+  },
+  {
+    label: 'Mẫu đặt phòng',
+    icon: <FiBookmark />,
+    to: '/templates',
     roles: ['admin', 'approver', 'user'],
   },
   {

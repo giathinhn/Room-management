@@ -42,5 +42,8 @@ router.use('/suggestions', require('./suggestion.routes'));
 // ─── Dashboard & Analytics (admin only) ───────────────────────────────────────
 router.use('/dashboard', require('./dashboard.routes'));
 
+// ─── Booking Templates ────────────────────────────────────────────────────────
+router.use('/templates', require('./template.routes'));
+
 module.exports = router;
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import BookingForm from '../components/bookings/BookingForm';
@@ -6,6 +6,7 @@ import RecurringForm from '../components/bookings/RecurringForm';
 import SlotPreview from '../components/bookings/SlotPreview';
 import SmartSuggestions from '../components/bookings/SmartSuggestions';
 import bookingService from '../services/booking.service';
+import templateService from '../services/template.service';
 import './BookingCreatePage.css';
 
 /**
@@ -16,15 +17,49 @@ function BookingCreatePage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Read pre-filled values from URL query params (set by RoomSearchPage)
+  // Read pre-filled values from URL query params (set by RoomSearchPage or TemplatesPage)
   const initialValues = useMemo(() => {
     const params = new URLSearchParams(location.search);
+    const startHHMM = params.get('startHHMM') || '';
+    const endHHMM = params.get('endHHMM') || '';
     return {
       roomId:    params.get('roomId')    || '',
       startTime: params.get('startTime') || '',
       endTime:   params.get('endTime')   || '',
+      title:     params.get('title')     || '',
+      // Time-of-day HH:mm from template pre-fill (used by BookingForm if startTime empty)
+      startHHMM,
+      endHHMM,
     };
   }, [location.search]);
+
+  // ── Templates (for pre-fill section) ─────────────────────────────────────
+  const [templates, setTemplates] = useState([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+
+  useEffect(() => {
+    setTemplatesLoading(true);
+    templateService.getTemplates()
+      .then((res) => setTemplates(res.data || []))
+      .catch(() => setTemplates([]))
+      .finally(() => setTemplatesLoading(false));
+  }, []);
+
+  // Navigate with template pre-fill
+  const handleUseTemplate = useCallback((tpl) => {
+    const params = new URLSearchParams();
+    if (tpl.roomId) params.set('roomId', tpl.roomId);
+    if (tpl.title) params.set('title', tpl.title);
+    if (tpl.startTime) {
+      const d = new Date(tpl.startTime);
+      params.set('startHHMM', `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
+    }
+    if (tpl.endTime) {
+      const d = new Date(tpl.endTime);
+      params.set('endHHMM', `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
+    }
+    navigate(`/bookings/new?${params.toString()}`);
+  }, [navigate]);
 
   // ── Single booking state ──────────────────────────────────────────────────
   const [isLoading, setIsLoading] = useState(false);
@@ -168,6 +203,51 @@ function BookingCreatePage() {
         {mode === 'single' ? (
           /* Single booking form */
           <>
+            {/* ── Template Section ──────────────────────────────────────── */}
+            {templates.length > 0 && (
+              <div className="create-page__templates">
+                <div className="create-page__templates-header">
+                  <span className="create-page__templates-icon">📋</span>
+                  <span className="create-page__templates-label">Đặt từ mẫu</span>
+                  <button
+                    id="go-to-templates-btn"
+                    className="create-page__templates-link"
+                    onClick={() => navigate('/templates')}
+                  >
+                    Quản lý →
+                  </button>
+                </div>
+                <div className="create-page__templates-scroll">
+                  {templates.map((tpl) => {
+                    const startStr = tpl.startTime
+                      ? new Date(tpl.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+                      : '';
+                    const endStr = tpl.endTime
+                      ? new Date(tpl.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+                      : '';
+                    return (
+                      <button
+                        key={tpl.id}
+                        id={`quick-tpl-${tpl.id}`}
+                        className="create-page__tpl-chip"
+                        onClick={() => handleUseTemplate(tpl)}
+                        title={`${tpl.title} • ${startStr}–${endStr}`}
+                      >
+                        <span className="create-page__tpl-chip-icon">🔖</span>
+                        <span className="create-page__tpl-chip-name">{tpl.name}</span>
+                        {tpl.room && (
+                          <span className="create-page__tpl-chip-room">{tpl.room.name}</span>
+                        )}
+                        {startStr && (
+                          <span className="create-page__tpl-chip-time">{startStr}–{endStr}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <SmartSuggestions
               onSelect={(s) => {
                 // Navigate with pre-filled params from suggestion
