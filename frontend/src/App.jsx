@@ -18,6 +18,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import CalendarPage from './pages/CalendarPage';
 import NotificationsPage from './pages/NotificationsPage';
 import TemplatesPage from './pages/TemplatesPage';
+import UsersPage from './pages/UsersPage';
 
 import './App.css';
 
@@ -49,7 +50,7 @@ function App() {
           {/* ── Protected routes (admin only) ────────────────────── */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<AppLayout />}>
-              {/* Admin-only routes will be added in later plans */}
+              <Route path="/admin/users" element={<UsersPage />} />
             </Route>
           </Route>
 

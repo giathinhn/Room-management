@@ -10,6 +10,7 @@
 ## Tổng quan
 
 Sau khi hoàn thành plan này:
+
 - Admin có thể truy cập `/admin/users` qua Sidebar.
 - Admin xem danh sách người dùng, tìm kiếm theo Tên/Email, lọc theo Vai trò và Trạng thái.
 - Admin có thể kích hoạt hoặc vô hiệu hóa (soft-delete) tài khoản.
@@ -21,6 +22,7 @@ Sau khi hoàn thành plan này:
 ## BACKEND
 
 Backend đã hoàn thiện đầy đủ các API cần thiết từ các plan trước:
+
 - `GET /api/users` — Danh sách users (phân trang, lọc, tìm kiếm)
 - `GET /api/users/:id` — Chi tiết user
 - `PATCH /api/users/:id/role` — Đổi role
@@ -36,6 +38,7 @@ Backend đã hoàn thiện đầy đủ các API cần thiết từ các plan tr
 
 **`src/services/user.service.js`**:
 Giao tiếp với API backend:
+
 - `getUsers(params)`: lấy danh sách kèm filter (`page`, `limit`, `role`, `search`, `isActive`)
 - `getUserById(id)`: xem chi tiết
 - `updateUserRole(id, role)`: thay đổi quyền
@@ -44,15 +47,18 @@ Giao tiếp với API backend:
 ### 2. Components
 
 #### `src/components/users/EditUserModal.jsx`
+
 - Chỉnh sửa `fullName` (validation: không rỗng, tối thiểu 2 ký tự).
 - Toggle switch thay đổi trạng thái `isActive`.
 - Hiển thị email dạng Read-only.
 
 #### `src/components/users/ChangeRoleModal.jsx`
+
 - Lựa chọn role mới qua radio/card interface (Admin, Người duyệt, Nhân viên).
 - Hiển thị cảnh báo nếu thay đổi hạ role của Admin khác.
 
 #### `src/components/users/CreateUserModal.jsx`
+
 - Form đăng ký user mới: Email, Họ tên, Mật khẩu, Nhập lại mật khẩu, Chọn vai trò.
 - Validation mật khẩu (ít nhất 8 ký tự, chứa chữ hoa, số, ký tự đặc biệt).
 - **Quy trình xử lý**: Gọi `POST /api/auth/register` để tạo, sau đó gọi `PATCH /api/users/:id/role` nếu role chọn khác `user`.
@@ -60,6 +66,7 @@ Giao tiếp với API backend:
 ### 3. Pages
 
 **`src/pages/UsersPage.jsx`**:
+
 - Toolbar: Tìm kiếm (debounced 400ms) + Lọc theo Role + Lọc theo Trạng thái + Button "Thêm user".
 - Bảng danh sách user:
   - Avatar chữ viết tắt (màu gradient theo role).
@@ -94,11 +101,11 @@ frontend/src/
 
 ## Tiêu chí hoàn thành
 
-- [ ] Route `/admin/users` được bảo vệ, chỉ Admin truy cập được (User thường vào bị redirect).
-- [ ] Bảng hiển thị danh sách user phân trang và đầy đủ thông tin.
-- [ ] Ô tìm kiếm (debounced) hoạt động chính xác với tên và email.
-- [ ] Các bộ lọc Role và Trạng thái cập nhật danh sách tức thì.
-- [ ] Sửa thông tin user (fullName, isActive) thành công qua modal.
-- [ ] Đổi role thành công và badge UI cập nhật tương ứng.
-- [ ] Tạo mới user thành công với mật khẩu hợp lệ và gán đúng role.
-- [ ] Nút kích hoạt/vô hiệu hóa nhanh ngoài bảng hoạt động chuẩn xác.
+- [X] Route `/admin/users` được bảo vệ, chỉ Admin truy cập được (User thường vào bị redirect).
+- [X] Bảng hiển thị danh sách user phân trang và đầy đủ thông tin.
+- [X] Ô tìm kiếm (debounced) hoạt động chính xác với tên và email.
+- [X] Các bộ lọc Role và Trạng thái cập nhật danh sách tức thì.
+- [X] Sửa thông tin user (fullName, isActive) thành công qua modal.
+- [X] Đổi role thành công và badge UI cập nhật tương ứng.
+- [X] Tạo mới user thành công với mật khẩu hợp lệ và gán đúng role.
+- [X] Nút kích hoạt/vô hiệu hóa nhanh ngoài bảng hoạt động chuẩn xác.

@@ -1,0 +1,100 @@
+/* ─── Edit User Form ─────────────────────────────────────────────────────────── */
+.edit-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.edit-user-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.edit-user-form__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #94a3b8);
+}
+
+.edit-user-form__readonly {
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md, 10px);
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.9rem;
+  font-family: 'Inter', monospace;
+  letter-spacing: 0.01em;
+  cursor: not-allowed;
+}
+
+/* ─── Toggle Switch ──────────────────────────────────────────────────────────── */
+.edit-user-form__toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.toggle-switch--on {
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.toggle-switch--off {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.toggle-switch__thumb {
+  position: absolute;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: left 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toggle-switch--on .toggle-switch__thumb {
+  left: calc(100% - 21px);
+}
+
+.toggle-switch--off .toggle-switch__thumb {
+  left: 3px;
+}
+
+.toggle-switch__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.toggle-switch__label--active {
+  color: #10b981;
+}
+
+.toggle-switch__label--inactive {
+  color: var(--color-text-muted, #64748b);
+}
+
+/* ─── Actions ────────────────────────────────────────────────────────────────── */
+.edit-user-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
