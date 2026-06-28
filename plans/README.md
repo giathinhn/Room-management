@@ -23,7 +23,8 @@ Plan 01: Auth Backend (JWT, Roles)
     │        ├──▶ Plan 10: Dashboard & Analytics ──┤
     │        ├──▶ Plan 11: In-app Notifications ───┤
     │        ├──▶ Plan 12: Comments & Suggestions ─┤
-    │        └──▶ Plan 13: Booking Templates ──────┘
+    │        ├──▶ Plan 13: Booking Templates ──────┤
+    │        └──▶ Plan 15: User Management ────────┘
     │
     ├──▶ Plan 14: i18n (nên làm sau khi UI ổn định)
     │
@@ -36,8 +37,8 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 | Thứ tự | Plan                               | Mô tả                                                   | Thời lượng |
 | :------: | ---------------------------------- | --------------------------------------------------------- | :-----------: |
 |    1    | [Plan 00](plan-00-project-setup.md)   | Project setup, Docker, Prisma schema (8 bảng), seed data |     1–2h     |
-|    2    | [Plan 01](plan-01-auth-backend.md)    | Auth backend: register, login, JWT, roles                 |    1.5–2h    |
-|    3    | [Plan 02](plan-02-auth-frontend.md)   | Auth frontend: login/register UI, context, layout         |    1.5–2h    |
+|    2    | [Plan 01](plan-01-auth-backend.md)    | Auth backend: register, login, JWT, roles                 |    1.5–2h     |
+|    3    | [Plan 02](plan-02-auth-frontend.md)   | Auth frontend: login/register UI, context, layout         |    1.5–2h     |
 |    4    | [Plan 03](plan-03-room-management.md) | Room CRUD: backend API + frontend card grid               |     2–3h     |
 |    5    | [Plan 04](plan-04-booking-system.md)  | Booking system: tạo, duyệt, hủy, kiểm tra trùng      |     3–4h     |
 
@@ -53,6 +54,7 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 | [Plan 11](plan-11-notifications-inapp.md)  | 🔔 In-app Notifications + SSE real-time            |    2–2.5h    |
 | [Plan 12](plan-12-comments-suggestions.md) | 💬 Comments + 🔄 Đề xuất phòng thay thế       |    1.5–2h    |
 | [Plan 13](plan-13-booking-templates.md)    | 📋 Booking Templates (mẫu đặt phòng)           |    1–1.5h    |
+| [Plan 15](plan-15-user-management.md)      | 👥 Quản lý User (Admin) — list, role, status   |     2–3h     |
 
 ## Nên làm sau khi UI ổn định
 
@@ -68,9 +70,9 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 
 ---
 
-## Tổng thời lượng ước tính: **23–34 giờ**
+## Tổng thời lượng ước tính: **25–37 giờ**
 
-## Tổng quan tính năng mới (Plan 10–14)
+## Tổng quan tính năng mới (Plan 10–15)
 
 | Plan | Feature                | Highlight                                                   |
 | ---- | ---------------------- | ----------------------------------------------------------- |
@@ -79,6 +81,7 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 | 12   | Comments + Suggestions | Thread comments trên booking, smart room/time alternatives |
 | 13   | Templates              | Lưu & đặt từ mẫu, save-as-template, max 10/user        |
 | 14   | i18n                   | react-i18next, VI/EN, error codes, language switcher        |
+| 15   | User Management        | Bảng quản lý người dùng, đổi role, kích hoạt/vô hiệu hóa    |
 
 ## Database mới (thêm 3 bảng)
 
@@ -95,7 +98,7 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 1. **Mỗi plan = 1 session**: Mỗi plan được thiết kế để hoàn thành trong 1 session code. Bắt đầu session, mở file plan, code theo checklist.
 2. **Copy checklist vào prompt**: Khi bắt đầu code với AI, copy nội dung file plan tương ứng vào prompt. Plan đã chứa đủ: file structure, function signatures, validation rules, error cases.
 3. **Tiêu chí hoàn thành**: Mỗi plan có checklist cuối — kiểm tra trước khi chuyển sang plan tiếp theo.
-4. **Plan 05–13 độc lập**: Sau Plan 04, bạn có thể làm các plan này theo thứ tự tùy thích, hoặc song song nếu nhiều người.
+4. **Plan 05–13 & 15 độc lập**: Sau Plan 04, bạn có thể làm các plan này theo thứ tự tùy thích, hoặc song song nếu nhiều người.
 5. **Plan 14 nên làm cuối**: i18n cần dịch tất cả text, nên làm khi UI đã ổn định để tránh dịch lại.
 6. **Chạy test sau mỗi plan**: Sau mỗi plan, test thủ công các tiêu chí hoàn thành trước khi tiếp tục.
 7. **Gợi ý thứ tự hay cho features mới**:
@@ -104,4 +107,6 @@ Plan 09: Swagger & Docker (làm cuối cùng)
    - Plan 12 (Comments + Suggestions) → cải thiện UX booking
    - Plan 10 (Dashboard) → cần đủ data để có chart đẹp
    - Plan 13 (Templates) → productivity feature
+   - Plan 15 (User Management) → quản lý người dùng
    - Plan 14 (i18n) → cuối cùng vì touch mọi file
+

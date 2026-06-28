@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { format, subDays } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 import dashboardService from '../services/dashboard.service';
@@ -51,6 +52,7 @@ const DashboardPage = () => {
   const [peakHours, setPeakHours] = useState(null);
   const [topUsers, setTopUsers] = useState([]);
   const [trends, setTrends] = useState([]);
+  const [personalStats, setPersonalStats] = useState(null);
 
   // Loading states (individual)
   const [loadingOverview, setLoadingOverview] = useState(false);
@@ -58,6 +60,7 @@ const DashboardPage = () => {
   const [loadingPeak, setLoadingPeak] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingTrends, setLoadingTrends] = useState(false);
+  const [loadingPersonal, setLoadingPersonal] = useState(false);
 
   const { startDate, endDate } = dateRange;
 
@@ -123,15 +126,30 @@ const DashboardPage = () => {
     }
   }, [startDate, endDate, granularity]);
 
-  // Fetch all when dateRange changes
+  const fetchPersonalStats = useCallback(async () => {
+    setLoadingPersonal(true);
+    try {
+      const data = await dashboardService.getPersonalStats();
+      setPersonalStats(data);
+    } catch (e) {
+      console.error('personal stats error', e);
+    } finally {
+      setLoadingPersonal(false);
+    }
+  }, []);
+
+  // Fetch all when dateRange/user shifts
   useEffect(() => {
-    if (!isAdmin) return;
-    fetchOverview();
-    fetchRoomUsage();
-    fetchPeakHours();
-    fetchTopUsers();
-    fetchTrends();
-  }, [isAdmin, fetchOverview, fetchRoomUsage, fetchPeakHours, fetchTopUsers, fetchTrends]);
+    if (isAdmin) {
+      fetchOverview();
+      fetchRoomUsage();
+      fetchPeakHours();
+      fetchTopUsers();
+      fetchTrends();
+    } else {
+      fetchPersonalStats();
+    }
+  }, [isAdmin, fetchOverview, fetchRoomUsage, fetchPeakHours, fetchTopUsers, fetchTrends, fetchPersonalStats]);
 
   // ── Render helpers ────────────────────────────────────────────────────────
 
@@ -172,10 +190,73 @@ const DashboardPage = () => {
         { icon: '⏳', label: 'Chờ duyệt', color: '#f59e0b' },
       ];
 
+  const personalCards = personalStats
+    ? user?.role === 'approver'
+      ? [
+          {
+            icon: '📥',
+            label: 'Chờ duyệt hệ thống',
+            value: personalStats.approverMetrics?.pendingApprovalsCount?.toLocaleString() || '0',
+            color: '#f59e0b',
+          },
+          {
+            icon: '✅',
+            label: 'Tôi đã duyệt',
+            value: personalStats.approverMetrics?.myApprovedCount?.toLocaleString() || '0',
+            color: '#10b981',
+          },
+          {
+            icon: '❌',
+            label: 'Tôi đã từ chối',
+            value: personalStats.approverMetrics?.myRejectedCount?.toLocaleString() || '0',
+            color: '#ef4444',
+          },
+          {
+            icon: '📋',
+            label: 'Lượt đặt cá nhân',
+            value: personalStats.totalBookings?.toLocaleString() || '0',
+            color: '#6366f1',
+          },
+        ]
+      : [
+          {
+            icon: '📋',
+            label: 'Lượt đặt cá nhân',
+            value: personalStats.totalBookings?.toLocaleString() || '0',
+            color: '#6366f1',
+          },
+          {
+            icon: '✅',
+            label: 'Đã duyệt',
+            value: personalStats.approved?.toLocaleString() || '0',
+            percentage: personalStats.totalBookings
+              ? ((personalStats.approved / personalStats.totalBookings) * 100).toFixed(1)
+              : 0,
+            color: '#10b981',
+          },
+          {
+            icon: '⏳',
+            label: 'Chờ duyệt',
+            value: personalStats.pending?.toLocaleString() || '0',
+            percentage: personalStats.totalBookings
+              ? ((personalStats.pending / personalStats.totalBookings) * 100).toFixed(1)
+              : 0,
+            color: '#f59e0b',
+          },
+          {
+            icon: '⏱️',
+            label: 'Tổng giờ sử dụng',
+            value: `${personalStats.totalHours}h`,
+            color: '#3b82f6',
+          },
+        ]
+    : [];
+
   // ── Non-admin view ────────────────────────────────────────────────────────
   if (!isAdmin) {
     return (
-      <div className="dashboard-page">
+      <div className="dashboard-page dashboard-page--personal">
+        {/* Welcome Section */}
         <section className="dashboard-hero animate-fade-in-up">
           <div className="dashboard-hero__text">
             <p className="dashboard-greeting">{greeting()},</p>
@@ -184,7 +265,7 @@ const DashboardPage = () => {
               {role.label}
             </div>
             <p className="dashboard-desc">
-              Chào mừng bạn đến với hệ thống đặt phòng họp. Sử dụng menu để đặt phòng và xem lịch.
+              Chào mừng bạn đến với hệ thống đặt phòng họp. Dưới đây là thống kê hoạt động cá nhân của bạn.
             </p>
           </div>
           <div className="dashboard-hero__illustration" aria-hidden="true">
@@ -200,6 +281,153 @@ const DashboardPage = () => {
             </svg>
           </div>
         </section>
+
+        {/* Stats Cards Section */}
+        <section className="dashboard-stats animate-fade-in">
+          {personalCards.length > 0
+            ? personalCards.map((card, i) => (
+                <StatCard
+                  key={card.label}
+                  icon={card.icon}
+                  label={card.label}
+                  value={card.value}
+                  percentage={card.percentage}
+                  color={card.color}
+                  loading={loadingPersonal}
+                  style={{ animationDelay: `${i * 0.07}s` }}
+                />
+              ))
+            : [1, 2, 3, 4].map((_, i) => (
+                <StatCard
+                  key={i}
+                  icon="📋"
+                  label="Đang tải..."
+                  loading={true}
+                  style={{ animationDelay: `${i * 0.07}s` }}
+                />
+              ))}
+        </section>
+
+        {/* Main Content Columns */}
+        <div className="dashboard-row animate-fade-in" style={{ marginTop: '2rem' }}>
+          {/* Column 1: Upcoming Bookings */}
+          <div className="dashboard-chart-card glass-card personal-upcoming">
+            <div className="dashboard-chart-card__header">
+              <div>
+                <h2 className="dashboard-chart-card__title">📅 Lịch đặt sắp diễn ra</h2>
+                <p className="dashboard-chart-card__sub">Danh sách 5 cuộc họp sắp tới của bạn</p>
+              </div>
+            </div>
+            <div className="dashboard-chart-card__body">
+              {loadingPersonal ? (
+                <div className="loading-spinner">Đang tải lịch đặt...</div>
+              ) : personalStats?.upcomingBookings?.length > 0 ? (
+                <div className="upcoming-list">
+                  {personalStats.upcomingBookings.map((b) => {
+                    const startFormatted = format(new Date(b.startTime), 'HH:mm - dd/MM/yyyy');
+                    return (
+                      <div key={b.id} className="upcoming-item">
+                        <div className="upcoming-item__left">
+                          <span className={`upcoming-status-badge upcoming-status-badge--${b.status}`}>
+                            {b.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
+                          </span>
+                        </div>
+                        <div className="upcoming-item__body">
+                          <h4 className="upcoming-item__title">{b.title}</h4>
+                          <p className="upcoming-item__meta">
+                            📍 {b.roomName} ({b.location})
+                          </p>
+                          <p className="upcoming-item__time">
+                            ⏰ {startFormatted}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="empty-state-container">
+                  <p className="empty-state-text">Bạn không có lịch đặt phòng nào sắp diễn ra.</p>
+                  <Link to="/bookings/new" className="btn btn--primary btn--sm" style={{ marginTop: '1rem' }}>
+                    Đặt phòng ngay
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2: Contextual Sidebar */}
+          {user?.role === 'approver' ? (
+            /* Approver Sidebar: Recent approvals processed */
+            <div className="dashboard-chart-card glass-card personal-recent-approvals">
+              <div className="dashboard-chart-card__header">
+                <div>
+                  <h2 className="dashboard-chart-card__title">📥 Yêu cầu duyệt gần đây</h2>
+                  <p className="dashboard-chart-card__sub">Lịch sử phê duyệt/từ chối của bạn</p>
+                </div>
+              </div>
+              <div className="dashboard-chart-card__body">
+                {loadingPersonal ? (
+                  <div className="loading-spinner">Đang tải lịch sử...</div>
+                ) : personalStats?.approverMetrics?.approvalsHistory?.length > 0 ? (
+                  <div className="approvals-history-list">
+                    {personalStats.approverMetrics.approvalsHistory.map((a) => {
+                      const approvedTime = a.approvedAt ? format(new Date(a.approvedAt), 'dd/MM/yyyy') : '';
+                      return (
+                        <div key={a.id} className="history-item">
+                          <div className="history-item__header">
+                            <span className="history-item__user">{a.bookerName}</span>
+                            <span className={`status-tag status-tag--${a.status}`}>
+                              {a.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
+                            </span>
+                          </div>
+                          <p className="history-item__title">{a.title}</p>
+                          <p className="history-item__meta">
+                            🚪 {a.roomName} {approvedTime && `• 📅 ${approvedTime}`}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="empty-state-container">
+                    <p className="empty-state-text">Bạn chưa thực hiện duyệt yêu cầu nào gần đây.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* User Sidebar: Quick actions */
+            <div className="dashboard-chart-card glass-card personal-quick-actions">
+              <div className="dashboard-chart-card__header">
+                <div>
+                  <h2 className="dashboard-chart-card__title">⚡ Phím tắt nhanh</h2>
+                  <p className="dashboard-chart-card__sub">Thao tác nhanh trên hệ thống</p>
+                </div>
+              </div>
+              <div className="dashboard-chart-card__body">
+                <div className="quick-actions-grid">
+                  <Link to="/bookings/new" className="quick-action-btn">
+                    <span className="quick-action-icon">➕</span>
+                    <span className="quick-action-label">Đặt phòng mới</span>
+                  </Link>
+                  <Link to="/rooms/search" className="quick-action-btn">
+                    <span className="quick-action-icon">🔍</span>
+                    <span className="quick-action-label">Tìm phòng trống</span>
+                  </Link>
+                  <Link to="/bookings" className="quick-action-btn">
+                    <span className="quick-action-icon">📅</span>
+                    <span className="quick-action-label">Xem lịch đặt của tôi</span>
+                  </Link>
+                  <Link to="/templates" className="quick-action-btn">
+                    <span className="quick-action-icon">🔖</span>
+                    <span className="quick-action-label">Mẫu đặt phòng</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }

@@ -4,6 +4,9 @@ const authenticate = require('../middlewares/auth.middleware');
 const authorize = require('../middlewares/role.middleware');
 const dashboardController = require('../controllers/dashboard.controller');
 
+// Personal stats for user/approver dashboard
+router.get('/personal',   authenticate, dashboardController.getPersonalStats);
+
 // All dashboard routes require admin role
 router.get('/overview',   authenticate, authorize('admin'), dashboardController.getOverview);
 router.get('/room-usage', authenticate, authorize('admin'), dashboardController.getRoomUsage);

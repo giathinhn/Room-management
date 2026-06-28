@@ -154,6 +154,94 @@ const dashboardRepository = {
     `;
     return results;
   },
+
+  /**
+   * Get personal statistics for User or Approver roles.
+   * @param {string} userId
+   * @param {string} role
+   */
+  async getPersonalStats(userId, role) {
+    // 1. Core stats: count of personal bookings by status
+    const statusGroups = await prisma.booking.groupBy({
+      by: ['status'],
+      where: { userId },
+      _count: { id: true },
+    });
+
+    // 2. Personal bookings approved total hours
+    const personalApprovedBookings = await prisma.booking.findMany({
+      where: { userId, status: 'approved' },
+      select: { startTime: true, endTime: true },
+    });
+
+    let totalHours = 0;
+    for (const b of personalApprovedBookings) {
+      const diffMs = b.endTime - b.startTime;
+      const hours = diffMs / 3600000;
+      totalHours += hours;
+    }
+
+    // 3. Top 5 upcoming bookings for the user (pending or approved)
+    const upcomingBookings = await prisma.booking.findMany({
+      where: {
+        userId,
+        startTime: { gte: new Date() },
+        status: { in: ['approved', 'pending'] },
+      },
+      include: {
+        room: {
+          select: { name: true, location: true },
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      take: 5,
+    });
+
+    // Initialize return object
+    const result = {
+      statusGroups,
+      totalHours,
+      upcomingBookings,
+    };
+
+    // 4. If role is approver, load approval metrics
+    if (role === 'approver') {
+      // Pending bookings in system
+      const pendingApprovalsCount = await prisma.booking.count({
+        where: { status: 'pending' },
+      });
+
+      // Approved by this approver
+      const myApprovedCount = await prisma.booking.count({
+        where: { approvedBy: userId, status: 'approved' },
+      });
+
+      // Rejected by this approver
+      const myRejectedCount = await prisma.booking.count({
+        where: { approvedBy: userId, status: 'rejected' },
+      });
+
+      // Recent 5 approvals handled by this approver
+      const approvalsHistory = await prisma.booking.findMany({
+        where: { approvedBy: userId },
+        include: {
+          room: { select: { name: true } },
+          user: { select: { fullName: true, email: true } },
+        },
+        orderBy: { approvedAt: 'desc' },
+        take: 5,
+      });
+
+      result.approverMetrics = {
+        pendingApprovalsCount,
+        myApprovedCount,
+        myRejectedCount,
+        approvalsHistory,
+      };
+    }
+
+    return result;
+  },
 };
 
 module.exports = dashboardRepository;

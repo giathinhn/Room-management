@@ -113,6 +113,66 @@ const dashboardService = {
       cancelled: Number(r.cancelled),
     }));
   },
+
+  /**
+   * Get personal statistics for a user or approver.
+   * @param {string} userId
+   * @param {string} role
+   */
+  async getPersonalStats(userId, role) {
+    const raw = await dashboardRepository.getPersonalStats(userId, role);
+
+    // Map status groups
+    const byStatus = { pending: 0, approved: 0, rejected: 0, cancelled: 0 };
+    let totalBookings = 0;
+
+    for (const g of raw.statusGroups) {
+      const count = Number(g._count.id);
+      byStatus[g.status] = count;
+      totalBookings += count;
+    }
+
+    const formattedUpcoming = raw.upcomingBookings.map((b) => ({
+      id: b.id,
+      title: b.title,
+      startTime: b.startTime.toISOString(),
+      endTime: b.endTime.toISOString(),
+      status: b.status,
+      roomName: b.room.name,
+      location: b.room.location,
+    }));
+
+    const result = {
+      totalBookings,
+      approved: byStatus.approved,
+      pending: byStatus.pending,
+      rejected: byStatus.rejected,
+      cancelled: byStatus.cancelled,
+      totalHours: Math.round(raw.totalHours * 10) / 10,
+      upcomingBookings: formattedUpcoming,
+    };
+
+    if (role === 'approver' && raw.approverMetrics) {
+      const formattedHistory = raw.approverMetrics.approvalsHistory.map((b) => ({
+        id: b.id,
+        title: b.title,
+        status: b.status,
+        approvedAt: b.approvedAt ? b.approvedAt.toISOString() : null,
+        roomName: b.room.name,
+        bookerName: b.user.fullName,
+        bookerEmail: b.user.email,
+      }));
+
+      result.approverMetrics = {
+        pendingApprovalsCount: Number(raw.approverMetrics.pendingApprovalsCount),
+        myApprovedCount: Number(raw.approverMetrics.myApprovedCount),
+        myRejectedCount: Number(raw.approverMetrics.myRejectedCount),
+        approvalsHistory: formattedHistory,
+      };
+    }
+
+    return result;
+  },
 };
 
 module.exports = dashboardService;

@@ -95,6 +95,19 @@ const dashboardController = {
       next(err);
     }
   },
+
+  /**
+   * GET /api/dashboard/personal
+   */
+  async getPersonalStats(req, res, next) {
+    try {
+      const { id: userId, role } = req.user;
+      const data = await dashboardService.getPersonalStats(userId, role);
+      res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = dashboardController;

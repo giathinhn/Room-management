@@ -67,7 +67,7 @@ const DateRangeFilter = ({ onChange }) => {
           type="date"
           className="date-range-filter__input"
           value={customStart}
-          max={customEnd || today}
+          max={customEnd}
           onChange={(e) => setCustomStart(e.target.value)}
           aria-label="Ngày bắt đầu"
         />
@@ -78,7 +78,6 @@ const DateRangeFilter = ({ onChange }) => {
           className="date-range-filter__input"
           value={customEnd}
           min={customStart}
-          max={today}
           onChange={(e) => setCustomEnd(e.target.value)}
           aria-label="Ngày kết thúc"
         />

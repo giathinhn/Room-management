@@ -46,6 +46,12 @@ const dashboardService = {
     });
     return data.data;
   },
+
+  /** GET /api/dashboard/personal */
+  async getPersonalStats() {
+    const { data } = await api.get('/dashboard/personal');
+    return data.data;
+  },
 };
 
 export default dashboardService;
