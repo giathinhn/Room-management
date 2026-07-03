@@ -34,7 +34,7 @@ const templateController = {
         return res.status(400).json({
           success: false,
           message: 'Dữ liệu không hợp lệ',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -69,7 +69,7 @@ const templateController = {
         return res.status(400).json({
           success: false,
           message: 'Dữ liệu không hợp lệ',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),

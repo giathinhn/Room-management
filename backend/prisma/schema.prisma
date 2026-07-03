@@ -59,6 +59,7 @@ model User {
   notifications     Notification[]
   comments          BookingComment[]
   templates         BookingTemplate[]
+  chatMessages      ChatMessage[]
 
   @@map("users")
 }
@@ -182,4 +183,18 @@ model BookingTemplate {
   room Room? @relation(fields: [roomId], references: [id])
 
   @@map("booking_templates")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      String   // 'user' | 'assistant'
+  content   String   @db.Text
+  metadata  Json?    // Structured data: action, parameters, rooms, bookings, proposal
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("chat_messages")
 }

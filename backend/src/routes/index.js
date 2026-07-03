@@ -45,5 +45,8 @@ router.use('/dashboard', require('./dashboard.routes'));
 // ─── Booking Templates ────────────────────────────────────────────────────────
 router.use('/templates', require('./template.routes'));
 
+// ─── AI Chatbot (Plan 16) ─────────────────────────────────────────────────────
+router.use('/ai', require('./ai.routes'));
+
 module.exports = router;
 

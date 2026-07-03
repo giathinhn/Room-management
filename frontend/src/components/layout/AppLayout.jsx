@@ -1,7 +1,8 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import ChatWidget from '../chat/ChatWidget';
 import './AppLayout.css';
 
 const AppLayout = () => {
@@ -30,6 +31,9 @@ const AppLayout = () => {
           aria-hidden="true"
         />
       )}
+
+      {/* AI Chatbot - always visible on every page when logged in */}
+      <ChatWidget />
     </div>
   );
 };

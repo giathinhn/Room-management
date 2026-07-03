@@ -14,8 +14,8 @@ const createBookingSchema = z.object({
     .string()
     .min(1, { message: 'Title is required' })
     .max(200, { message: 'Title must not exceed 200 characters' }),
-  startTime: z.string().datetime({ message: 'startTime must be a valid ISO datetime' }),
-  endTime: z.string().datetime({ message: 'endTime must be a valid ISO datetime' }),
+  startTime: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'startTime must be a valid datetime string' }),
+  endTime: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'endTime must be a valid datetime string' }),
 });
 
 /**

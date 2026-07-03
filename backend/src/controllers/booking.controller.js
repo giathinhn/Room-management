@@ -19,7 +19,7 @@ const bookingController = {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -55,7 +55,7 @@ const bookingController = {
         return res.status(400).json({
           success: false,
           message: 'Invalid query parameters',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -117,7 +117,7 @@ const bookingController = {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -171,7 +171,7 @@ const bookingController = {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
@@ -199,7 +199,7 @@ const bookingController = {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: parsed.error.errors.map((e) => ({
+          errors: (parsed.error.errors || parsed.error.issues || []).map((e) => ({
             field: e.path.join('.'),
             message: e.message,
           })),
