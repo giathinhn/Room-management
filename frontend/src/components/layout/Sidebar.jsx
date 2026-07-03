@@ -9,6 +9,7 @@ import {
   FiSearch,
   FiBookmark,
   FiChevronLeft,
+  FiMap,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import './Sidebar.css';
@@ -42,6 +43,12 @@ const NAV_ITEMS = [
     label: 'Tìm phòng trống',
     icon: <FiSearch />,
     to: '/rooms/search',
+    roles: ['admin', 'approver', 'user'],
+  },
+  {
+    label: 'Sơ đồ tầng',
+    icon: <FiMap />,
+    to: '/floor-map',
     roles: ['admin', 'approver', 'user'],
   },
   {

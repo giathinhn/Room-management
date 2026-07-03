@@ -74,6 +74,14 @@ model Room {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // ── Floor Map fields ──────────────────────────────────────────────────────
+  floor     String?  @db.VarChar(50)   // Tầng: "1", "2", "3", ...
+  building  String?  @db.VarChar(50)   // Tòa nhà: "A", "B", ...
+  mapX      Float?   @map("map_x")     // Cột trong grid (integer 0-N)
+  mapY      Float?   @map("map_y")     // Hàng trong grid (integer 0-N)
+  mapWidth  Float?   @default(15) @map("map_width")  // Giữ cho tương thích ngược
+  mapHeight Float?   @default(12) @map("map_height") // Giữ cho tương thích ngược
+
   bookings          Booking[]
   recurringBookings RecurringBooking[]
   templates         BookingTemplate[]

@@ -19,6 +19,7 @@ import CalendarPage from './pages/CalendarPage';
 import NotificationsPage from './pages/NotificationsPage';
 import TemplatesPage from './pages/TemplatesPage';
 import UsersPage from './pages/UsersPage';
+import FloorMapPage from './pages/FloorMapPage';
 
 import './App.css';
 
@@ -44,6 +45,7 @@ function App() {
               <Route path="/calendar"           element={<CalendarPage />} />
               <Route path="/notifications"      element={<NotificationsPage />} />
               <Route path="/templates"          element={<TemplatesPage />} />
+              <Route path="/floor-map"          element={<FloorMapPage />} />
             </Route>
           </Route>
 

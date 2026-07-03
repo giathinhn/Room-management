@@ -82,7 +82,7 @@ const roomRepository = {
 
   /**
    * Create a new room.
-   * @param {{ name: string, capacity: number, location: string, equipment: string[] }} data
+   * @param {object} data
    */
   async create(data) {
     return prisma.room.create({ data });
@@ -143,6 +143,144 @@ const roomRepository = {
     return prisma.room.findMany({
       where,
       orderBy: { capacity: 'asc' },
+    });
+  },
+
+  /**
+   * Get all active rooms with real-time booking status for floor map.
+   * Status computed from approved bookings within the next 30 minutes.
+   * @param {string} [floor] — filter by floor (optional)
+   * @param {string} [building] — filter by building (optional)
+   */
+  async findAllWithStatus(floor, building) {
+    const now = new Date();
+    const next30min = new Date(now.getTime() + 30 * 60 * 1000);
+
+    const where = { isActive: true };
+    if (floor) where.floor = floor;
+    if (building) where.building = building;
+
+    const rooms = await prisma.room.findMany({
+      where,
+      include: {
+        bookings: {
+          where: {
+            status: 'approved',
+            startTime: { lte: next30min },
+            endTime: { gt: now },
+          },
+          orderBy: { startTime: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            startTime: true,
+            endTime: true,
+            user: {
+              select: { id: true, fullName: true, email: true },
+            },
+          },
+        },
+      },
+      // Sort by grid position so rooms appear in natural order
+      orderBy: [{ mapY: 'asc' }, { mapX: 'asc' }, { name: 'asc' }],
+    });
+
+    return rooms.map((room) => {
+      const currentBooking = room.bookings.find(
+        (b) => b.startTime <= now && b.endTime > now
+      ) || null;
+      const nextBooking = room.bookings.find(
+        (b) => b.startTime > now && b.startTime <= next30min
+      ) || null;
+
+      let status = 'available';
+      if (currentBooking) status = 'in_use';
+      else if (nextBooking) status = 'upcoming';
+
+      return {
+        id: room.id,
+        name: room.name,
+        capacity: room.capacity,
+        location: room.location,
+        equipment: room.equipment,
+        floor: room.floor,
+        building: room.building,
+        mapX: room.mapX,
+        mapY: room.mapY,
+        status,
+        currentBooking,
+        nextBooking,
+      };
+    });
+  },
+
+  /**
+   * Get list of unique buildings that have active rooms.
+   * @returns {string[]}
+   */
+  async getBuildings() {
+    const result = await prisma.room.findMany({
+      where: { isActive: true, building: { not: null } },
+      select: { building: true },
+      distinct: ['building'],
+      orderBy: { building: 'asc' },
+    });
+    return result.map((r) => r.building).filter(Boolean);
+  },
+
+  /**
+   * Get list of unique floors for a given building (or all if no building).
+   * @param {string} [building]
+   * @returns {string[]}
+   */
+  async getFloors(building) {
+    const where = { isActive: true, floor: { not: null } };
+    if (building) where.building = building;
+
+    const result = await prisma.room.findMany({
+      where,
+      select: { floor: true },
+      distinct: ['floor'],
+      orderBy: { floor: 'asc' },
+    });
+    return result.map((r) => r.floor).filter(Boolean);
+  },
+
+  /**
+   * Auto-assign the next available grid position for a new room on a floor.
+   * Fills cells left-to-right, top-to-bottom with MAX_COLS = 4.
+   * @param {string} floor
+   * @param {string} building
+   */
+  async autoAssignGridPosition(floor, building) {
+    const MAX_COLS = 4;
+    const existing = await prisma.room.findMany({
+      where: { floor, building, isActive: true },
+      select: { mapX: true, mapY: true },
+    });
+
+    const occupied = new Set(existing.map((r) => `${r.mapX},${r.mapY}`));
+
+    for (let row = 0; row < 50; row++) {
+      for (let col = 0; col < MAX_COLS; col++) {
+        if (!occupied.has(`${col},${row}`)) {
+          return { mapX: col, mapY: row };
+        }
+      }
+    }
+    // Fallback: append after last
+    return { mapX: 0, mapY: existing.length };
+  },
+
+  /**
+   * Update a room's position on the floor map (admin only).
+   * @param {string} id
+   * @param {{ floor?: string, building?: string, mapX?: number, mapY?: number }} mapData
+   */
+  async updateMapPosition(id, mapData) {
+    return prisma.room.update({
+      where: { id },
+      data: mapData,
     });
   },
 };

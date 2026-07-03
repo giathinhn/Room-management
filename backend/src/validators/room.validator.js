@@ -24,8 +24,16 @@ const createRoomSchema = z.object({
     .max(500, { message: 'Capacity must not exceed 500' }),
   location: z
     .string()
-    .min(1, { message: 'Location is required' })
-    .max(200, { message: 'Location must not exceed 200 characters' }),
+    .max(200, { message: 'Location must not exceed 200 characters' })
+    .optional(),
+  floor: z
+    .string()
+    .min(1, { message: 'Floor is required' })
+    .max(50, { message: 'Floor must not exceed 50 characters' }),
+  building: z
+    .string()
+    .min(1, { message: 'Building is required' })
+    .max(50, { message: 'Building must not exceed 50 characters' }),
   equipment: z
     .array(z.string())
     .default([]),
@@ -49,8 +57,15 @@ const updateRoomSchema = z.object({
     .optional(),
   location: z
     .string()
-    .min(1, { message: 'Location is required' })
     .max(200, { message: 'Location must not exceed 200 characters' })
+    .optional(),
+  floor: z
+    .string()
+    .max(50, { message: 'Floor must not exceed 50 characters' })
+    .optional(),
+  building: z
+    .string()
+    .max(50, { message: 'Building must not exceed 50 characters' })
     .optional(),
   equipment: z.array(z.string()).optional(),
 });

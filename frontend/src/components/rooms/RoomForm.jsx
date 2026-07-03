@@ -15,7 +15,8 @@ const EQUIPMENT_OPTIONS = [
 const EMPTY_FORM = {
   name: '',
   capacity: '',
-  location: '',
+  floor: '',
+  building: '',
   equipment: [],
 };
 
@@ -25,7 +26,7 @@ const EMPTY_FORM = {
  * Props:
  *   isOpen    {boolean}          Whether the modal is visible
  *   onClose   {Function}         Called to close the modal
- *   onSubmit  {Function}         Called with form data { name, capacity, location, equipment }
+ *   onSubmit  {Function}         Called with form data { name, capacity, location, floor, building, equipment }
  *   room      {object|null}      If provided, pre-fills the form (edit mode)
  *   isLoading {boolean}          Disable submit while request is in flight
  */
@@ -39,7 +40,8 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
       setForm({
         name:      room.name      || '',
         capacity:  room.capacity  || '',
-        location:  room.location  || '',
+        floor:     room.floor     || '',
+        building:  room.building  || '',
         equipment: room.equipment || [],
       });
     } else {
@@ -80,10 +82,16 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
       errs.capacity = 'Sức chứa phải là số nguyên từ 1 đến 500';
     }
 
-    if (!form.location.trim()) {
-      errs.location = 'Vị trí là bắt buộc';
-    } else if (form.location.trim().length > 200) {
-      errs.location = 'Vị trí tối đa 200 ký tự';
+    if (!form.building.trim()) {
+      errs.building = 'Tòa nhà là bắt buộc';
+    } else if (form.building.trim().length > 50) {
+      errs.building = 'Tòa nhà tối đa 50 ký tự';
+    }
+
+    if (!form.floor.trim()) {
+      errs.floor = 'Tầng là bắt buộc';
+    } else if (form.floor.trim().length > 50) {
+      errs.floor = 'Tầng tối đa 50 ký tự';
     }
 
     return errs;
@@ -100,7 +108,8 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
     onSubmit({
       name:      form.name.trim(),
       capacity:  Number(form.capacity),
-      location:  form.location.trim(),
+      floor:     form.floor.trim(),
+      building:  form.building.trim(),
       equipment: form.equipment,
     });
   }
@@ -151,22 +160,44 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
           {errors.capacity && <p className="form-error">{errors.capacity}</p>}
         </div>
 
-        {/* Location */}
-        <div className="form-group">
-          <label htmlFor="room-location" className="form-label">
-            Vị trí <span className="form-required">*</span>
-          </label>
-          <input
-            id="room-location"
-            name="location"
-            type="text"
-            className={`form-input${errors.location ? ' form-input--error' : ''}`}
-            placeholder="Vd: Tầng 3, Tòa A"
-            value={form.location}
-            onChange={handleChange}
-            maxLength={200}
-          />
-          {errors.location && <p className="form-error">{errors.location}</p>}
+
+
+        {/* Building & Floor (Mandatory) */}
+        <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label htmlFor="room-building" className="form-label">
+              Tòa nhà <span className="form-required">*</span>
+            </label>
+            <input
+              id="room-building"
+              name="building"
+              type="text"
+              className={`form-input${errors.building ? ' form-input--error' : ''}`}
+              placeholder="Vd: A"
+              value={form.building}
+              onChange={handleChange}
+              maxLength={50}
+              style={{ width: '100%', padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
+            />
+            {errors.building && <p className="form-error" style={{ marginTop: '4px' }}>{errors.building}</p>}
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label htmlFor="room-floor" className="form-label">
+              Tầng <span className="form-required">*</span>
+            </label>
+            <input
+              id="room-floor"
+              name="floor"
+              type="text"
+              className={`form-input${errors.floor ? ' form-input--error' : ''}`}
+              placeholder="Vd: 3"
+              value={form.floor}
+              onChange={handleChange}
+              maxLength={50}
+              style={{ width: '100%', padding: '8px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
+            />
+            {errors.floor && <p className="form-error" style={{ marginTop: '4px' }}>{errors.floor}</p>}
+          </div>
         </div>
 
         {/* Equipment */}

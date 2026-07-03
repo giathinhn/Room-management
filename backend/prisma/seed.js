@@ -7,23 +7,16 @@
  */
 
 const { PrismaClient } = require('@prisma/client');
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/**
- * Hash password dynamically using bcryptjs.
- */
 function hashPassword(password) {
   return bcrypt.hashSync(password, 10);
 }
 
-/**
- * Creates a date relative to now
- */
 function daysFromNow(days, hour = 9, minute = 0) {
   const d = new Date();
   d.setDate(d.getDate() + days);
@@ -38,6 +31,7 @@ async function main() {
 
   // ── Clean existing data ──
   console.log('  🗑️  Cleaning existing data...');
+  await prisma.chatMessage.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.bookingComment.deleteMany();
   await prisma.bookingTemplate.deleteMany();
@@ -75,7 +69,7 @@ async function main() {
     data: {
       email: 'user1@company.com',
       passwordHash,
-      fullName: 'Nguyễn Văn A',
+      fullName: 'Nguyen Van A',
       role: 'user',
       isActive: true,
     },
@@ -85,7 +79,7 @@ async function main() {
     data: {
       email: 'user2@company.com',
       passwordHash,
-      fullName: 'Trần Thị B',
+      fullName: 'Tran Thi B',
       role: 'user',
       isActive: true,
     },
@@ -96,57 +90,133 @@ async function main() {
   // ── Rooms ──
   console.log('  🏢 Creating rooms...');
 
+  // Tầng 1
   const room1 = await prisma.room.create({
     data: {
-      name: 'Phòng họp Emerald',
-      capacity: 6,
-      location: 'Tầng 2, Tòa A',
-      equipment: ['Máy chiếu', 'Bảng trắng', 'TV 55"', 'Điều hòa'],
+      name: 'Hoi truong Diamond',
+      capacity: 30,
+      location: 'Tang 1, Toa A',
+      equipment: ['May chieu laser', 'He thong am thanh', 'Micro khong day', 'Video conference', 'Dieu hoa trung tam', 'Bang trang dien tu'],
       isActive: true,
+      floor: '1', building: 'A', mapX: 0, mapY: 0,
     },
   });
 
+  const room1b = await prisma.room.create({
+    data: {
+      name: 'Phong hoi Jade',
+      capacity: 10,
+      location: 'Tang 1, Toa A',
+      equipment: ['May chieu', 'Bang trang', 'Dieu hoa'],
+      isActive: true,
+      floor: '1', building: 'A', mapX: 1, mapY: 0,
+    },
+  });
+
+  // Tầng 2
   const room2 = await prisma.room.create({
     data: {
-      name: 'Phòng họp Sapphire',
-      capacity: 12,
-      location: 'Tầng 3, Tòa A',
-      equipment: ['Máy chiếu 4K', 'Video conference', 'Bảng trắng', 'Điều hòa', 'Mini bar'],
+      name: 'Phong hop Emerald',
+      capacity: 6,
+      location: 'Tang 2, Toa A',
+      equipment: ['May chieu', 'Bang trang', 'TV 55"', 'Dieu hoa'],
       isActive: true,
+      floor: '2', building: 'A', mapX: 0, mapY: 0,
     },
   });
 
   const room3 = await prisma.room.create({
     data: {
-      name: 'Phòng họp Ruby',
+      name: 'Phong hop Ruby',
       capacity: 4,
-      location: 'Tầng 2, Tòa B',
-      equipment: ['TV 43"', 'Bảng trắng', 'Điều hòa'],
+      location: 'Tang 2, Toa A',
+      equipment: ['TV 43"', 'Bang trang', 'Dieu hoa'],
       isActive: true,
+      floor: '2', building: 'A', mapX: 1, mapY: 0,
     },
   });
 
   const room4 = await prisma.room.create({
     data: {
-      name: 'Hội trường Diamond',
-      capacity: 30,
-      location: 'Tầng 1, Tòa A',
-      equipment: ['Máy chiếu laser', 'Hệ thống âm thanh', 'Micro không dây', 'Video conference', 'Điều hòa trung tâm', 'Bảng trắng điện tử'],
+      name: 'Phong hop Topaz',
+      capacity: 8,
+      location: 'Tang 2, Toa A',
+      equipment: ['May chieu', 'Webcam', 'Dieu hoa', 'Bang trang'],
       isActive: true,
+      floor: '2', building: 'A', mapX: 2, mapY: 0,
     },
   });
 
+  // Tầng 3
   const room5 = await prisma.room.create({
     data: {
-      name: 'Phòng brainstorm Pearl',
-      capacity: 8,
-      location: 'Tầng 4, Tòa A',
-      equipment: ['Bảng trắng lớn', 'Post-it boards', 'TV 65"', 'Điều hòa', 'Ghế bean bag'],
+      name: 'Phong hop Sapphire',
+      capacity: 12,
+      location: 'Tang 3, Toa A',
+      equipment: ['May chieu 4K', 'Video conference', 'Bang trang', 'Dieu hoa', 'Mini bar'],
       isActive: true,
+      floor: '3', building: 'A', mapX: 0, mapY: 0,
     },
   });
 
-  console.log(`  ✅ Created ${5} rooms`);
+  const room6 = await prisma.room.create({
+    data: {
+      name: 'Phong hop Opal',
+      capacity: 6,
+      location: 'Tang 3, Toa A',
+      equipment: ['TV 55"', 'Webcam', 'Dieu hoa'],
+      isActive: true,
+      floor: '3', building: 'A', mapX: 1, mapY: 0,
+    },
+  });
+
+  const room7 = await prisma.room.create({
+    data: {
+      name: 'Phong thao luan Amber',
+      capacity: 4,
+      location: 'Tang 3, Toa A',
+      equipment: ['TV 43"', 'Bang trang', 'Dieu hoa'],
+      isActive: true,
+      floor: '3', building: 'A', mapX: 2, mapY: 0,
+    },
+  });
+
+  // Tầng 4
+  const room8 = await prisma.room.create({
+    data: {
+      name: 'Phong brainstorm Pearl',
+      capacity: 8,
+      location: 'Tang 4, Toa A',
+      equipment: ['Bang trang lon', 'Post-it boards', 'TV 65"', 'Dieu hoa', 'Ghe bean bag'],
+      isActive: true,
+      floor: '4', building: 'A', mapX: 0, mapY: 0,
+    },
+  });
+
+  // Tòa B
+  const room9 = await prisma.room.create({
+    data: {
+      name: 'Phong hop Coral',
+      capacity: 6,
+      location: 'Tang 1, Toa B',
+      equipment: ['TV 43"', 'Bang trang', 'Dieu hoa'],
+      isActive: true,
+      floor: '1', building: 'B', mapX: 0, mapY: 0,
+    },
+  });
+
+  const room10 = await prisma.room.create({
+    data: {
+      name: 'Phong hop Slate',
+      capacity: 8,
+      location: 'Tang 2, Toa B',
+      equipment: ['May chieu', 'Webcam', 'Dieu hoa'],
+      isActive: true,
+      floor: '2', building: 'B', mapX: 0, mapY: 0,
+    },
+  });
+
+  console.log(`  ✅ Created ${10} rooms`);
 
   // ── Bookings ──
   console.log('  📅 Creating bookings...');
@@ -154,7 +224,7 @@ async function main() {
   // Booking 1: approved - upcoming
   const booking1 = await prisma.booking.create({
     data: {
-      roomId: room1.id,
+      roomId: room2.id,
       userId: user1.id,
       title: 'Sprint Planning Q1',
       startTime: daysFromNow(1, 9, 0),
@@ -168,9 +238,9 @@ async function main() {
   // Booking 2: pending - upcoming
   const booking2 = await prisma.booking.create({
     data: {
-      roomId: room2.id,
+      roomId: room5.id,
       userId: user2.id,
-      title: 'Cuộc họp Q1 Review với khách hàng',
+      title: 'Q1 Review Meeting',
       startTime: daysFromNow(2, 14, 0),
       endTime: daysFromNow(2, 16, 0),
       status: 'pending',
@@ -194,7 +264,7 @@ async function main() {
   // Booking 4: rejected
   const booking4 = await prisma.booking.create({
     data: {
-      roomId: room4.id,
+      roomId: room1.id,
       userId: user2.id,
       title: 'Company All-hands Meeting',
       startTime: daysFromNow(5, 13, 0),
@@ -202,16 +272,16 @@ async function main() {
       status: 'rejected',
       approvedBy: approver.id,
       approvedAt: new Date(),
-      rejectionReason: 'Phòng đã được đặt trước cho sự kiện công ty. Vui lòng chọn ngày khác.',
+      rejectionReason: 'Phong da duoc dat truoc cho su kien cong ty. Vui long chon ngay khac.',
     },
   });
 
   // Booking 5: cancelled
   const booking5 = await prisma.booking.create({
     data: {
-      roomId: room1.id,
+      roomId: room2.id,
       userId: user1.id,
-      title: 'Workshop thiết kế UX',
+      title: 'Workshop UX Design',
       startTime: daysFromNow(3, 10, 0),
       endTime: daysFromNow(3, 12, 0),
       status: 'cancelled',
@@ -221,7 +291,7 @@ async function main() {
   // Booking 6: pending - upcoming
   const booking6 = await prisma.booking.create({
     data: {
-      roomId: room5.id,
+      roomId: room8.id,
       userId: user2.id,
       title: 'Brainstorming Feature Q2',
       startTime: daysFromNow(4, 15, 0),
@@ -230,10 +300,10 @@ async function main() {
     },
   });
 
-  // Booking 7: approved - today
+  // Booking 7: approved - today (in progress)
   const booking7 = await prisma.booking.create({
     data: {
-      roomId: room2.id,
+      roomId: room5.id,
       userId: user1.id,
       title: 'Tech Architecture Review',
       startTime: daysFromNow(0, 14, 0),
@@ -247,7 +317,7 @@ async function main() {
   // Booking 8: approved - past (for admin)
   const booking8 = await prisma.booking.create({
     data: {
-      roomId: room4.id,
+      roomId: room1.id,
       userId: admin.id,
       title: 'Annual Strategy Meeting',
       startTime: daysFromNow(-7, 9, 0),
@@ -258,7 +328,22 @@ async function main() {
     },
   });
 
-  console.log(`  ✅ Created ${8} bookings`);
+  // Booking 9: approved - today starting soon (for floor map demo)
+  const nowHour = new Date().getHours();
+  const booking9 = await prisma.booking.create({
+    data: {
+      roomId: room3.id,
+      userId: user2.id,
+      title: 'Product Demo',
+      startTime: daysFromNow(0, Math.min(nowHour + 1, 21), 0),
+      endTime: daysFromNow(0, Math.min(nowHour + 2, 22), 0),
+      status: 'approved',
+      approvedBy: approver.id,
+      approvedAt: daysFromNow(-1),
+    },
+  });
+
+  console.log(`  ✅ Created ${9} bookings`);
 
   // ── Sample Comments ──
   console.log('  💬 Creating sample comments...');
@@ -267,7 +352,7 @@ async function main() {
     data: {
       bookingId: booking1.id,
       userId: user1.id,
-      content: 'Nhớ chuẩn bị slide trước 30 phút nhé mọi người!',
+      content: 'Nho chuan bi slide truoc 30 phut nhe moi nguoi!',
     },
   });
 
@@ -275,7 +360,7 @@ async function main() {
     data: {
       bookingId: booking1.id,
       userId: approver.id,
-      content: 'OK, mình sẽ đến sớm để setup màn hình.',
+      content: 'OK, minh se den som de setup man hinh.',
     },
   });
 
@@ -283,7 +368,7 @@ async function main() {
     data: {
       bookingId: booking2.id,
       userId: user2.id,
-      content: 'Cuộc họp này rất quan trọng với khách hàng VIP, mong được duyệt sớm.',
+      content: 'Cuoc hop nay rat quan trong voi khach hang VIP, mong duoc duyet som.',
     },
   });
 
@@ -296,8 +381,8 @@ async function main() {
     data: {
       userId: user1.id,
       type: 'booking_approved',
-      title: 'Đặt phòng được duyệt',
-      message: `Booking "Sprint Planning Q1" đã được duyệt. Phòng ${room1.name} từ 9:00 - 11:00.`,
+      title: 'Dat phong duoc duyet',
+      message: `Booking "Sprint Planning Q1" da duoc duyet. Phong ${room2.name} tu 9:00 - 11:00.`,
       bookingId: booking1.id,
       isRead: false,
     },
@@ -307,8 +392,8 @@ async function main() {
     data: {
       userId: user2.id,
       type: 'booking_rejected',
-      title: 'Đặt phòng bị từ chối',
-      message: `Booking "Company All-hands Meeting" đã bị từ chối. Lý do: Phòng đã được đặt trước.`,
+      title: 'Dat phong bi tu choi',
+      message: `Booking "Company All-hands Meeting" da bi tu choi. Ly do: Phong da duoc dat truoc.`,
       bookingId: booking4.id,
       isRead: false,
     },
@@ -318,8 +403,8 @@ async function main() {
     data: {
       userId: approver.id,
       type: 'new_booking_pending',
-      title: 'Có đặt phòng mới cần duyệt',
-      message: `"${booking2.title}" cần được duyệt. Phòng ${room2.name}.`,
+      title: 'Co dat phong moi can duyet',
+      message: `"${booking2.title}" can duoc duyet. Phong ${room5.name}.`,
       bookingId: booking2.id,
       isRead: false,
     },
@@ -330,7 +415,6 @@ async function main() {
   // ── Sample Templates ──
   console.log('  📋 Creating booking templates...');
 
-  // Time objects for templates (date part doesn't matter, only time)
   const startTimeMorning = new Date('1970-01-01T09:00:00.000Z');
   const endTimeMorning = new Date('1970-01-01T10:00:00.000Z');
   const startTimeAfternoon = new Date('1970-01-01T14:00:00.000Z');
@@ -350,9 +434,9 @@ async function main() {
   await prisma.bookingTemplate.create({
     data: {
       userId: user2.id,
-      name: 'Họp chiều thường lệ',
-      roomId: room1.id,
-      title: 'Cuộc họp nhóm chiều',
+      name: 'Hop chieu thuong le',
+      roomId: room2.id,
+      title: 'Cuoc hop nhom chieu',
       startTime: startTimeAfternoon,
       endTime: endTimeAfternoon,
     },
@@ -370,8 +454,8 @@ async function main() {
   console.log('    user2@company.com     (role: user)');
   console.log('  Password for all accounts: Password123!');
   console.log('');
-  console.log('  Rooms: 5 (Emerald, Sapphire, Ruby, Diamond, Pearl)');
-  console.log('  Bookings: 8 (approved/pending/rejected/cancelled)');
+  console.log('  Rooms: 10 (Toa A: Tang 1-4, Toa B: Tang 1-2)');
+  console.log('  Bookings: 9 (approved/pending/rejected/cancelled)');
   console.log('');
   console.log('  Run `npm run db:studio` to explore data in Prisma Studio.');
 }

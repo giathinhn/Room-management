@@ -1,0 +1,522 @@
+/* ── Page layout ──────────────────────────────────────────────────────────── */
+.floor-map-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.fmp__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.fmp__header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.fmp__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fmp__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.2;
+}
+
+.fmp__title-icon {
+  font-size: 28px;
+}
+
+.fmp__subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.fmp__book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 20px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fmp__book-btn:hover {
+  background: linear-gradient(135deg, #818cf8, #6366f1);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+  transform: translateY(-1px);
+}
+
+/* ── Controls bar ─────────────────────────────────────────────────────────── */
+.fmp__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.fmp__controls-right {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+}
+
+.fmp__refresh-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fmp__refresh-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+  animation: refreshPulse 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.fmp__refresh-dot--spinning {
+  background: #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.7);
+  animation: spinDot 0.8s linear infinite;
+}
+
+@keyframes refreshPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes spinDot {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(0.8); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.fmp__refresh-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fmp__refresh-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fmp__refresh-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.fmp__refresh-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Stats strip ──────────────────────────────────────────────────────────── */
+.fmp__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.fmp__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: transform 0.2s;
+}
+
+.fmp__stat:hover {
+  transform: translateY(-2px);
+}
+
+.fmp__stat--total {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.fmp__stat--available {
+  background: rgba(34, 197, 94, 0.07);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.fmp__stat--in-use {
+  background: rgba(239, 68, 68, 0.07);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.fmp__stat--upcoming {
+  background: rgba(245, 158, 11, 0.07);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.fmp__stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.fmp__stat--total .fmp__stat-value { color: #f1f5f9; }
+.fmp__stat--available .fmp__stat-value { color: #4ade80; }
+.fmp__stat--in-use .fmp__stat-value { color: #f87171; }
+.fmp__stat--upcoming .fmp__stat-value { color: #fbbf24; }
+
+.fmp__stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Loading ──────────────────────────────────────────────────────────────── */
+.fmp__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 300px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+.fmp__loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Error ────────────────────────────────────────────────────────────────── */
+.fmp__error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 14px;
+  color: #f87171;
+  font-size: 14px;
+}
+
+.fmp__error-icon { font-size: 18px; flex-shrink: 0; }
+
+.fmp__error-retry {
+  margin-left: auto;
+  padding: 7px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #f87171;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fmp__error-retry:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+.fmp__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 300px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+
+.fmp__empty-icon { font-size: 48px; }
+
+.fmp__empty-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.fmp__empty-hint a {
+  color: #818cf8;
+  text-decoration: none;
+}
+
+.fmp__empty-hint a:hover {
+  text-decoration: underline;
+}
+
+/* ── Canvas wrapper ───────────────────────────────────────────────────────── */
+.fmp__canvas-wrapper {
+  display: flex;
+  gap: 20px;
+  min-height: 0;
+  flex: 1;
+}
+
+/* ── Canvas (map mode) ────────────────────────────────────────────────────── */
+.fmp__canvas {
+  flex: 1;
+  min-height: 480px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.fmp__canvas--map {
+  position: relative;
+  background: linear-gradient(135deg, #0b0b1e 0%, #111130 100%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 150px;
+  gap: 20px;
+  padding: 24px;
+}
+
+/* ── Grid lines overlay ───────────────────────────────────────────────────── */
+.fmp__canvas-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+  background-size: 25% 25%;
+  pointer-events: none;
+}
+
+/* ── Room wrapper ─────────────────────────────────────────────────────────── */
+.fmp__room-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Admin edit position button ───────────────────────────────────────────── */
+.fmp__edit-pos-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: rgba(245, 158, 11, 0.95);
+  border: 1px solid rgba(245, 158, 11, 1);
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.fmp__edit-pos-btn:hover {
+  background: #f59e0b;
+  transform: scale(1.1);
+}
+
+.fmp__edit-pos-btn:hover {
+  background: rgba(245, 158, 11, 0.35);
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* ── Floor watermark ──────────────────────────────────────────────────────── */
+.fmp__floor-watermark {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  font-size: 80px;
+  font-weight: 900;
+  color: rgba(99, 102, 241, 0.05);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+/* ── Editor panel (admin) ─────────────────────────────────────────────────── */
+.fmp__editor-panel {
+  width: 300px;
+  flex-shrink: 0;
+  animation: slideInRight 0.25s ease;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Selectors Layout ─────────────────────────────────────────────────────── */
+.fmp__selectors {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── Edit Mode Button ─────────────────────────────────────────────────────── */
+.fmp__edit-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fmp__edit-mode-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.35);
+  color: #fff;
+}
+
+.fmp__edit-mode-btn--active {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #f59e0b;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.fmp__edit-mode-btn--active:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.5);
+}
+
+/* ── Grid Placeholder (Edit mode empty cells) ────────────────────────────── */
+.fmp__grid-placeholder {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.01);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 150px;
+  user-select: none;
+}
+
+.fmp__grid-placeholder:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.fmp__grid-placeholder .placeholder-icon {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.25);
+  font-weight: 300;
+  transition: all 0.2s ease;
+}
+
+.fmp__grid-placeholder:hover .placeholder-icon {
+  color: #6366f1;
+  transform: scale(1.2);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .fmp__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fmp__controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fmp__canvas-wrapper {
+    flex-direction: column;
+  }
+
+  .fmp__editor-panel {
+    width: 100%;
+  }
+
+  .fmp__canvas--map {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 600px) {
+  .fmp__header {
+    flex-direction: column;
+  }
+
+  .fmp__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fmp__title {
+    font-size: 20px;
+  }
+}

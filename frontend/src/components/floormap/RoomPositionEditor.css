@@ -1,0 +1,140 @@
+.pos-editor {
+  background: linear-gradient(135deg, #1e1e38, #12122a);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+}
+
+.pos-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pos-editor__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.pos-editor__close {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.pos-editor__close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.pos-editor__room-name {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 16px 0;
+}
+
+.pos-editor__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pos-editor__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pos-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pos-editor__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.05em;
+}
+
+.pos-editor__input,
+.pos-editor__select {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 13px;
+  font-weight: 500;
+  transition: border-color 0.2s;
+  outline: none;
+  width: 100%;
+}
+
+.pos-editor__input:focus,
+.pos-editor__select:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.pos-editor__select option {
+  background: #1e1e38;
+  color: #f1f5f9;
+}
+
+
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+.pos-editor__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pos-editor__btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.pos-editor__btn--cancel {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pos-editor__btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pos-editor__btn--save {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+}
+
+.pos-editor__btn--save:hover:not(:disabled) {
+  background: linear-gradient(135deg, #818cf8, #6366f1);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+}
+
+.pos-editor__btn--save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
