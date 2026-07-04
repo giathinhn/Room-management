@@ -27,6 +27,19 @@ function calcDuration(startISO, endISO) {
   return `${m} phút`;
 }
 
+// ── Helper: extract date / time parts from ISO string ────────────────────
+const extractDate = (iso) => {
+  if (!iso) return '';
+  try { return new Date(iso).toISOString().slice(0, 10); } catch { return ''; }
+};
+const extractTime = (iso) => {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  } catch { return ''; }
+};
+
 /**
  * BookingForm — step-by-step form for creating a booking.
  * Step 1: Select date & time
@@ -42,19 +55,6 @@ function calcDuration(startISO, endISO) {
  * }} props
  */
 function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initialValues = {} }) {
-  // ── Helper: extract date / time parts from ISO string ────────────────────
-  const extractDate = (iso) => {
-    if (!iso) return '';
-    try { return new Date(iso).toISOString().slice(0, 10); } catch { return ''; }
-  };
-  const extractTime = (iso) => {
-    if (!iso) return '';
-    try {
-      const d = new Date(iso);
-      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    } catch { return ''; }
-  };
-
   // ── State ─────────────────────────────────────────────────────────────────
   const [date, setDate] = useState(extractDate(initialValues.startTime) || '');
   const [startTime, setStartTime] = useState(extractTime(initialValues.startTime) || '');
@@ -67,6 +67,60 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
   const [roomsLoaded, setRoomsLoaded] = useState(false);
 
   const [errors, setErrors] = useState({});
+
+  // Sync state if initialValues changes (e.g. from suggestions or templates)
+  useEffect(() => {
+    if (initialValues.startTime && initialValues.endTime) {
+      const d = extractDate(initialValues.startTime);
+      const st = extractTime(initialValues.startTime);
+      const et = extractTime(initialValues.endTime);
+      
+      setDate(d);
+      setStartTime(st);
+      setEndTime(et);
+      
+      if (initialValues.roomId) {
+        setSelectedRoomId(initialValues.roomId);
+      }
+      if (initialValues.title) {
+        setTitle(initialValues.title);
+      }
+
+      // Automatically search rooms for pre-filled times
+      const start = combineDateTime(d, st);
+      const end = combineDateTime(d, et);
+      if (start && end && new Date(start) < new Date(end)) {
+        setRoomsLoading(true);
+        setRoomsLoaded(false);
+        roomService.getAvailableRooms({ startTime: start, endTime: end })
+          .then((res) => {
+            setAvailableRooms(res.data || []);
+            setRoomsLoaded(true);
+            
+            // Smoothly scroll to the bottom of the page to focus on Step 3 info
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: 'smooth'
+              });
+            }, 100);
+          })
+          .catch(() => {
+            setAvailableRooms([]);
+            setRoomsLoaded(true);
+          })
+          .finally(() => {
+            setRoomsLoading(false);
+          });
+      }
+    } else {
+      // Handle partial templates (e.g. from handleUseTemplate which only has startHHMM, endHHMM)
+      if (initialValues.startHHMM) setStartTime(initialValues.startHHMM);
+      if (initialValues.endHHMM) setEndTime(initialValues.endHHMM);
+      if (initialValues.roomId) setSelectedRoomId(initialValues.roomId);
+      if (initialValues.title) setTitle(initialValues.title);
+    }
+  }, [initialValues]);
 
   // ── Derived values ────────────────────────────────────────────────────────
   const startISO = combineDateTime(date, startTime);

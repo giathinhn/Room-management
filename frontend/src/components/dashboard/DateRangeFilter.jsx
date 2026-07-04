@@ -6,6 +6,7 @@ const PRESETS = [
   { label: '7 ngày', days: 7 },
   { label: '30 ngày', days: 30 },
   { label: '3 tháng', months: 3 },
+  { label: 'Tất cả', all: true },
 ];
 
 /**
@@ -26,13 +27,19 @@ const DateRangeFilter = ({ onChange }) => {
     setCustomStart('');
     setCustomEnd('');
 
-    const end = new Date();
-    let start;
-    if (preset.months) {
-      start = subMonths(end, preset.months);
+    let start, end;
+    if (preset.all) {
+      start = new Date('2020-01-01');
+      end = new Date('2099-12-31');
     } else {
-      start = subDays(end, preset.days - 1);
+      end = new Date();
+      if (preset.months) {
+        start = subMonths(end, preset.months);
+      } else {
+        start = subDays(end, preset.days - 1);
+      }
     }
+
     onChange({
       startDate: format(start, 'yyyy-MM-dd'),
       endDate: format(end, 'yyyy-MM-dd'),
