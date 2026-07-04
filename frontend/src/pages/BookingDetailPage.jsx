@@ -56,8 +56,17 @@ function BookingDetailPage() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-
   const [rejectModal, setRejectModal] = useState(false);
+  const [now, setNow] = useState(new Date());
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (booking?.status !== 'approved' || booking?.checkedIn) return;
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [booking]);
 
   // Load booking
   useEffect(() => {
@@ -89,6 +98,20 @@ function BookingDetailPage() {
 
   const canApproveReject = (isAdmin || isApprover) && booking.status === 'pending';
   const canCancel = (isOwner || isAdmin) && ['pending', 'approved'].includes(booking.status);
+
+  const startTime = new Date(booking.startTime);
+  const checkInStart = new Date(startTime.getTime() - 10 * 60 * 1000);
+  const checkInEnd = new Date(startTime.getTime() + 15 * 60 * 1000);
+
+  const showCheckIn = booking.status === 'approved' && !booking.checkedIn && now >= checkInStart && now <= checkInEnd;
+  const isExpired = booking.status === 'approved' && !booking.checkedIn && now > checkInEnd;
+  const secondsLeft = Math.max(0, Math.floor((checkInEnd.getTime() - now.getTime()) / 1000));
+
+  const formatCountdown = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m} phút ${s} giây`;
+  };
 
   // Actions
   const handleApprove = async () => {
@@ -127,6 +150,19 @@ function BookingDetailPage() {
       toast.success('Đã hủy booking');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Hủy thất bại');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCheckIn = async () => {
+    setActionLoading(true);
+    try {
+      const res = await bookingService.checkInBooking(id);
+      setBooking(res.data);
+      toast.success('Check-in thành công!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Check-in thất bại');
     } finally {
       setActionLoading(false);
     }
@@ -225,6 +261,66 @@ function BookingDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Cancellation Reason (No-Show or Admin Cancelled) */}
+        {booking.status === 'cancelled' && booking.cancelReason && (
+          <div className="detail-page__rejection-section">
+            <div className="detail-page__divider" />
+            <div className="detail-page__rejection" style={{ borderLeft: '4px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '8px', margin: '16px 0' }}>
+              <span className="detail-page__rejection-icon" style={{ fontSize: '1.25rem' }}>⚠️</span>
+              <div>
+                <span className="detail-page__info-label" style={{ color: '#ef4444', fontWeight: 600 }}>Lý do hủy</span>
+                <p className="detail-page__rejection-reason" style={{ margin: '4px 0 0', color: 'var(--color-text-primary)' }}>{booking.cancelReason}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Check-in Section */}
+        {booking.status === 'approved' && (
+          <div className="detail-page__checkin-section">
+            <div className="detail-page__divider" />
+            <div style={{ padding: '12px 0' }}>
+              {booking.checkedIn ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontWeight: 600 }}>
+                  <span>✅ Đã check-in lúc {formatFull(booking.checkInTime)}</span>
+                </div>
+              ) : showCheckIn ? (
+                <div className="checkin-info">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 600 }}>📍 Cuộc họp đã sẵn sàng check-in</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                        Vui lòng bấm nút check-in bên phải để xác nhận cuộc họp của bạn.
+                      </p>
+                      <p className="checkin-countdown">
+                        ⏱️ Tự động hủy sau: {formatCountdown(secondsLeft)}
+                      </p>
+                    </div>
+                    {(isOwner || isAdmin || isApprover) && (
+                      <button
+                        id="checkin-btn"
+                        className="btn-checkin"
+                        onClick={handleCheckIn}
+                        disabled={actionLoading}
+                      >
+                        📍 Check-in ngay
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : isExpired ? (
+                <div style={{ color: '#ef4444', fontWeight: 600 }}>
+                  ⚠️ Quá hạn check-in (Lịch đặt đang chờ hệ thống hủy giải phóng)
+                </div>
+              ) : (
+                <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                  ⏳ Có thể check-in trước giờ họp 10 phút (Hạn chót là 15 phút sau giờ họp).
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Approver section (rejected/approved) */}
         {booking.approver && (

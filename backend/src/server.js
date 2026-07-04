@@ -48,6 +48,11 @@ async function start() {
     } else {
       console.log('[Server] ⚠️  SMTP not configured — reminder cron job skipped.');
     }
+
+    // Start check-in / auto-release cron job
+    const { startCheckInJob } = require('./jobs/checkin.job');
+    startCheckInJob();
+    console.log('[Server] ⏰ Check-in / Auto-release cron job started.');
   } catch (error) {
     console.error('[Server] Failed to start:', error);
     process.exit(1);

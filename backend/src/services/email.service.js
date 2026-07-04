@@ -73,11 +73,33 @@ const emailService = {
    * Notify booker that their booking was cancelled.
    * @param {object} booking — must include booking.user.email
    */
-  async sendBookingCancelled(booking) {
+  async sendBookingCancelled(booking, reason) {
     await this._send({
       to: booking.user.email,
       subject: `🚫 Lịch đặt phòng "${booking.title}" đã bị hủy`,
-      html: emailTemplates.bookingCancelled(booking),
+      html: emailTemplates.bookingCancelled(booking, reason),
+    });
+  },
+
+  /**
+   * Notify booker that the check-in window is open.
+   */
+  async sendCheckInReminder(booking) {
+    await this._send({
+      to: booking.user.email,
+      subject: `📍 Đến giờ Check-in cuộc họp "${booking.title}"`,
+      html: emailTemplates.bookingCheckInReminder(booking),
+    });
+  },
+
+  /**
+   * Notify booker 5 minutes before check-in expires.
+   */
+  async sendCheckInWarning(booking) {
+    await this._send({
+      to: booking.user.email,
+      subject: `⚠️ Cảnh báo: Sắp hết hạn Check-in cuộc họp "${booking.title}"`,
+      html: emailTemplates.bookingCheckInWarning(booking),
     });
   },
 

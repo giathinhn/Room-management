@@ -259,7 +259,7 @@ frontend/src/
 ## 🏁 Tiêu chí hoàn thành (Checklist)
 
 - [X] Chạy migration thành công, cập nhật bảng `bookings` thêm 3 trường mới trong database.
-- [X] Nút "Check-in" chỉ hiển thị đúng khung thời gian quy định (từ trước 10p đến sau 15p của giờ họp).
+- [X] Nút "Check-in" chỉ hiển thị đúng khung thời gian quy định (từ trước 10p đến sau 15p của giờ họp). Khi nút "Check-in" hiển thị thì sẽ gửi mail thông báo cho người đặt lịch phải check-in. 5 phút cuối trước khi hết hạn, thông báo thêm 1 lần nữa.
 - [X] Thực hiện check-in thành công: cập nhật `checkedIn: true` trong DB, đổi giao diện nút thành badge xanh lá.
 - [X] Test background job: Đặt lịch họp mẫu có `startTime` cách đây 16 phút, trạng thái `approved`, `checkedIn: false`. Sau 5 phút, background job quét qua và tự động hủy lịch, giải phóng phòng họp về trạng thái trống.
 - [X] Người đặt lịch nhận được cả email và thông báo trong app khi cuộc họp bị hủy tự động do quá giờ check-in.

@@ -47,6 +47,9 @@ router.patch('/:id/reject', authenticate, authorize('admin', 'approver'), bookin
 // Cancel a booking (owner or admin — enforced in service)
 router.patch('/:id/cancel', authenticate, bookingController.cancel);
 
+// Check-in to an approved booking (owner or admin/approver)
+router.post('/:id/check-in', authenticate, bookingController.checkIn);
+
 // ── Comment routes (nested under bookings) ───────────────────────────────────
 // List comments for a booking
 router.get('/:id/comments', authenticate, commentController.getByBooking);

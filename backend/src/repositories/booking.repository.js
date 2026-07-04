@@ -131,6 +131,29 @@ const bookingRepository = {
   },
 
   /**
+   * Update booking generic fields.
+   * @param {string} id
+   * @param {object} data
+   */
+  async update(id, data) {
+    return prisma.booking.update({
+      where: { id },
+      data,
+      include: {
+        room: {
+          select: { id: true, name: true, location: true, capacity: true },
+        },
+        user: {
+          select: { id: true, fullName: true, email: true },
+        },
+        approver: {
+          select: { id: true, fullName: true, email: true },
+        },
+      },
+    });
+  },
+
+  /**
    * Find bookings that overlap with the given time range.
    * Overlap: existing.startTime < endTime AND existing.endTime > startTime
    * Only considers 'pending' and 'approved' bookings.

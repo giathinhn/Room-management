@@ -104,6 +104,11 @@ model Booking {
   rejectionReason String?       @map("rejection_reason") @db.Text
   recurringId     String?       @map("recurring_id")
   reminderSent    Boolean       @default(false) @map("reminder_sent")
+  checkedIn           Boolean       @default(false) @map("checked_in")
+  checkInTime         DateTime?     @map("check_in_time")
+  cancelReason        String?       @map("cancel_reason") @db.Text
+  checkInReminderSent Boolean       @default(false) @map("check_in_reminder_sent")
+  checkInWarningSent  Boolean       @default(false) @map("check_in_warning_sent")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 

@@ -217,6 +217,7 @@ function BookingsPage() {
                 onApprove={handleApprove}
                 onReject={handleRejectOpen}
                 onCancel={handleCancel}
+                onCheckInSuccess={fetchBookings}
                 onClick={(id) => navigate(`/bookings/${id}`)}
               />
             ))}

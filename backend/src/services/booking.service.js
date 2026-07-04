@@ -4,6 +4,7 @@ const userRepository = require('../repositories/user.repository');
 const emailService = require('./email.service');
 const notificationService = require('./notification.service');
 const logger = require('../utils/logger');
+const prisma = require('../config/database');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BUSINESS_HOUR_START = 7;   // 07:00
@@ -364,6 +365,173 @@ const bookingService = {
     });
 
     return updatedBooking;
+  },
+
+  /**
+   * Check in to a booking.
+   * @param {string} bookingId
+   * @param {string} userId
+   * @param {string} userRole
+   */
+  async checkIn(bookingId, userId, userRole) {
+    const booking = await bookingRepository.findById(bookingId);
+    if (!booking) {
+      const err = new Error('Không tìm thấy lịch đặt phòng');
+      err.statusCode = 404;
+      throw err;
+    }
+    if (booking.status !== 'approved') {
+      const err = new Error('Chỉ có thể check-in các lịch đặt đã được duyệt');
+      err.statusCode = 400;
+      throw err;
+    }
+  
+    // Check permission: owner or admin/approver
+    if (booking.userId !== userId && userRole === 'user') {
+      const err = new Error('Bạn không có quyền check-in lịch đặt này');
+      err.statusCode = 403;
+      throw err;
+    }
+
+    const now = new Date();
+    const startTime = new Date(booking.startTime);
+  
+    const checkInStart = new Date(startTime.getTime() - 10 * 60 * 1000); // 10 minutes before
+    const checkInEnd = new Date(startTime.getTime() + 15 * 60 * 1000);  // 15 minutes after
+
+    if (now < checkInStart) {
+      const err = new Error('Chưa đến giờ check-in (Có thể check-in trước giờ họp 10 phút)');
+      err.statusCode = 400;
+      throw err;
+    }
+    if (now > checkInEnd) {
+      const err = new Error('Đã quá thời hạn check-in (Hạn check-in tối đa là 15 phút sau khi cuộc họp bắt đầu)');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    return bookingRepository.update(bookingId, {
+      checkedIn: true,
+      checkInTime: now,
+    });
+  },
+
+  /**
+   * Scan bookings and process check-in reminder, warning, and no-show auto-release.
+   * Runs periodically (every minute).
+   */
+  async processCheckInWindows() {
+    const now = new Date();
+
+    // 1. Send Check-in Reminder (Start of check-in window: startTime - 10 min)
+    // Find approved bookings starting in 10 minutes that haven't been notified yet.
+    const reminderWindowEnd = new Date(now.getTime() + 10 * 60 * 1000);
+    const startOfReminderWindow = new Date(now.getTime() - 5 * 60 * 1000); // safety buffer for past meetings that haven't been processed
+    const bookingsForReminder = await prisma.booking.findMany({
+      where: {
+        status: 'approved',
+        checkedIn: false,
+        checkInReminderSent: false,
+        startTime: {
+          lte: reminderWindowEnd,
+          gte: startOfReminderWindow
+        }
+      },
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+        room: { select: { id: true, name: true, location: true } }
+      }
+    });
+
+    for (const booking of bookingsForReminder) {
+      try {
+        await bookingRepository.update(booking.id, { checkInReminderSent: true });
+        emailService.sendCheckInReminder(booking).catch(err => 
+          logger.error(`[CheckInJob] Failed to send check-in reminder for booking ${booking.id}: ${err.message}`)
+        );
+        logger.info(`[CheckInJob] Sent check-in reminder for booking ${booking.id}`);
+      } catch (err) {
+        logger.error(`[CheckInJob] Failed to update check-in reminder flag for booking ${booking.id}: ${err.message}`);
+      }
+    }
+
+    // 2. Send Check-in Warning (5 minutes before expiration: startTime + 10 min)
+    // Warning window: startTime is between now - 15 minutes and now - 10 minutes (meaning 10 to 15 min since startTime).
+    const warningWindowStart = new Date(now.getTime() - 15 * 60 * 1000);
+    const warningWindowEnd = new Date(now.getTime() - 10 * 60 * 1000);
+    const bookingsForWarning = await prisma.booking.findMany({
+      where: {
+        status: 'approved',
+        checkedIn: false,
+        checkInWarningSent: false,
+        startTime: {
+          gte: warningWindowStart,
+          lte: warningWindowEnd
+        }
+      },
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+        room: { select: { id: true, name: true, location: true } }
+      }
+    });
+
+    for (const booking of bookingsForWarning) {
+      try {
+        await bookingRepository.update(booking.id, { checkInWarningSent: true });
+        emailService.sendCheckInWarning(booking).catch(err => 
+          logger.error(`[CheckInJob] Failed to send check-in warning for booking ${booking.id}: ${err.message}`)
+        );
+        logger.info(`[CheckInJob] Sent check-in warning for booking ${booking.id}`);
+      } catch (err) {
+        logger.error(`[CheckInJob] Failed to update check-in warning flag for booking ${booking.id}: ${err.message}`);
+      }
+    }
+
+    // 3. Auto-release/Cancel No-Show bookings (startTime + 15 min)
+    const limitTime = new Date(now.getTime() - 15 * 60 * 1000);
+    const expiredBookings = await prisma.booking.findMany({
+      where: {
+        status: 'approved',
+        checkedIn: false,
+        startTime: { lt: limitTime },
+        endTime: { gt: now }
+      },
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+        room: { select: { id: true, name: true, location: true } }
+      }
+    });
+
+    for (const booking of expiredBookings) {
+      try {
+        const cancelReason = 'Hệ thống tự động hủy do quá giờ check-in (No-Show)';
+        
+        await bookingRepository.update(booking.id, {
+          status: 'cancelled',
+          cancelReason
+        });
+
+        // 1. Send email cancellation notification (fire-and-forget)
+        emailService.sendBookingCancelled(booking, cancelReason).catch(err => 
+          logger.error(`[CheckInJob] Failed to send email cancellation notification for booking ${booking.id}: ${err.message}`)
+        );
+
+        // 2. Send In-app notification
+        await notificationService.createNotification(
+          booking.userId,
+          'booking_cancelled',
+          'Lịch họp bị hủy tự động',
+          `Lịch đặt phòng "${booking.title}" tại ${booking.room.name} đã bị tự động hủy do không check-in đúng giờ.`,
+          booking.id
+        ).catch(err => 
+          logger.error(`[CheckInJob] Failed to create in-app cancellation notification for booking ${booking.id}: ${err.message}`)
+        );
+
+        logger.info(`[CheckInJob] Auto-released booking ${booking.id} due to no-show`);
+      } catch (err) {
+        logger.error(`[CheckInJob] Failed to auto-release booking ${booking.id}: ${err.message}`);
+      }
+    }
   },
 };
 

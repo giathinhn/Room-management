@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import bookingService from '../services/booking.service';
 import { format, subDays } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 import dashboardService from '../services/dashboard.service';
@@ -40,11 +42,33 @@ function defaultRange() {
 
 const DashboardPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const role = roleConfig[user?.role] || roleConfig.user;
   const isAdmin = user?.role === 'admin';
 
   const [dateRange, setDateRange] = useState(defaultRange());
   const [granularity, setGranularity] = useState('week');
+  const [now, setNow] = useState(new Date());
+
+  // Timer for check-in countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleDashboardCheckIn = async (e, bookingId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await bookingService.checkInBooking(bookingId);
+      toast.success('Check-in phòng họp thành công!');
+      fetchPersonalStats();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Check-in thất bại');
+    }
+  };
 
   // Data states
   const [overview, setOverview] = useState(null);
@@ -325,8 +349,23 @@ const DashboardPage = () => {
                 <div className="upcoming-list">
                   {personalStats.upcomingBookings.map((b) => {
                     const startFormatted = format(new Date(b.startTime), 'HH:mm - dd/MM/yyyy');
+                    const startTime = new Date(b.startTime);
+                    const checkInStart = new Date(startTime.getTime() - 10 * 60 * 1000);
+                    const checkInEnd = new Date(startTime.getTime() + 15 * 60 * 1000);
+                    const showCheckIn = b.status === 'approved' && !b.checkedIn && now >= checkInStart && now <= checkInEnd;
+                    const secondsLeft = Math.max(0, Math.floor((checkInEnd.getTime() - now.getTime()) / 1000));
+                    const formatCountdown = (secs) => {
+                      const m = Math.floor(secs / 60);
+                      const s = secs % 60;
+                      return `${m}:${s.toString().padStart(2, '0')}`;
+                    };
                     return (
-                      <div key={b.id} className="upcoming-item">
+                      <div
+                        key={b.id}
+                        className="upcoming-item"
+                        onClick={() => navigate(`/bookings/${b.id}`)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <div className="upcoming-item__left">
                           <span className={`upcoming-status-badge upcoming-status-badge--${b.status}`}>
                             {b.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
@@ -340,6 +379,22 @@ const DashboardPage = () => {
                           <p className="upcoming-item__time">
                             ⏰ {startFormatted}
                           </p>
+                          {b.checkedIn && (
+                            <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
+                              ✅ Đã check-in lúc {format(new Date(b.checkInTime), 'HH:mm')}
+                            </p>
+                          )}
+                          {showCheckIn && (
+                            <div style={{ marginTop: '8px' }}>
+                              <button
+                                className="btn-checkin"
+                                style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
+                                onClick={(e) => handleDashboardCheckIn(e, b.id)}
+                              >
+                                📍 Check-in ({formatCountdown(secondsLeft)})
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

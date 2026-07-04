@@ -198,7 +198,8 @@ function bookingRejected(booking) {
  * Email sent to booker when their booking is cancelled.
  * @param {object} booking — includes room, user
  */
-function bookingCancelled(booking) {
+function bookingCancelled(booking, reason) {
+  const cancelReason = reason || booking.cancelReason;
   const body = `
     <h2 style="margin:0 0 8px;color:#9333ea;font-size:20px;font-weight:700;">
       Lịch đặt phòng đã bị hủy
@@ -207,10 +208,19 @@ function bookingCancelled(booking) {
       Xin chào <strong>${booking.user?.fullName || 'bạn'}</strong>,
     </p>
     <p style="margin:0 0 20px;color:#475569;font-size:14px;">
-      Lịch đặt phòng họp của bạn đã được hủy thành công. Chi tiết:
+      Lịch đặt phòng họp của bạn đã bị hủy. Chi tiết:
     </p>
 
     ${bookingTable(booking)}
+
+    ${
+      cancelReason
+        ? `<div style="margin-top:16px;padding:16px;background:#fef2f2;border-radius:10px;border-left:4px solid #dc2626;">
+            <p style="margin:0 0 4px;color:#991b1b;font-size:13px;font-weight:600;">Lý do hủy:</p>
+            <p style="margin:0;color:#7f1d1d;font-size:13px;line-height:1.6;">${cancelReason}</p>
+          </div>`
+        : ''
+    }
 
     <div style="margin-top:24px;padding:16px;background:#faf5ff;border-radius:10px;border-left:4px solid #9333ea;">
       <p style="margin:0;color:#581c87;font-size:13px;line-height:1.6;">
@@ -296,6 +306,70 @@ function newBookingForApprover(booking) {
   });
 }
 
+/**
+ * Email sent to booker when check-in window opens.
+ */
+function bookingCheckInReminder(booking) {
+  const body = `
+    <h2 style="margin:0 0 8px;color:#2563eb;font-size:20px;font-weight:700;">
+      Đến giờ Check-in phòng họp!
+    </h2>
+    <p style="margin:0 0 4px;color:#475569;font-size:14px;">
+      Xin chào <strong>${booking.user?.fullName || 'bạn'}</strong>,
+    </p>
+    <p style="margin:0 0 20px;color:#475569;font-size:14px;">
+      Cuộc họp "${booking.title}" của bạn tại phòng <strong>${booking.room?.name}</strong> chuẩn bị bắt đầu. Vui lòng thực hiện Check-in trong vòng 15 phút từ giờ bắt đầu họp để không bị hệ thống tự động hủy và giải phóng phòng.
+    </p>
+
+    ${bookingTable(booking)}
+
+    <div style="margin-top:24px;padding:16px;background:#eff6ff;border-radius:10px;border-left:4px solid #2563eb;">
+      <p style="margin:0;color:#1e40af;font-size:13px;line-height:1.6;">
+        ⏰ <strong>Hạn check-in tối đa:</strong> 15 phút sau giờ bắt đầu họp. Vui lòng đăng nhập vào ứng dụng và bấm Check-in.
+      </p>
+    </div>
+  `;
+
+  return layout({
+    headerColor: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+    icon: '📍',
+    title: `Check-in cuộc họp: ${booking.title}`,
+    bodyHtml: body,
+  });
+}
+
+/**
+ * Email sent as a 5-minute warning before check-in deadline.
+ */
+function bookingCheckInWarning(booking) {
+  const body = `
+    <h2 style="margin:0 0 8px;color:#dc2626;font-size:20px;font-weight:700;">
+      ⚠️ Cảnh báo: Sắp hết hạn Check-in phòng họp!
+    </h2>
+    <p style="margin:0 0 4px;color:#475569;font-size:14px;">
+      Xin chào <strong>${booking.user?.fullName || 'bạn'}</strong>,
+    </p>
+    <p style="margin:0 0 20px;color:#475569;font-size:14px;">
+      Lịch họp "${booking.title}" tại phòng <strong>${booking.room?.name}</strong> vẫn chưa được Check-in. <strong>Bạn chỉ còn dưới 5 phút</strong> để thực hiện Check-in trước khi hệ thống tự động hủy lịch đặt này và giải phóng phòng họp.
+    </p>
+
+    ${bookingTable(booking)}
+
+    <div style="margin-top:24px;padding:16px;background:#fef2f2;border-radius:10px;border-left:4px solid #dc2626;">
+      <p style="margin:0;color:#991b1b;font-size:13px;line-height:1.6;">
+        ⚠️ <strong>Hành động ngay:</strong> Đăng nhập vào ứng dụng và bấm Check-in phòng họp ngay lập tức để giữ phòng.
+      </p>
+    </div>
+  `;
+
+  return layout({
+    headerColor: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+    icon: '⚠️',
+    title: `Cảnh báo Check-in: ${booking.title}`,
+    bodyHtml: body,
+  });
+}
+
 // ─── Exports ───────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -303,5 +377,7 @@ module.exports = {
   bookingRejected,
   bookingCancelled,
   bookingReminder,
+  bookingCheckInReminder,
+  bookingCheckInWarning,
   newBookingForApprover,
 };

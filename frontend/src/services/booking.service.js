@@ -119,6 +119,15 @@ const bookingService = {
     const { data } = await api.get(`/bookings/calendar?${searchParams.toString()}`);
     return data;
   },
+
+  /**
+   * Check in to an approved booking.
+   * @param {string} id
+   */
+  async checkInBooking(id) {
+    const { data } = await api.post(`/bookings/${id}/check-in`);
+    return data;
+  },
 };
 
 export default bookingService;

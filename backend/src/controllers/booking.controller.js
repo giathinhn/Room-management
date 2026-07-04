@@ -311,6 +311,27 @@ const bookingController = {
       next(err);
     }
   },
+
+  /**
+   * POST /api/bookings/:id/check-in
+   * Check in to a booking.
+   */
+  async checkIn(req, res, next) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const userRole = req.user.role;
+
+      const booking = await bookingService.checkIn(id, userId, userRole);
+      return res.json({
+        success: true,
+        message: 'Check-in phòng họp thành công',
+        data: booking,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = bookingController;

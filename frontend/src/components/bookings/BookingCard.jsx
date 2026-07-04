@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import bookingService from '../../services/booking.service';
 import StatusBadge from '../common/StatusBadge';
 import RecurringBadge from './RecurringBadge';
 import './BookingCard.css';
@@ -42,8 +44,19 @@ function formatDuration(startTime, endTime) {
  *   onClick?: (id: string) => void,
  * }} props
  */
-function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onClick }) {
-  const { id, title, status, startTime, endTime, room, user, recurringId, recurring } = booking;
+function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onClick, onCheckInSuccess }) {
+  const { id, title, status, startTime, endTime, room, user, recurringId, recurring, checkedIn, checkInTime, cancelReason } = booking;
+
+  const [now, setNow] = useState(new Date());
+  const [checkingIn, setCheckingIn] = useState(false);
+
+  useEffect(() => {
+    if (status !== 'approved' || checkedIn) return;
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [status, checkedIn]);
 
   const isOwner = currentUser?.id === booking.userId;
   const isAdmin = currentUser?.role === 'admin';
@@ -51,6 +64,37 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
 
   const canApproveReject = (isAdmin || isApprover) && status === 'pending';
   const canCancel = (isOwner || isAdmin) && ['pending', 'approved'].includes(status);
+
+  const startDt = new Date(startTime);
+  const checkInStart = new Date(startDt.getTime() - 10 * 60 * 1000);
+  const checkInEnd = new Date(startDt.getTime() + 15 * 60 * 1000);
+
+  const showCheckIn = status === 'approved' && !checkedIn && now >= checkInStart && now <= checkInEnd;
+  const secondsLeft = Math.max(0, Math.floor((checkInEnd.getTime() - now.getTime()) / 1000));
+
+  const formatCountdown = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handleCheckInClick = async (e) => {
+    e.stopPropagation();
+    setCheckingIn(true);
+    try {
+      const res = await bookingService.checkInBooking(id);
+      toast.success('Check-in thành công!');
+      if (onCheckInSuccess) {
+        onCheckInSuccess(id, res.data);
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Check-in thất bại');
+    } finally {
+      setCheckingIn(false);
+    }
+  };
 
   return (
     <div
@@ -90,11 +134,34 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
             <span className="booking-card__icon">👤</span>
             {user?.fullName || user?.email}
           </span>
+          {checkedIn && (
+            <span className="booking-card__info-item" style={{ color: '#10b981', fontWeight: 600 }}>
+              <span className="booking-card__icon">✅</span>
+              Đã check-in lúc {new Date(checkInTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          {status === 'cancelled' && cancelReason && (
+            <span className="booking-card__info-item" style={{ color: '#f87171', fontSize: '0.85rem' }}>
+              <span className="booking-card__icon">⚠️</span>
+              Lý do: {cancelReason}
+            </span>
+          )}
         </div>
       </div>
 
-      {(canApproveReject || canCancel) && (
+      {(canApproveReject || canCancel || showCheckIn) && (
         <div className="booking-card__actions" onClick={(e) => e.stopPropagation()}>
+          {showCheckIn && (isOwner || isAdmin || isApprover) && (
+            <button
+              id={`checkin-btn-${id}`}
+              className="btn-checkin"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', marginRight: 'auto' }}
+              onClick={handleCheckInClick}
+              disabled={checkingIn}
+            >
+              📍 Check-in ({formatCountdown(secondsLeft)})
+            </button>
+          )}
           {canApproveReject && (
             <>
               <button
