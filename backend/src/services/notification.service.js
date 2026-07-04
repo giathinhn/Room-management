@@ -1,6 +1,7 @@
 const notificationRepository = require('../repositories/notification.repository');
 const sseManager = require('../utils/sseManager');
 const logger = require('../utils/logger');
+const prisma = require('../config/database');
 
 /**
  * Notification service — business logic for in-app notifications.
@@ -16,6 +17,23 @@ const notificationService = {
    */
   async createNotification(userId, type, title, message, bookingId = null) {
     try {
+      // Check user preferences
+      let settings = await prisma.userSettings.findUnique({ where: { userId } });
+      if (!settings) {
+        settings = await prisma.userSettings.create({ data: { userId } });
+      }
+
+      let allowed = true;
+      if (type === 'booking_approved') allowed = settings.inAppNotifyApproved;
+      else if (type === 'booking_rejected') allowed = settings.inAppNotifyRejected;
+      else if (type === 'booking_cancelled') allowed = settings.inAppNotifyCancelled;
+      else if (type === 'booking_reminder') allowed = settings.inAppNotifyReminder;
+
+      if (!allowed) {
+        logger.info(`[Notification] In-app notification of type ${type} is disabled for user ${userId}. Skipping.`);
+        return null;
+      }
+
       const data = { userId, type, title, message };
       if (bookingId) data.bookingId = bookingId;
 

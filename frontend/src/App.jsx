@@ -24,6 +24,7 @@ import UsersPage from './pages/UsersPage';
 import FloorMapPage from './pages/FloorMapPage';
 import QuickBookPage from './pages/QuickBookPage';
 import RoomQRPrintPage from './pages/RoomQRPrintPage';
+import SettingsPage from './pages/SettingsPage';
 
 import './App.css';
 
@@ -55,6 +56,7 @@ function App() {
               <Route path="/notifications"      element={<NotificationsPage />} />
               <Route path="/templates"          element={<TemplatesPage />} />
               <Route path="/floor-map"          element={<FloorMapPage />} />
+              <Route path="/settings"           element={<SettingsPage />} />
             </Route>
           </Route>
 

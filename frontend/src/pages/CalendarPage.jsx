@@ -208,7 +208,7 @@ function CalendarPage() {
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
+          initialView={localStorage.getItem('defaultCalendarView') || 'timeGridWeek'}
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',

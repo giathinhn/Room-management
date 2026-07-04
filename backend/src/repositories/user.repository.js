@@ -30,6 +30,21 @@ const userRepository = {
         department: true,
         createdAt: true,
         updatedAt: true,
+        settings: {
+          select: {
+            emailNotifyApproved: true,
+            emailNotifyRejected: true,
+            emailNotifyCancelled: true,
+            emailNotifyReminder: true,
+            inAppNotifyApproved: true,
+            inAppNotifyRejected: true,
+            inAppNotifyCancelled: true,
+            inAppNotifyReminder: true,
+            language: true,
+            theme: true,
+            defaultCalendarView: true,
+          }
+        }
       },
     });
   },
@@ -40,7 +55,12 @@ const userRepository = {
    */
   async create(data) {
     return prisma.user.create({
-      data,
+      data: {
+        ...data,
+        settings: {
+          create: {},
+        },
+      },
       select: {
         id: true,
         email: true,

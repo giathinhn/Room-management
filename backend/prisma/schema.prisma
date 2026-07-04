@@ -64,6 +64,7 @@ model User {
   templates         BookingTemplate[]
   chatMessages      ChatMessage[]
   favoriteRooms     Room[]            @relation("UserFavoriteRooms")
+  settings          UserSettings?
 
   @@map("users")
 }
@@ -216,3 +217,46 @@ model ChatMessage {
   @@index([userId, createdAt])
   @@map("chat_messages")
 }
+
+model UserSettings {
+  id                    String   @id @default(uuid())
+  userId                String   @unique @map("user_id")
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Trạng thái nhận thông báo Email
+  emailNotifyApproved   Boolean  @default(true) @map("email_notify_approved")
+  emailNotifyRejected   Boolean  @default(true) @map("email_notify_rejected")
+  emailNotifyCancelled  Boolean  @default(true) @map("email_notify_cancelled")
+  emailNotifyReminder   Boolean  @default(true) @map("email_notify_reminder")
+  
+  // Trạng thái nhận thông báo Trong app
+  inAppNotifyApproved   Boolean  @default(true) @map("in_app_notify_approved")
+  inAppNotifyRejected   Boolean  @default(true) @map("in_app_notify_rejected")
+  inAppNotifyCancelled  Boolean  @default(true) @map("in_app_notify_cancelled")
+  inAppNotifyReminder   Boolean  @default(true) @map("in_app_notify_reminder")
+  
+  // Tùy chọn hiển thị giao diện
+  language              String   @default("vi") @db.VarChar(5)
+  theme                 String   @default("system") @db.VarChar(20) // "light" | "dark" | "system"
+  defaultCalendarView   String   @default("timeGridWeek") @db.VarChar(20) @map("default_calendar_view") // "timeGridDay" | "timeGridWeek" | "dayGridMonth"
+  
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("user_settings")
+}
+
+model SystemSettings {
+  id                    Int      @id @default(1)
+  workHourStart         String   @default("07:00") @db.VarChar(5) @map("work_hour_start") // Định dạng "HH:MM"
+  workHourEnd           String   @default("22:00") @db.VarChar(5) @map("work_hour_end")
+  maxBookingDaysAhead   Int      @default(30) @map("max_booking_days_ahead")
+  minBookingDurationMin Int      @default(30) @map("min_booking_duration_min")
+  maxBookingDurationMin Int      @default(480) @map("max_booking_duration_min") // 8 tiếng
+  noShowReleaseTimeMin  Int      @default(15) @map("no_show_release_time_min") // Hủy sau X phút
+  allowCancelApproved   Boolean  @default(true) @map("allow_cancel_approved")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+

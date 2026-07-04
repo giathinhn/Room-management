@@ -59,4 +59,4 @@ async function start() {
   }
 }
 
-start();
+start(); // Restart trigger

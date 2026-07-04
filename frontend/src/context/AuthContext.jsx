@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import authService from '../services/auth.service';
 import toast from 'react-hot-toast';
+import { useTheme } from './ThemeContext';
+import i18n from '../i18n';
 
 const AuthContext = createContext(null);
 
@@ -8,6 +10,23 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // checking token on mount
+  const { setTheme } = useTheme();
+
+  // Sync user settings (theme, language, calendar view) when user object loads
+  useEffect(() => {
+    if (user && user.settings) {
+      const { theme: userTheme, language, defaultCalendarView } = user.settings;
+      if (userTheme) {
+        setTheme(userTheme);
+      }
+      if (language) {
+        i18n.changeLanguage(language);
+      }
+      if (defaultCalendarView) {
+        localStorage.setItem('defaultCalendarView', defaultCalendarView);
+      }
+    }
+  }, [user, setTheme]);
 
   // ─── Verify token on mount ───────────────────────────────────────────────────
   useEffect(() => {

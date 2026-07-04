@@ -21,6 +21,9 @@ router.use('/auth', require('./auth.routes'));
 // ─── Profile routes ───────────────────────────────────────────────────────────
 router.use('/profile', require('./profile.routes'));
 
+// ─── Settings routes ──────────────────────────────────────────────────────────
+router.use('/settings', require('./settings.routes'));
+
 // ─── Admin — user management ──────────────────────────────────────────────────
 router.use('/users', require('./user.routes'));
 

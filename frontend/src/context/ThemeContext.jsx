@@ -3,33 +3,70 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Lấy theme đã lưu hoặc ưu tiên lựa chọn hệ thống
   const getInitialTheme = () => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme;
-
-    const userPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return userPrefersDark ? 'dark' : 'light';
+    return savedTheme || 'system';
   };
 
   const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    
+    const applyTheme = (currentTheme) => {
+      if (currentTheme === 'dark') {
+        root.classList.add('dark');
+      } else if (currentTheme === 'light') {
+        root.classList.remove('dark');
+      } else {
+        // System preference
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (systemPrefersDark) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+      }
+    };
+
+    applyTheme(theme);
     localStorage.setItem('theme', theme);
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e) => {
+        if (e.matches) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+      };
+      
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleChange);
+      } else {
+        mediaQuery.addListener(handleChange);
+      }
+
+      return () => {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener('change', handleChange);
+        } else {
+          mediaQuery.removeListener(handleChange);
+        }
+      };
+    }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prev) => {
+      const isCurrentlyDark = prev === 'dark' || (prev === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      return isCurrentlyDark ? 'light' : 'dark';
+    });
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

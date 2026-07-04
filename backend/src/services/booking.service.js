@@ -3,6 +3,7 @@ const roomRepository = require('../repositories/room.repository');
 const userRepository = require('../repositories/user.repository');
 const emailService = require('./email.service');
 const notificationService = require('./notification.service');
+const settingsService = require('./settings.service');
 const logger = require('../utils/logger');
 const prisma = require('../config/database');
 
@@ -46,35 +47,46 @@ const bookingService = {
       throw err;
     }
 
-    // 3. Within business hours (07:00 – 22:00)
+    // Load dynamic system settings
+    const sysSettings = await settingsService.getSystemSettings();
+    const parseTimeToHour = (timeStr) => {
+      const [h, m] = timeStr.split(':').map(Number);
+      return h + m / 60;
+    };
+    const workHourStartVal = parseTimeToHour(sysSettings.workHourStart);
+    const workHourEndVal = parseTimeToHour(sysSettings.workHourEnd);
+
+    // 3. Within business hours
     const startHour = startTime.getHours() + startTime.getMinutes() / 60;
     const endHour = endTime.getHours() + endTime.getMinutes() / 60;
-    if (startHour < BUSINESS_HOUR_START || endHour > BUSINESS_HOUR_END) {
-      const err = new Error('Booking must be between 07:00 and 22:00');
+    if (startHour < workHourStartVal || endHour > workHourEndVal) {
+      const err = new Error(`Booking must be between ${sysSettings.workHourStart} and ${sysSettings.workHourEnd}`);
       err.statusCode = 400;
       throw err;
     }
 
-    // 4. Minimum duration: 15 minutes
+    // 4. Minimum duration
     const durationMs = endTime - startTime;
-    if (durationMs < MIN_DURATION_MS) {
-      const err = new Error('Minimum duration is 15 minutes');
+    const minDurationMs = sysSettings.minBookingDurationMin * 60 * 1000;
+    if (durationMs < minDurationMs) {
+      const err = new Error(`Minimum duration is ${sysSettings.minBookingDurationMin} minutes`);
       err.statusCode = 400;
       throw err;
     }
 
-    // 5. Maximum duration: 8 hours
-    if (durationMs > MAX_DURATION_MS) {
-      const err = new Error('Maximum duration is 8 hours');
+    // 5. Maximum duration
+    const maxDurationMs = sysSettings.maxBookingDurationMin * 60 * 1000;
+    if (durationMs > maxDurationMs) {
+      const err = new Error(`Maximum duration is ${sysSettings.maxBookingDurationMin} minutes`);
       err.statusCode = 400;
       throw err;
     }
 
-    // 6. Cannot book more than 30 days in advance
+    // 6. Cannot book too far in advance
     const maxAdvanceDate = new Date(now);
-    maxAdvanceDate.setDate(maxAdvanceDate.getDate() + MAX_ADVANCE_DAYS);
+    maxAdvanceDate.setDate(maxAdvanceDate.getDate() + sysSettings.maxBookingDaysAhead);
     if (startTime > maxAdvanceDate) {
-      const err = new Error('Cannot book more than 30 days in advance');
+      const err = new Error(`Cannot book more than ${sysSettings.maxBookingDaysAhead} days in advance`);
       err.statusCode = 400;
       throw err;
     }
@@ -335,6 +347,15 @@ const bookingService = {
       throw err;
     }
 
+    if (booking.status === 'approved' && !isAdmin) {
+      const sysSettings = await settingsService.getSystemSettings();
+      if (sysSettings && !sysSettings.allowCancelApproved) {
+        const err = new Error('Cannot cancel bookings that have already been approved');
+        err.statusCode = 400;
+        throw err;
+      }
+    }
+
     const updatedBooking = await bookingRepository.updateStatus(id, 'cancelled');
 
     // Notify booker of cancellation (fire-and-forget)
@@ -396,8 +417,11 @@ const bookingService = {
     const now = new Date();
     const startTime = new Date(booking.startTime);
   
+    const sysSettings = await settingsService.getSystemSettings();
+    const releaseTimeMin = sysSettings?.noShowReleaseTimeMin ?? 15;
+
     const checkInStart = new Date(startTime.getTime() - 10 * 60 * 1000); // 10 minutes before
-    const checkInEnd = new Date(startTime.getTime() + 15 * 60 * 1000);  // 15 minutes after
+    const checkInEnd = new Date(startTime.getTime() + releaseTimeMin * 60 * 1000);  // dynamic minutes after
 
     if (now < checkInStart) {
       const err = new Error('Chưa đến giờ check-in (Có thể check-in trước giờ họp 10 phút)');
@@ -405,7 +429,7 @@ const bookingService = {
       throw err;
     }
     if (now > checkInEnd) {
-      const err = new Error('Đã quá thời hạn check-in (Hạn check-in tối đa là 15 phút sau khi cuộc họp bắt đầu)');
+      const err = new Error(`Đã quá thời hạn check-in (Hạn check-in tối đa là ${releaseTimeMin} phút sau khi cuộc họp bắt đầu)`);
       err.statusCode = 400;
       throw err;
     }
@@ -422,6 +446,15 @@ const bookingService = {
    */
   async processCheckInWindows() {
     const now = new Date();
+
+    // Load dynamic system settings
+    let sysSettings;
+    try {
+      sysSettings = await settingsService.getSystemSettings();
+    } catch (err) {
+      logger.error('[CheckInJob] Failed to load system settings:', err.message);
+    }
+    const noShowMin = sysSettings?.noShowReleaseTimeMin ?? 15;
 
     // 1. Send Check-in Reminder (Start of check-in window: startTime - 10 min)
     // Find approved bookings starting in 10 minutes that haven't been notified yet.
@@ -455,10 +488,9 @@ const bookingService = {
       }
     }
 
-    // 2. Send Check-in Warning (5 minutes before expiration: startTime + 10 min)
-    // Warning window: startTime is between now - 15 minutes and now - 10 minutes (meaning 10 to 15 min since startTime).
-    const warningWindowStart = new Date(now.getTime() - 15 * 60 * 1000);
-    const warningWindowEnd = new Date(now.getTime() - 10 * 60 * 1000);
+    // 2. Send Check-in Warning (5 minutes before expiration: startTime + noShowMin - 5 min)
+    const warningWindowStart = new Date(now.getTime() - noShowMin * 60 * 1000);
+    const warningWindowEnd = new Date(now.getTime() - Math.max(0, noShowMin - 5) * 60 * 1000);
     const bookingsForWarning = await prisma.booking.findMany({
       where: {
         status: 'approved',
@@ -487,8 +519,8 @@ const bookingService = {
       }
     }
 
-    // 3. Auto-release/Cancel No-Show bookings (startTime + 15 min)
-    const limitTime = new Date(now.getTime() - 15 * 60 * 1000);
+    // 3. Auto-release/Cancel No-Show bookings (startTime + noShowMin min)
+    const limitTime = new Date(now.getTime() - noShowMin * 60 * 1000);
     const expiredBookings = await prisma.booking.findMany({
       where: {
         status: 'approved',

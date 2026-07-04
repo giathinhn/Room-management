@@ -38,8 +38,10 @@ async function main() {
   await prisma.booking.deleteMany();
   await prisma.recurringBooking.deleteMany();
   await prisma.refreshToken.deleteMany();
+  await prisma.userSettings.deleteMany();
   await prisma.user.deleteMany();
   await prisma.room.deleteMany();
+  await prisma.systemSettings.deleteMany();
 
   // ── Users ──
   console.log('  👤 Creating users...');
@@ -443,6 +445,22 @@ async function main() {
   });
 
   console.log(`  ✅ Created booking templates`);
+
+  // ── System Settings ──
+  console.log('  ⚙️ Creating default system settings...');
+  await prisma.systemSettings.create({
+    data: {
+      id: 1,
+      workHourStart: '07:00',
+      workHourEnd: '22:00',
+      maxBookingDaysAhead: 30,
+      minBookingDurationMin: 30,
+      maxBookingDurationMin: 480,
+      noShowReleaseTimeMin: 15,
+      allowCancelApproved: true,
+    },
+  });
+  console.log('  ✅ Created default system settings');
 
   // ── Summary ──
   console.log('\n🎉 Seed completed successfully!\n');
