@@ -9,6 +9,7 @@ import AppLayout from './components/layout/AppLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import ProfilePage from './pages/ProfilePage';
 import RoomsPage from './pages/RoomsPage';
 import RoomDetailPage from './pages/RoomDetailPage';
 import RoomSearchPage from './pages/RoomSearchPage';
@@ -43,6 +44,7 @@ function App() {
 
             <Route element={<AppLayout />}>
               <Route path="/dashboard"          element={<DashboardPage />} />
+              <Route path="/profile"            element={<ProfilePage />} />
               <Route path="/rooms"              element={<RoomsPage />} />
               <Route path="/rooms/search"       element={<RoomSearchPage />} />
               <Route path="/rooms/:id"          element={<RoomDetailPage />} />

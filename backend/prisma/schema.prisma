@@ -49,6 +49,9 @@ model User {
   fullName     String   @map("full_name") @db.VarChar(100)
   role         Role     @default(user)
   isActive     Boolean  @default(true) @map("is_active")
+  phone        String?  @db.VarChar(20) @map("phone")
+  avatar       String?  @db.VarChar(255) @map("avatar")
+  department   String?  @db.VarChar(100) @map("department")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const userRepository = require('../repositories/user.repository');
 const ApiError = require('../utils/ApiError');
+const prisma = require('../config/database');
 
 const SALT_ROUNDS = 12;
 
@@ -19,13 +20,19 @@ const profileService = {
   },
 
   /**
-   * Update the user's full name.
+   * Update the user's profile.
    * @param {string} userId
-   * @param {string} fullName
+   * @param {object} profileData
    */
-  async updateProfile(userId, { fullName }) {
-    const user = await userRepository.update(userId, { fullName });
-    if (!user) throw ApiError.notFound('User not found');
+  async updateProfile(userId, { fullName, phone, avatar, department }) {
+    const updateData = {};
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (phone !== undefined) updateData.phone = phone;
+    if (avatar !== undefined) updateData.avatar = avatar;
+    if (department !== undefined) updateData.department = department;
+
+    const user = await userRepository.update(userId, updateData);
+    if (!user) throw ApiError.notFound('Không tìm thấy người dùng');
     return user;
   },
 
@@ -50,6 +57,60 @@ const profileService = {
 
     return { message: 'Password changed successfully' };
   },
+
+  /**
+   * Get personal booking statistics and recent history.
+   * @param {string} userId
+   */
+  async getPersonalStats(userId) {
+    const [bookingsCount, bookings] = await Promise.all([
+      // Thống kê đếm số lượng theo trạng thái
+      prisma.booking.groupBy({
+        by: ['status'],
+        where: { userId },
+        _count: true
+      }),
+      // Danh sách 5 booking gần nhất
+      prisma.booking.findMany({
+        where: { userId },
+        orderBy: { startTime: 'desc' },
+        take: 5,
+        include: { room: true }
+      })
+    ]);
+
+    // Tính tổng số giờ họp của các booking đã duyệt (approved)
+    const approvedBookings = await prisma.booking.findMany({
+      where: { userId, status: 'approved' },
+      select: { startTime: true, endTime: true }
+    });
+
+    let totalHours = 0;
+    approvedBookings.forEach(b => {
+      const diffMs = new Date(b.endTime) - new Date(b.startTime);
+      totalHours += diffMs / (1000 * 60 * 60);
+    });
+
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      cancelled: 0,
+      total: 0
+    };
+
+    bookingsCount.forEach(item => {
+      stats[item.status] = item._count;
+      stats.total += item._count;
+    });
+
+    return {
+      stats,
+      totalMeetingHours: Math.round(totalHours * 10) / 10,
+      recentBookings: bookings
+    };
+  }
 };
 
 module.exports = profileService;
+

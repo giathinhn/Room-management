@@ -50,7 +50,11 @@ const updateProfileSchema = z.object({
   fullName: z
     .string()
     .min(2, { message: 'Full name must be at least 2 characters' })
-    .max(100, { message: 'Full name must not exceed 100 characters' }),
+    .max(100, { message: 'Full name must not exceed 100 characters' })
+    .optional(),
+  phone: z.string().max(20).nullable().optional(),
+  department: z.string().max(100).nullable().optional(),
+  avatar: z.string().max(255).nullable().optional(),
 });
 
 module.exports = { registerSchema, loginSchema, changePasswordSchema, updateProfileSchema };

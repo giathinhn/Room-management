@@ -3,6 +3,7 @@ const profileController = require('../controllers/profile.controller');
 const authenticate = require('../middlewares/auth.middleware');
 const validate = require('../middlewares/validate.middleware');
 const { updateProfileSchema, changePasswordSchema } = require('../validators/auth.validator');
+const { uploadAvatar } = require('../middlewares/upload.middleware');
 
 const router = express.Router();
 
@@ -28,5 +29,17 @@ router.put('/', validate(updateProfileSchema), profileController.updateProfile);
  * Body: { currentPassword, newPassword }
  */
 router.put('/password', validate(changePasswordSchema), profileController.changePassword);
+
+/**
+ * POST /api/profile/avatar
+ * Upload a profile avatar.
+ */
+router.post('/avatar', uploadAvatar.single('avatar'), profileController.uploadAvatar);
+
+/**
+ * GET /api/profile/stats
+ * Get personal booking statistics.
+ */
+router.get('/stats', profileController.getStats);
 
 module.exports = router;

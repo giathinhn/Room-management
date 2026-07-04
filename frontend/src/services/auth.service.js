@@ -53,7 +53,7 @@ export const getProfile = async () => {
 
 /**
  * Update user profile
- * @param {{ fullName?: string, avatar?: string }} profileData
+ * @param {{ fullName?: string, phone?: string, department?: string, avatar?: string }} profileData
  */
 export const updateProfile = async (profileData) => {
   const { data } = await api.put('/profile', profileData);
@@ -61,12 +61,35 @@ export const updateProfile = async (profileData) => {
 };
 
 /**
+ * Upload profile avatar
+ * @param {File} file
+ */
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  const { data } = await api.post('/profile/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return data;
+};
+
+/**
+ * Get personal stats
+ */
+export const getPersonalStats = async () => {
+  const { data } = await api.get('/profile/stats');
+  return data;
+};
+
+/**
  * Change password
- * @param {string} oldPassword
+ * @param {string} currentPassword
  * @param {string} newPassword
  */
-export const changePassword = async (oldPassword, newPassword) => {
-  const { data } = await api.put('/profile/password', { oldPassword, newPassword });
+export const changePassword = async (currentPassword, newPassword) => {
+  const { data } = await api.put('/profile/password', { currentPassword, newPassword });
   return data;
 };
 
@@ -77,6 +100,8 @@ const authService = {
   refreshToken,
   getProfile,
   updateProfile,
+  uploadAvatar,
+  getPersonalStats,
   changePassword,
 };
 

@@ -73,7 +73,15 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
             id="header-user-menu"
           >
             <div className="user-avatar">
-              {getInitials(user?.fullName)}
+              {user?.avatar ? (
+                <img
+                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`}
+                  alt="Avatar"
+                  className="avatar-img"
+                />
+              ) : (
+                getInitials(user?.fullName)
+              )}
             </div>
             <div className="user-info">
               <span className="user-info__name">{user?.fullName || 'User'}</span>
@@ -88,7 +96,15 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
             <div className="user-dropdown__menu">
               <div className="user-dropdown__header">
                 <div className="user-avatar user-avatar--lg">
-                  {getInitials(user?.fullName)}
+                  {user?.avatar ? (
+                    <img
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`}
+                      alt="Avatar"
+                      className="avatar-img"
+                    />
+                  ) : (
+                    getInitials(user?.fullName)
+                  )}
                 </div>
                 <div>
                   <p className="user-dropdown__name">{user?.fullName}</p>

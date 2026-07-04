@@ -95,6 +95,15 @@ export const AuthProvider = ({ children }) => {
     toast.success('Đã đăng xuất thành công');
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await authService.getProfile();
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to refresh user data", err);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -105,6 +114,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         setUser,
+        refreshUser,
       }}
     >
       {children}
