@@ -58,20 +58,27 @@ function RoomFilter({ roomId, onChange }) {
           >
             🏢 Tất cả phòng
           </button>
-          {rooms.map((room) => (
-            <button
-              key={room.id}
-              className={`room-filter__option ${roomId === room.id ? 'room-filter__option--active' : ''}`}
-              role="option"
-              aria-selected={roomId === room.id}
-              onClick={() => handleSelect(room.id)}
-            >
-              📍 {room.name}
-              {room.capacity && (
-                <span className="room-filter__capacity">{room.capacity} người</span>
-              )}
-            </button>
-          ))}
+          {(() => {
+            const sorted = [...rooms].sort((a, b) => {
+              if (a.isFavorite && !b.isFavorite) return -1;
+              if (!a.isFavorite && b.isFavorite) return 1;
+              return 0;
+            });
+            return sorted.map((room) => (
+              <button
+                key={room.id}
+                className={`room-filter__option ${roomId === room.id ? 'room-filter__option--active' : ''}`}
+                role="option"
+                aria-selected={roomId === room.id}
+                onClick={() => handleSelect(room.id)}
+              >
+                {room.isFavorite ? '⭐' : '📍'} {room.name}
+                {room.capacity && (
+                  <span className="room-filter__capacity">{room.capacity} người</span>
+                )}
+              </button>
+            ));
+          })()}
         </div>
       )}
 

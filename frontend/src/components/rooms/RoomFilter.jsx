@@ -149,6 +149,19 @@ function RoomFilter({ filters, onChange }) {
           </div>
         )}
       </div>
+
+      {/* Favorite Filter */}
+      <label className="room-filter__fav-toggle" htmlFor="room-fav-filter">
+        <input
+          id="room-fav-filter"
+          type="checkbox"
+          checked={filters.onlyFavorites || false}
+          onChange={(e) => onChange({ ...filters, onlyFavorites: e.target.checked, page: 1 })}
+          className="room-fav-checkbox"
+        />
+        <span className="room-fav-toggle-star">⭐</span>
+        <span className="room-fav-toggle-text">Chỉ xem phòng yêu thích</span>
+      </label>
     </div>
   );
 }

@@ -16,6 +16,8 @@ router.get('/available', authenticate, roomController.findAvailable);
 // ── Standard CRUD ────────────────────────────────────────────────────────────
 router.get('/',    authenticate, roomController.getAll);
 router.get('/:id', authenticate, roomController.getById);
+router.post('/:id/favorite', authenticate, roomController.favoriteRoom);
+router.delete('/:id/favorite', authenticate, roomController.unfavoriteRoom);
 router.post('/',   authenticate, authorize('admin'), roomController.create);
 router.put('/:id/map-position', authenticate, authorize('admin'), roomController.updateMapPosition);
 router.put('/:id',  authenticate, authorize('admin'), roomController.update);

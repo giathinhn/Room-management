@@ -72,7 +72,10 @@ const roomService = {
       filters.isActive = true;
     }
 
-    const result = await roomRepository.findAll(filters);
+    const result = await roomRepository.findAll({
+      ...filters,
+      userId: user?.id,
+    });
     return result;
   },
 
@@ -80,8 +83,8 @@ const roomService = {
    * Get a single room by ID.
    * @param {string} id
    */
-  async getById(id) {
-    const room = await roomRepository.findById(id);
+  async getById(id, user) {
+    const room = await roomRepository.findById(id, user?.id);
     if (!room) {
       throw ApiError.notFound('Room not found');
     }
@@ -210,7 +213,7 @@ const roomService = {
    * Find rooms available during a given time window.
    * @param {object} rawQuery — raw query parameters from request
    */
-  async findAvailable(rawQuery) {
+  async findAvailable(rawQuery, user) {
     const parsed = availableRoomSchema.safeParse(rawQuery);
     if (!parsed.success) {
       throw ApiError.badRequest(parsed.error.errors[0].message);
@@ -221,7 +224,7 @@ const roomService = {
     const rooms = await roomRepository.findAvailable(
       new Date(startTime),
       new Date(endTime),
-      { capacity, equipment, location }
+      { capacity, equipment, location, userId: user?.id }
     );
 
     return rooms;
@@ -232,8 +235,8 @@ const roomService = {
    * @param {string|null} [floor]
    * @param {string|null} [building]
    */
-  async getFloorMap(floor, building) {
-    return roomRepository.findAllWithStatus(floor || undefined, building || undefined);
+  async getFloorMap(floor, building, user) {
+    return roomRepository.findAllWithStatus(floor || undefined, building || undefined, user?.id);
   },
 
   /**
@@ -264,6 +267,32 @@ const roomService = {
       throw ApiError.notFound('Room not found');
     }
     return roomRepository.updateMapPosition(roomId, mapData);
+  },
+
+  /**
+   * Add room to user favorites.
+   * @param {string} userId
+   * @param {string} roomId
+   */
+  async favoriteRoom(userId, roomId) {
+    const room = await roomRepository.findById(roomId);
+    if (!room) {
+      throw ApiError.notFound('Room not found');
+    }
+    return roomRepository.favoriteRoom(userId, roomId);
+  },
+
+  /**
+   * Remove room from user favorites.
+   * @param {string} userId
+   * @param {string} roomId
+   */
+  async unfavoriteRoom(userId, roomId) {
+    const room = await roomRepository.findById(roomId);
+    if (!room) {
+      throw ApiError.notFound('Room not found');
+    }
+    return roomRepository.unfavoriteRoom(userId, roomId);
   },
 };
 

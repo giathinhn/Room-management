@@ -26,7 +26,7 @@ const roomController = {
    */
   async findAvailable(req, res, next) {
     try {
-      const rooms = await roomService.findAvailable(req.query);
+      const rooms = await roomService.findAvailable(req.query, req.user);
       return res.status(200).json({ data: rooms });
     } catch (err) {
       return next(err);
@@ -38,7 +38,7 @@ const roomController = {
    */
   async getById(req, res, next) {
     try {
-      const room = await roomService.getById(req.params.id);
+      const room = await roomService.getById(req.params.id, req.user);
       return res.status(200).json({ data: room });
     } catch (err) {
       return next(err);
@@ -119,7 +119,7 @@ const roomController = {
   async getFloorMap(req, res, next) {
     try {
       const { floor, building } = req.query;
-      const rooms = await roomService.getFloorMap(floor || null, building || null);
+      const rooms = await roomService.getFloorMap(floor || null, building || null, req.user);
       return res.status(200).json({ success: true, data: rooms });
     } catch (err) {
       return next(err);
@@ -142,6 +142,40 @@ const roomController = {
         ...(mapY !== undefined && { mapY: Number(mapY) }),
       });
       return res.status(200).json({ success: true, data: room });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+   * POST /api/rooms/:id/favorite
+   */
+  async favoriteRoom(req, res, next) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      await roomService.favoriteRoom(userId, id);
+      return res.status(200).json({
+        success: true,
+        message: 'Đã thêm phòng họp vào danh sách yêu thích',
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+   * DELETE /api/rooms/:id/favorite
+   */
+  async unfavoriteRoom(req, res, next) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      await roomService.unfavoriteRoom(userId, id);
+      return res.status(200).json({
+        success: true,
+        message: 'Đã xóa phòng họp khỏi danh sách yêu thích',
+      });
     } catch (err) {
       return next(err);
     }

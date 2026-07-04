@@ -33,11 +33,18 @@ function BookingFilter({ rooms = [], filters, onChange, onReset }) {
         onChange={(e) => onChange({ ...filters, roomId: e.target.value, page: 1 })}
       >
         <option value="">📍 Tất cả phòng</option>
-        {rooms.map((r) => (
-          <option key={r.id} value={r.id}>
-            {r.name}
-          </option>
-        ))}
+        {(() => {
+          const sorted = [...rooms].sort((a, b) => {
+            if (a.isFavorite && !b.isFavorite) return -1;
+            if (!a.isFavorite && b.isFavorite) return 1;
+            return 0;
+          });
+          return sorted.map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.isFavorite ? '⭐ ' : ''}{r.name}
+            </option>
+          ));
+        })()}
       </select>
 
       {/* Status dropdown */}

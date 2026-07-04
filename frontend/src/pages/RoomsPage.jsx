@@ -17,6 +17,7 @@ const DEFAULT_FILTERS = {
   search: '',
   capacity: '',
   equipment: [],
+  onlyFavorites: false,
 };
 
 function RoomsPage() {
@@ -72,6 +73,13 @@ function RoomsPage() {
     setFilters((prev) => ({ ...prev, page }));
   }
 
+  // ── Toggle Favorite status locally ───────────────────────────────────────────
+  const handleFavoriteToggle = useCallback((roomId, isFavorite) => {
+    setRooms((prevRooms) =>
+      prevRooms.map((r) => (r.id === roomId ? { ...r, isFavorite } : r))
+    );
+  }, []);
+
   // ── Create / Edit ────────────────────────────────────────────────────────────
   function openCreate() {
     setEditRoom(null);
@@ -122,6 +130,19 @@ function RoomsPage() {
     }
   }
 
+  // ── Filter & Sort Rooms ──────────────────────────────────────────────────────
+  const displayedRooms = (() => {
+    let list = rooms;
+    if (filters.onlyFavorites) {
+      list = list.filter((r) => r.isFavorite);
+    }
+    return [...list].sort((a, b) => {
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      return 0;
+    });
+  })();
+
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="rooms-page">
@@ -154,7 +175,7 @@ function RoomsPage() {
           <div className="spinner" />
           <p>Đang tải danh sách phòng…</p>
         </div>
-      ) : rooms.length === 0 ? (
+      ) : displayedRooms.length === 0 ? (
         <div className="rooms-page__empty">
           <div className="rooms-page__empty-icon">🏚️</div>
           <p>Không tìm thấy phòng nào phù hợp.</p>
@@ -166,7 +187,7 @@ function RoomsPage() {
         </div>
       ) : (
         <div className="rooms-page__grid">
-          {rooms.map((room) => (
+          {displayedRooms.map((room) => (
             <RoomCard
               key={room.id}
               room={room}
@@ -174,6 +195,7 @@ function RoomsPage() {
               onView={(id) => navigate(`/rooms/${id}`)}
               onEdit={openEdit}
               onDelete={openDelete}
+              onFavoriteToggle={handleFavoriteToggle}
             />
           ))}
         </div>

@@ -238,19 +238,28 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
             </div>
           ) : (
             <div className="booking-form__rooms-grid">
-              {availableRooms.map((room) => (
-                <button
-                  key={room.id}
-                  type="button"
-                  id={`room-option-${room.id}`}
-                  className={`booking-form__room-card ${selectedRoomId === room.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedRoomId(room.id)}
-                >
-                  <div className="booking-form__room-name">{room.name}</div>
-                  <div className="booking-form__room-info">
-                    <span>👥 {room.capacity} người</span>
-                    {room.location && <span>📍 {room.location}</span>}
-                  </div>
+              {(() => {
+                const sorted = [...availableRooms].sort((a, b) => {
+                  if (a.isFavorite && !b.isFavorite) return -1;
+                  if (!a.isFavorite && b.isFavorite) return 1;
+                  return 0;
+                });
+                return sorted.map((room) => (
+                  <button
+                    key={room.id}
+                    type="button"
+                    id={`room-option-${room.id}`}
+                    className={`booking-form__room-card ${selectedRoomId === room.id ? 'selected' : ''}`}
+                    onClick={() => setSelectedRoomId(room.id)}
+                  >
+                    <div className="booking-form__room-name">
+                      {room.isFavorite && <span style={{ marginRight: '4px', color: '#fbbf24' }}>⭐</span>}
+                      {room.name}
+                    </div>
+                    <div className="booking-form__room-info">
+                      <span>👥 {room.capacity} người</span>
+                      {room.location && <span>📍 {room.location}</span>}
+                    </div>
                   {room.equipment && room.equipment.length > 0 && (
                     <div className="booking-form__room-tags">
                       {room.equipment.slice(0, 3).map((eq) => (
@@ -265,8 +274,9 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
                     <div className="booking-form__room-check">✓</div>
                   )}
                 </button>
-              ))}
-            </div>
+              ));
+            })()}
+          </div>
           )}
           {errors.room && <p className="booking-form__error">{errors.room}</p>}
         </div>

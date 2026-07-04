@@ -79,6 +79,24 @@ const roomService = {
     const { data } = await api.get(`/rooms/available?${searchParams.toString()}`);
     return data;
   },
+
+  /**
+   * Favorite a room.
+   * @param {string} roomId
+   */
+  async favoriteRoom(roomId) {
+    const { data } = await api.post(`/rooms/${roomId}/favorite`);
+    return data;
+  },
+
+  /**
+   * Unfavorite a room.
+   * @param {string} roomId
+   */
+  async unfavoriteRoom(roomId) {
+    const { data } = await api.delete(`/rooms/${roomId}/favorite`);
+    return data;
+  },
 };
 
 export default roomService;

@@ -8,7 +8,7 @@ const roomRepository = {
    * Get all rooms with pagination and filtering.
    * @param {{ page?: number, limit?: number, capacity?: number, location?: string, equipment?: string[], search?: string, isActive?: boolean }} filters
    */
-  async findAll({ page = 1, limit = 10, capacity, location, equipment, search, isActive } = {}) {
+  async findAll({ page = 1, limit = 10, capacity, location, equipment, search, isActive, userId } = {}) {
     const where = {};
 
     if (typeof isActive === 'boolean') {
@@ -43,12 +43,24 @@ const roomRepository = {
         skip,
         take: limit,
         orderBy: { name: 'asc' },
+        include: userId ? {
+          favoritedBy: {
+            where: { id: userId },
+            select: { id: true }
+          }
+        } : undefined,
       }),
       prisma.room.count({ where }),
     ]);
 
+    const mappedRooms = rooms.map((room) => {
+      const isFavorite = userId ? (room.favoritedBy && room.favoritedBy.length > 0) : false;
+      const { favoritedBy, ...rest } = room;
+      return { ...rest, isFavorite };
+    });
+
     return {
-      rooms,
+      rooms: mappedRooms,
       pagination: {
         total,
         page,
@@ -61,9 +73,24 @@ const roomRepository = {
   /**
    * Find a single room by ID.
    * @param {string} id
+   * @param {string} [userId]
    */
-  async findById(id) {
-    return prisma.room.findUnique({ where: { id } });
+  async findById(id, userId) {
+    const room = await prisma.room.findUnique({
+      where: { id },
+      include: userId ? {
+        favoritedBy: {
+          where: { id: userId },
+          select: { id: true },
+        },
+      } : undefined,
+    });
+
+    if (!room) return null;
+
+    const isFavorite = userId ? (room.favoritedBy && room.favoritedBy.length > 0) : false;
+    const { favoritedBy, ...rest } = room;
+    return { ...rest, isFavorite };
   },
 
   /**
@@ -115,7 +142,7 @@ const roomRepository = {
    * @param {Date} endTime
    * @param {{ capacity?: number, equipment?: string[], location?: string }} filters
    */
-  async findAvailable(startTime, endTime, { capacity, equipment, location } = {}) {
+  async findAvailable(startTime, endTime, { capacity, equipment, location, userId } = {}) {
     const where = {
       isActive: true,
       // Exclude rooms that have overlapping bookings
@@ -140,9 +167,21 @@ const roomRepository = {
       where.location = { contains: location, mode: 'insensitive' };
     }
 
-    return prisma.room.findMany({
+    const rooms = await prisma.room.findMany({
       where,
+      include: userId ? {
+        favoritedBy: {
+          where: { id: userId },
+          select: { id: true },
+        },
+      } : undefined,
       orderBy: { capacity: 'asc' },
+    });
+
+    return rooms.map((room) => {
+      const isFavorite = userId ? (room.favoritedBy && room.favoritedBy.length > 0) : false;
+      const { favoritedBy, ...rest } = room;
+      return { ...rest, isFavorite };
     });
   },
 
@@ -152,7 +191,7 @@ const roomRepository = {
    * @param {string} [floor] — filter by floor (optional)
    * @param {string} [building] — filter by building (optional)
    */
-  async findAllWithStatus(floor, building) {
+  async findAllWithStatus(floor, building, userId) {
     const now = new Date();
     const next30min = new Date(now.getTime() + 30 * 60 * 1000);
 
@@ -180,6 +219,10 @@ const roomRepository = {
             },
           },
         },
+        favoritedBy: userId ? {
+          where: { id: userId },
+          select: { id: true },
+        } : undefined,
       },
       // Sort by grid position so rooms appear in natural order
       orderBy: [{ mapY: 'asc' }, { mapX: 'asc' }, { name: 'asc' }],
@@ -197,6 +240,9 @@ const roomRepository = {
       if (currentBooking) status = 'in_use';
       else if (nextBooking) status = 'upcoming';
 
+      const isFavorite = userId ? (room.favoritedBy && room.favoritedBy.length > 0) : false;
+      const { favoritedBy, ...rest } = room;
+
       return {
         id: room.id,
         name: room.name,
@@ -210,6 +256,7 @@ const roomRepository = {
         status,
         currentBooking,
         nextBooking,
+        isFavorite,
       };
     });
   },
@@ -281,6 +328,38 @@ const roomRepository = {
     return prisma.room.update({
       where: { id },
       data: mapData,
+    });
+  },
+
+  /**
+   * Add a room to user's favorites.
+   * @param {string} userId
+   * @param {string} roomId
+   */
+  async favoriteRoom(userId, roomId) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        favoriteRooms: {
+          connect: { id: roomId },
+        },
+      },
+    });
+  },
+
+  /**
+   * Remove a room from user's favorites.
+   * @param {string} userId
+   * @param {string} roomId
+   */
+  async unfavoriteRoom(userId, roomId) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        favoriteRooms: {
+          disconnect: { id: roomId },
+        },
+      },
     });
   },
 };

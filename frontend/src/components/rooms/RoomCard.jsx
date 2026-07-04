@@ -1,3 +1,8 @@
+import { useState, useEffect } from 'react';
+import { FiStar } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import roomService from '../../services/room.service';
+
 const EQUIPMENT_ICONS = {
   'Máy chiếu': '📽️',
   'Micro': '🎤',
@@ -19,8 +24,36 @@ export { EQUIPMENT_ICONS };
  *   onDelete {Function} Called when admin clicks Delete (optional)
  *   onView   {Function} Called when user clicks View detail
  *   isAdmin  {boolean}  Show admin controls
+ *   onFavoriteToggle {Function} Called when favorite status changes (optional)
  */
-function RoomCard({ room, onEdit, onDelete, onView, isAdmin }) {
+function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle }) {
+  const [isFavorite, setIsFavorite] = useState(room.isFavorite || false);
+
+  useEffect(() => {
+    setIsFavorite(room.isFavorite || false);
+  }, [room.isFavorite]);
+
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation();
+    const newStatus = !isFavorite;
+    setIsFavorite(newStatus);
+    try {
+      if (newStatus) {
+        await roomService.favoriteRoom(room.id);
+        toast.success(`Đã thêm "${room.name}" vào danh sách yêu thích`);
+      } else {
+        await roomService.unfavoriteRoom(room.id);
+        toast.success(`Đã xóa "${room.name}" khỏi danh sách yêu thích`);
+      }
+      if (onFavoriteToggle) {
+        onFavoriteToggle(room.id, newStatus);
+      }
+    } catch (err) {
+      setIsFavorite(!newStatus);
+      toast.error('Không thể cập nhật trạng thái yêu thích');
+    }
+  };
+
   return (
     <article className="room-card" id={`room-card-${room.id}`}>
       {/* Status badge */}
@@ -29,7 +62,17 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin }) {
       )}
 
       <div className="room-card__header">
-        <h3 className="room-card__name">{room.name}</h3>
+        <div className="room-card__name-wrapper">
+          <button
+            type="button"
+            className={`room-card__favorite-btn ${isFavorite ? 'room-card__favorite-btn--active' : ''}`}
+            onClick={handleFavoriteClick}
+            title={isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+          >
+            <FiStar fill={isFavorite ? '#fbbf24' : 'none'} />
+          </button>
+          <h3 className="room-card__name">{room.name}</h3>
+        </div>
         <div className="room-card__capacity-badge">
           <span className="room-card__capacity-icon">👥</span>
           <span>{room.capacity} người</span>

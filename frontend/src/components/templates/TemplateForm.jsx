@@ -153,11 +153,18 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
               disabled={roomsLoading}
             >
               <option value="">-- Không chọn phòng --</option>
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.name} ({room.location})
-                </option>
-              ))}
+              {(() => {
+                const sorted = [...rooms].sort((a, b) => {
+                  if (a.isFavorite && !b.isFavorite) return -1;
+                  if (!a.isFavorite && b.isFavorite) return 1;
+                  return 0;
+                });
+                return sorted.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.isFavorite ? '⭐ ' : ''}{room.name} ({room.location})
+                  </option>
+                ));
+              })()}
             </select>
           </div>
 

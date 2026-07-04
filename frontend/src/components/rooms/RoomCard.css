@@ -128,3 +128,31 @@
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   flex-wrap: wrap;
 }
+
+.room-card__name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.room-card__favorite-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.room-card__favorite-btn:hover {
+  transform: scale(1.2);
+  color: #fbbf24;
+}
+
+.room-card__favorite-btn--active {
+  color: #fbbf24 !important;
+}
