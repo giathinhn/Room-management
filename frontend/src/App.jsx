@@ -20,6 +20,8 @@ import NotificationsPage from './pages/NotificationsPage';
 import TemplatesPage from './pages/TemplatesPage';
 import UsersPage from './pages/UsersPage';
 import FloorMapPage from './pages/FloorMapPage';
+import QuickBookPage from './pages/QuickBookPage';
+import RoomQRPrintPage from './pages/RoomQRPrintPage';
 
 import './App.css';
 
@@ -34,6 +36,9 @@ function App() {
 
           {/* ── Protected routes (all authenticated users) ────────── */}
           <Route element={<ProtectedRoute />}>
+            <Route path="/rooms/:id/quick-book" element={<QuickBookPage />} />
+            <Route path="/rooms/:id/qr"         element={<RoomQRPrintPage />} />
+
             <Route element={<AppLayout />}>
               <Route path="/dashboard"          element={<DashboardPage />} />
               <Route path="/rooms"              element={<RoomsPage />} />

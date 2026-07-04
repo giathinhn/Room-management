@@ -21,7 +21,8 @@ const ProtectedRoute = ({ allowedRoles }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    const currentPath = window.location.pathname + window.location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(currentPath)}`} replace />;
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {

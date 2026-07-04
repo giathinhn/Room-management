@@ -6,6 +6,8 @@ import roomService from '../services/room.service';
 import RoomForm from '../components/rooms/RoomForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import { EQUIPMENT_ICONS } from '../components/rooms/RoomCard';
+import RoomQRModal from '../components/rooms/RoomQRModal';
+import { BsQrCode } from 'react-icons/bs';
 import '../components/rooms/RoomCard.css';
 import './RoomDetailPage.css';
 
@@ -25,6 +27,9 @@ function RoomDetailPage() {
   // Delete dialog
   const [deleteOpen,    setDeleteOpen]    = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // QR modal
+  const [qrOpen, setQrOpen] = useState(false);
 
   // Fetch room
   useEffect(() => {
@@ -85,13 +90,24 @@ function RoomDetailPage() {
     <div className="room-detail-page">
       {/* Top bar */}
       <div className="room-detail__topbar">
-        <button
-          id="room-detail-back-btn"
-          className="btn btn--ghost btn--sm"
-          onClick={() => navigate('/rooms')}
-        >
-          ← Quay lại
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            id="room-detail-back-btn"
+            className="btn btn--ghost btn--sm"
+            onClick={() => navigate('/rooms')}
+          >
+            ← Quay lại
+          </button>
+          <button
+            id="room-detail-qr-btn"
+            className="btn btn--ghost btn--sm"
+            onClick={() => setQrOpen(true)}
+            title="Xem mã QR đặt phòng"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <BsQrCode /> Mã QR
+          </button>
+        </div>
 
         {isAdmin && (
           <div className="room-detail__admin-actions">
@@ -198,6 +214,15 @@ function RoomDetailPage() {
         confirmLabel="Vô hiệu hóa"
         isLoading={deleteLoading}
       />
+
+      {/* QR Modal */}
+      {qrOpen && (
+        <RoomQRModal
+          isOpen={qrOpen}
+          onClose={() => setQrOpen(false)}
+          room={room}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,297 @@
+.quick-book-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background-color: #0f172a;
+}
+
+.quick-book-page__loading {
+  min-height: 100vh;
+  background-color: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quick-book-card {
+  width: 100%;
+  max-width: 480px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.quick-book-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.quick-book-room-name {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.quick-book-room-location {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+}
+
+.quick-book-room-meta {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.quick-book-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  background: #334155;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+}
+
+/* Status Cards */
+.quick-book-status-card {
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-badge-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+.status-description {
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Available (Green) */
+.status-available {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #a7f3d0;
+}
+
+.status-available .status-badge-wrapper {
+  color: #34d399;
+}
+
+/* Soon Busy (Orange) */
+.status-soon-busy {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+}
+
+.status-soon-busy .status-badge-wrapper {
+  color: #fbbf24;
+}
+
+.animate-pulse {
+  animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+/* Busy (Red) */
+.status-busy {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #fecaca;
+}
+
+.status-busy .status-badge-wrapper {
+  color: #f87171;
+}
+
+.status-countdown {
+  font-size: 0.9rem;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.countdown-timer {
+  font-family: monospace;
+  font-weight: 700;
+}
+
+/* Forms & Inputs */
+.quick-book-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.duration-buttons {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.duration-btn {
+  flex: 1;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background: #334155;
+  color: #e2e8f0;
+  border: 1px solid #475569;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.duration-btn:hover:not(.disabled) {
+  background: #475569;
+  border-color: #64748b;
+  transform: translateY(-1px);
+}
+
+.duration-btn.active {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #818cf8;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.duration-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #1e293b;
+  color: #475569;
+  border-color: #334155;
+}
+
+/* Time customization toggle */
+.time-toggle-wrapper {
+  margin-top: 0.5rem;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-container input {
+  cursor: pointer;
+  accent-color: #6366f1;
+  width: 16px;
+  height: 16px;
+}
+
+.checkbox-label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* Custom time fields block */
+.custom-time-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px dashed #334155;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Submit & Cancel Actions */
+.quick-book-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn-submit-quick-book {
+  width: 100%;
+}
+
+.btn-cancel-quick-book {
+  width: 100%;
+}
+
+/* Room Busy fallback block */
+.quick-book-busy-msg {
+  text-align: center;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quick-book-busy-msg p {
+  color: #f87171;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.quick-book-busy-msg .btn {
+  width: 100%;
+}

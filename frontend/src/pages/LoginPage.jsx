@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiMail, FiLock, FiLogIn } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import Input from '../components/common/Input';
@@ -9,6 +9,7 @@ import './LoginPage.css';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
 
   const [form, setForm] = useState({ email: '', password: '' });
@@ -47,7 +48,8 @@ const LoginPage = () => {
     try {
       await login(form.email, form.password);
       toast.success('Đăng nhập thành công! Chào mừng trở lại 👋');
-      navigate('/dashboard', { replace: true });
+      const redirectPath = searchParams.get('redirect') || '/dashboard';
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       const msg =
         err?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';

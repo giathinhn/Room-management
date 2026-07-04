@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { FiStar } from 'react-icons/fi';
+import { BsQrCode } from 'react-icons/bs';
 import toast from 'react-hot-toast';
 import roomService from '../../services/room.service';
+import RoomQRModal from './RoomQRModal';
 
 const EQUIPMENT_ICONS = {
   'Máy chiếu': '📽️',
@@ -28,6 +30,7 @@ export { EQUIPMENT_ICONS };
  */
 function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle }) {
   const [isFavorite, setIsFavorite] = useState(room.isFavorite || false);
+  const [qrOpen, setQrOpen] = useState(false);
 
   useEffect(() => {
     setIsFavorite(room.isFavorite || false);
@@ -108,6 +111,19 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
           Xem chi tiết
         </button>
 
+        <button
+          type="button"
+          className="btn btn--sm btn--ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+            setQrOpen(true);
+          }}
+          title="Xem mã QR của phòng này"
+          style={{ padding: '0.4rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}
+        >
+          <BsQrCode />
+        </button>
+
         {isAdmin && (
           <>
             <button
@@ -127,6 +143,10 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
           </>
         )}
       </div>
+
+      {qrOpen && (
+        <RoomQRModal isOpen={qrOpen} onClose={() => setQrOpen(false)} room={room} />
+      )}
     </article>
   );
 }

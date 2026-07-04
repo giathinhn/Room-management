@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BUSINESS_HOUR_START = 7;   // 07:00
 const BUSINESS_HOUR_END = 22;    // 22:00
-const MIN_DURATION_MS = 30 * 60 * 1000;       // 30 minutes
+const MIN_DURATION_MS = 15 * 60 * 1000;       // 15 minutes
 const MAX_DURATION_MS = 8 * 60 * 60 * 1000;   // 8 hours
 const MAX_ADVANCE_DAYS = 30;
 const PAST_TOLERANCE_MS = 5 * 60 * 1000;       // 5 minutes grace period
@@ -54,10 +54,10 @@ const bookingService = {
       throw err;
     }
 
-    // 4. Minimum duration: 30 minutes
+    // 4. Minimum duration: 15 minutes
     const durationMs = endTime - startTime;
     if (durationMs < MIN_DURATION_MS) {
-      const err = new Error('Minimum duration is 30 minutes');
+      const err = new Error('Minimum duration is 15 minutes');
       err.statusCode = 400;
       throw err;
     }

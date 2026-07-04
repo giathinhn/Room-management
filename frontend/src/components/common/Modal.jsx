@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './Modal.css';
 
 /**
- * Reusable modal overlay component.
+ * Reusable modal overlay component using React Portals.
  *
  * Props:
  *   isOpen    {boolean}   Whether the modal is visible
@@ -38,7 +39,7 @@ function Modal({ isOpen, onClose, title, children }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className="modal-backdrop"
       role="dialog"
@@ -64,7 +65,8 @@ function Modal({ isOpen, onClose, title, children }) {
 
         <div className="modal-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

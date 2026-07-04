@@ -109,4 +109,4 @@ frontend/
 - [X] Quét mã QR dẫn đúng tới URL `/rooms/:roomId/quick-book`.
 - [X] Nếu người dùng chưa đăng nhập, quét QR sẽ dẫn họ đi đăng nhập rồi quay trở lại đúng trang đặt phòng nhanh đó.
 - [X] Trang đặt phòng nhanh hiển thị chính xác trạng thái thực tế của phòng tại thời điểm quét.
-- [X] Tạo đặt phòng nhanh hoạt động đúng thời gian hiện tại và thời lượng đã chọn, tự động kiểm tra trùng lịch (ví dụ không cho đặt vượt quá thời gian bắt đầu của ca họp tiếp theo).
+- [X] Tạo đặt phòng nhanh hoạt động đúng thời gian hiện tại (mặc định) nhưng người dùng vẫn có thể sửa thời gian đặt và thời gian kết thúc do người dùng chọn, tự động kiểm tra trùng lịch (ví dụ không cho đặt vượt quá thời gian bắt đầu của ca họp tiếp theo), kiểm tra sức chứa,....

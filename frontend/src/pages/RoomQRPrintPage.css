@@ -1,0 +1,240 @@
+/* ─── Screen View (Dark Theme) ────────────────────────────────────────────── */
+.qr-print-page {
+  min-height: 100vh;
+  background-color: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+}
+
+.qr-print-page__loading,
+.qr-print-page__error {
+  min-height: 100vh;
+  background-color: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.qr-print-page__toolbar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 600px;
+  justify-content: space-between;
+}
+
+.qr-print-page__toolbar .btn {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.qr-print-page__toolbar .btn--primary {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+.qr-print-page__toolbar .btn--primary:hover {
+  background-color: #4f46e5;
+}
+
+.qr-print-page__toolbar .btn--outline {
+  background-color: transparent;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+.qr-print-page__toolbar .btn--outline:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+}
+
+/* Poster layout */
+.qr-print-page__poster {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid #334155;
+}
+
+.qr-print-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.qr-print-page__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.qr-print-page__logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #f8fafc;
+}
+
+.qr-print-page__title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.qr-print-page__location {
+  font-size: 1.125rem;
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+.qr-print-page__qr-container {
+  margin-bottom: 2.5rem;
+  display: inline-flex;
+  justify-content: center;
+  background: white;
+  padding: 1.25rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.qr-print-page__instructions {
+  background-color: #0f172a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  margin-bottom: 2.5rem;
+  text-align: left;
+  border: 1px solid #334155;
+}
+
+.qr-print-page__instructions h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.qr-print-page__instructions ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.qr-print-page__instructions li {
+  margin-bottom: 0.5rem;
+}
+
+.qr-print-page__instructions li:last-child {
+  margin-bottom: 0;
+}
+
+.qr-print-page__footer {
+  width: 100%;
+}
+
+.qr-print-page__url {
+  font-family: monospace;
+  font-size: 0.825rem;
+  color: #6366f1;
+  word-break: break-all;
+  margin-bottom: 0.5rem;
+}
+
+.qr-print-page__copyright {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ─── Print Styles ────────────────────────────────────────────────────────── */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .qr-print-page {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    min-height: auto;
+    padding: 0;
+  }
+
+  .qr-print-page__toolbar {
+    display: none !important; /* Hide button menu when printing */
+  }
+
+  .qr-print-page__poster {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 2cm 1cm !important;
+    max-width: 100% !important;
+    height: 100%;
+    page-break-inside: avoid;
+  }
+
+  .qr-print-page__logo-text {
+    color: #000000 !important;
+  }
+
+  .qr-print-page__title {
+    color: #000000 !important;
+    font-size: 3rem !important;
+  }
+
+  .qr-print-page__location {
+    color: #4b5563 !important;
+    font-size: 1.5rem !important;
+  }
+
+  .qr-print-page__instructions {
+    background-color: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+  }
+
+  .qr-print-page__instructions h2 {
+    color: #312e81 !important;
+  }
+
+  .qr-print-page__instructions ol {
+    color: #1f2937 !important;
+    font-size: 1rem !important;
+  }
+
+  .qr-print-page__url {
+    color: #4f46e5 !important;
+    font-size: 1rem !important;
+  }
+
+  .qr-print-page__copyright {
+    color: #4b5563 !important;
+    font-size: 0.85rem !important;
+  }
+}
