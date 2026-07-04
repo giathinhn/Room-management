@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: rgba(15, 15, 26, 0.85);
+  background: var(--header-bg, rgba(15, 15, 26, 0.85));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
@@ -79,7 +79,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #0f0f1a;
+  border: 2px solid var(--color-bg);
 }
 
 /* ── User avatar ─────────────────────────────────────────────────────────── */
@@ -218,7 +218,7 @@
 }
 
 .user-dropdown__item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--sidebar-hover-bg, rgba(255, 255, 255, 0.05));
   color: var(--color-text-primary);
 }
 

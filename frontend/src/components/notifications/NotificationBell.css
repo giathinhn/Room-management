@@ -12,24 +12,24 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(241, 245, 249, 0.7);
+  border: 1px solid var(--color-border);
+  background: var(--color-input-bg);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
 }
 
 .notif-bell__btn:hover {
-  background: rgba(124, 58, 237, 0.15);
-  border-color: rgba(124, 58, 237, 0.3);
-  color: #a78bfa;
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
   transform: scale(1.05);
 }
 
 .notif-bell__btn--active {
-  background: rgba(124, 58, 237, 0.2);
-  border-color: rgba(124, 58, 237, 0.4);
-  color: #c4b5fd;
+  background: rgba(99, 102, 241, 0.12);
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .notif-bell__icon {
@@ -54,7 +54,7 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  border: 2px solid #0f172a;
+  border: 2px solid var(--color-bg-card);
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
   z-index: 1;
 }

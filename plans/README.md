@@ -30,7 +30,9 @@ Plan 01: Auth Backend (JWT, Roles)
     │        ├──▶ Plan 18: Dark Mode ──────────────┤
     │        ├──▶ Plan 19: Favorite Rooms ─────────┤
     │        ├──▶ Plan 20: QR Code Booking ────────┤
-    │        └──▶ Plan 21: Auto-release (No-Show) ─┘
+    │        ├──▶ Plan 21: Auto-release (No-Show) ─┤
+    │        ├──▶ Plan 22: Personal Profile ───────┤
+    │        └──▶ Plan 23: Settings Management ────┘
     │
     ├──▶ Plan 14: i18n (nên làm sau khi UI ổn định)
     │
@@ -67,6 +69,8 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 | [Plan 19](plan-19-favorite-rooms.md)      | ⭐ Phòng họp yêu thích (Favorite/Pinned Rooms) |     2–3h     |
 | [Plan 20](plan-20-qr-code-booking.md)      | 📱 Mã QR Đặt phòng nhanh (Quick Booking QR)   |     2–3h     |
 | [Plan 21](plan-21-auto-release-no-show.md) | ⏳ Tự động giải phóng phòng (Auto-release)     |     2–3h     |
+| [Plan 22](plan-22-personal-profile.md)    | 👤 Hồ sơ cá nhân (avatar, mật khẩu, thống kê) |     2–3h     |
+| [Plan 23](plan-23-settings.md)            | ⚙️ Cài đặt (nhận thông báo, Admin config)     |     2–3h     |
 
 ## Nên làm sau khi UI ổn định
 
@@ -82,7 +86,7 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 
 ---
 
-## Tổng thời lượng ước tính: **38.5–56 giờ**
+## Tổng thời lượng ước tính: **42.5–62 giờ**
 
 ## Tổng quan tính năng mới (Plan 10–21)
 
@@ -100,6 +104,8 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 | 19   | Favorite Rooms         | Phòng họp yêu thích (Favorite) tự động ghim lên đầu danh sách |
 | 20   | QR Code Booking        | Sinh mã QR in ấn & Trang đặt phòng nhanh trên Mobile `/quick-book` |
 | 21   | Auto-release           | Tự động hủy đặt phòng sau 15 phút nếu người dùng không Check-in      |
+| 22   | Personal Profile       | Thống kê đặt phòng, đổi mật khẩu, upload avatar bằng multer           |
+| 23   | Settings Management    | Lưu cấu hình nhận thông báo (email/in-app), cấu hình hệ thống Admin  |
 
 ## Database mới & Thay đổi Database
 
@@ -111,6 +117,9 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 | `chat_messages`       | Plan 16 | Lưu lịch sử hội thoại của AI Chatbot                         |
 | `rooms` (cập nhật)    | Plan 17 | Thêm `floor`, `mapX`, `mapY`, `mapWidth`, `mapHeight`        |
 | `_UserFavoriteRooms`  | Plan 19 | Bảng liên kết nhiều-nhiều lưu vết phòng yêu thích của User   |
+| `users` (cập nhật)    | Plan 22 | Thêm `phone`, `avatar`, `department`                        |
+| `user_settings`       | Plan 23 | Bảng lưu cấu hình cá nhân (ngôn ngữ, theme, thông báo)      |
+| `system_settings`     | Plan 23 | Bảng cấu hình vận hành hệ thống của Admin (work hours,...)   |
 
 ---
 
@@ -119,7 +128,7 @@ Plan 09: Swagger & Docker (làm cuối cùng)
 1. **Mỗi plan = 1 session**: Mỗi plan được thiết kế để hoàn thành trong 1 session code. Bắt đầu session, mở file plan, code theo checklist.
 2. **Copy checklist vào prompt**: Khi bắt đầu code với AI, copy nội dung file plan tương ứng vào prompt. Plan đã chứa đủ: file structure, function signatures, validation rules, error cases.
 3. **Tiêu chí hoàn thành**: Mỗi plan có checklist cuối — kiểm tra trước khi chuyển sang plan tiếp theo.
-4. **Plan 05–13 & 15–21 độc lập**: Sau Plan 04, bạn có thể làm các plan này theo thứ tự tùy thích, hoặc song song nếu nhiều người.
+4. **Plan 05–13 & 15–23 độc lập**: Sau Plan 04, bạn có thể làm các plan này theo thứ tự tùy thích, hoặc song song nếu nhiều người.
 5. **Plan 14 nên làm cuối**: i18n cần dịch tất cả text, nên làm khi UI đã ổn định để tránh dịch lại.
 6. **Chạy test sau mỗi plan**: Sau mỗi plan, test thủ công các tiêu chí hoàn thành trước khi tiếp tục.
 7. **Gợi ý thứ tự hay cho features mới**:
@@ -135,4 +144,5 @@ Plan 09: Swagger & Docker (làm cuối cùng)
    - Plan 13 (Templates) → productivity feature
    - Plan 15 (User Management) → quản lý người dùng
    - Plan 16 (AI Chatbot) → tăng tiện ích trải nghiệm người dùng
+   - Plan 22 (Personal Profile) & Plan 23 (Settings) → Nên làm sau các tính năng cốt lõi để đồng bộ cài đặt nhận thông báo và tùy chọn cá nhân
    - Plan 14 (i18n) → cuối cùng vì touch mọi file

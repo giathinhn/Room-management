@@ -31,7 +31,7 @@
 .fmp__title {
   font-size: 26px;
   font-weight: 800;
-  color: #f1f5f9;
+  color: var(--color-text-primary);
   margin: 0;
   display: flex;
   align-items: center;
@@ -45,7 +45,7 @@
 
 .fmp__subtitle {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -79,8 +79,8 @@
   align-items: stretch;
   gap: 16px;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   flex-shrink: 0;
 }
@@ -92,7 +92,7 @@
   gap: 20px;
   flex-wrap: wrap;
   width: 100%;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-border);
   padding-top: 12px;
 }
 
@@ -131,7 +131,7 @@
 
 .fmp__refresh-text {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-text-muted);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -140,9 +140,9 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--color-border);
+  background: var(--color-input-bg);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 13px;
   transition: all 0.2s ease;
@@ -175,7 +175,7 @@
   align-items: center;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--color-border);
   transition: transform 0.2s;
 }
 
@@ -184,7 +184,7 @@
 }
 
 .fmp__stat--total {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-bg-card);
 }
 
 .fmp__stat--available {
@@ -209,15 +209,15 @@
   margin-bottom: 4px;
 }
 
-.fmp__stat--total .fmp__stat-value { color: #f1f5f9; }
-.fmp__stat--available .fmp__stat-value { color: #4ade80; }
-.fmp__stat--in-use .fmp__stat-value { color: #f87171; }
-.fmp__stat--upcoming .fmp__stat-value { color: #fbbf24; }
+.fmp__stat--total .fmp__stat-value { color: var(--color-text-primary); }
+.fmp__stat--available .fmp__stat-value { color: #10b981; }
+.fmp__stat--in-use .fmp__stat-value { color: #ef4444; }
+.fmp__stat--upcoming .fmp__stat-value { color: #f59e0b; }
 
 .fmp__stat-label {
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -319,14 +319,14 @@
   flex: 1;
   min-height: 480px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border);
   overflow: hidden;
 }
 
 .fmp__canvas--map {
   position: relative;
-  background: linear-gradient(135deg, #0b0b1e 0%, #111130 100%);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background: var(--map-canvas-bg);
+  box-shadow: var(--shadow-md);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: 150px;
@@ -423,9 +423,9 @@
   align-items: center;
   gap: 6px;
   padding: 11px 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.85);
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-secondary);
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -435,9 +435,9 @@
 }
 
 .fmp__edit-mode-btn:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: rgba(99, 102, 241, 0.35);
-  color: #fff;
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--color-primary-light);
+  color: var(--color-primary-light);
 }
 
 .fmp__edit-mode-btn--active {
@@ -454,9 +454,9 @@
 
 /* ── Grid Placeholder (Edit mode empty cells) ────────────────────────────── */
 .fmp__grid-placeholder {
-  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border: 2px dashed var(--color-border);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--color-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -467,13 +467,13 @@
 }
 
 .fmp__grid-placeholder:hover {
-  border-color: rgba(99, 102, 241, 0.4);
+  border-color: var(--color-primary-light);
   background: rgba(99, 102, 241, 0.04);
 }
 
 .fmp__grid-placeholder .placeholder-icon {
   font-size: 24px;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--color-text-muted);
   font-weight: 300;
   transition: all 0.2s ease;
 }

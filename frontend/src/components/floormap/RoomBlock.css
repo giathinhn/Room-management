@@ -18,11 +18,11 @@
 .room-block:hover {
   transform: scale(1.04) translateZ(0);
   z-index: 20;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .room-block:focus-visible {
-  outline: 3px solid #6366f1;
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -40,37 +40,37 @@
 .room-block--available {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.06));
   border-color: rgba(34, 197, 94, 0.35);
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.1), inset 0 1px 0 rgba(34, 197, 94, 0.2);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.05), inset 0 1px 0 rgba(34, 197, 94, 0.1);
 }
 
 .room-block--available:hover {
   border-color: rgba(34, 197, 94, 0.6);
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
-  box-shadow: 0 12px 40px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 12px 40px rgba(34, 197, 94, 0.18);
 }
 
 .room-block--in-use {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.07));
   border-color: rgba(239, 68, 68, 0.4);
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.15);
 }
 
 .room-block--in-use:hover {
   border-color: rgba(239, 68, 68, 0.65);
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(239, 68, 68, 0.12));
-  box-shadow: 0 12px 40px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 12px 40px rgba(239, 68, 68, 0.22);
 }
 
 .room-block--upcoming {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.07));
   border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12), inset 0 1px 0 rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08), inset 0 1px 0 rgba(245, 158, 11, 0.12);
 }
 
 .room-block--upcoming:hover {
   border-color: rgba(245, 158, 11, 0.65);
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.12));
-  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.28);
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.2);
 }
 
 /* ── Pulse indicator (in_use) ─────────────────────────────────────────────── */
@@ -94,7 +94,7 @@
 .room-block__name {
   font-size: 12px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-primary);
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -110,7 +110,7 @@
 
 .room-block__capacity {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
@@ -136,19 +136,19 @@
 }
 
 .room-block__badge--available {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: var(--color-approved-bg);
+  color: var(--color-approved-text);
+  border: 1px solid var(--color-border);
 }
 
 .room-block__badge--available .room-block__badge-dot {
-  background: #22c55e;
+  background: #10b981;
 }
 
 .room-block__badge--in-use {
-  background: rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--color-rejected-bg);
+  color: var(--color-rejected-text);
+  border: 1px solid var(--color-border);
 }
 
 .room-block__badge--in-use .room-block__badge-dot {
@@ -157,9 +157,9 @@
 }
 
 .room-block__badge--upcoming {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: var(--color-pending-bg);
+  color: var(--color-pending-text);
+  border: 1px solid var(--color-border);
 }
 
 .room-block__badge--upcoming .room-block__badge-dot {
@@ -173,7 +173,7 @@
 
 .room-block__booking-title {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -181,6 +181,6 @@
 
 .room-block__booking-time {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-muted);
   font-weight: 500;
 }

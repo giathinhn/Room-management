@@ -5,25 +5,25 @@
 :root {
   /* Colors */
   --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #4f46e5;
-  --color-secondary: #06b6d4;
-  --color-accent: #f59e0b;
+  --color-primary-light: #4f46e5;
+  --color-primary-dark: #3730a3;
+  --color-secondary: #0891b2;
+  --color-accent: #d97706;
 
   /* Backgrounds */
-  --color-bg: #0f0f1a;
-  --color-bg-secondary: #161627;
-  --color-bg-card: #1e1e35;
-  --color-bg-card-hover: #252540;
+  --color-bg: #f8fafc;
+  --color-bg-secondary: #f1f5f9;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f1f5f9;
 
   /* Text */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
 
   /* Borders */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.16);
+  --color-border: rgba(15, 23, 42, 0.08);
+  --color-border-hover: rgba(15, 23, 42, 0.16);
 
   /* Status Colors */
   --color-success: #10b981;
@@ -32,14 +32,22 @@
   --color-info: #06b6d4;
 
   /* Status Badges */
-  --color-pending-bg: rgba(245, 158, 11, 0.15);
-  --color-pending-text: #f59e0b;
-  --color-approved-bg: rgba(16, 185, 129, 0.15);
-  --color-approved-text: #10b981;
-  --color-rejected-bg: rgba(239, 68, 68, 0.15);
-  --color-rejected-text: #ef4444;
-  --color-cancelled-bg: rgba(100, 116, 139, 0.15);
-  --color-cancelled-text: #94a3b8;
+  --color-pending-bg: rgba(245, 158, 11, 0.1);
+  --color-pending-text: #b45309;
+  --color-approved-bg: rgba(16, 185, 129, 0.1);
+  --color-approved-text: #047857;
+  --color-rejected-bg: rgba(239, 68, 68, 0.1);
+  --color-rejected-text: #b91c1c;
+  --color-cancelled-bg: rgba(100, 116, 139, 0.1);
+  --color-cancelled-text: #475569;
+
+  /* Dynamic inputs & hover states */
+  --color-input-bg: #ffffff;
+  --color-input-bg-focus: rgba(99, 102, 241, 0.04);
+  --color-input-hover-bg: rgba(15, 23, 42, 0.04);
+  --sidebar-hover-bg: rgba(15, 23, 42, 0.05);
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --map-canvas-bg: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -104,6 +112,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+}
+
+/* Global transitions for smooth theme switching */
+body,
+.app-layout,
+.app-layout__body,
+.sidebar,
+.header,
+.glass-card,
+.btn,
+.btn--secondary,
+.form-input,
+.input-field {
+  transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
 }
 
 #root {
@@ -426,14 +448,14 @@ a:hover {
 .form-input {
   width: 100%;
   padding: 0.65rem 0.9rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   color: var(--color-text-primary);
   font-family: var(--font-family);
   font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
 }
 
 .form-input::placeholder {
@@ -441,8 +463,9 @@ a:hover {
 }
 
 .form-input:focus {
-  border-color: rgba(99, 102, 241, 0.6);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  border-color: var(--color-primary);
+  background: var(--color-input-bg-focus);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
 }
 
 .form-input--error {
@@ -581,5 +604,48 @@ a:hover {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Dark Mode overrides ─────────────────────────────────────────────────── */
+html.dark {
+  /* Colors */
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-primary-dark: #4f46e5;
+  --color-secondary: #06b6d4;
+  --color-accent: #f59e0b;
+
+  /* Backgrounds */
+  --color-bg: #0f0f1a;
+  --color-bg-secondary: #161627;
+  --color-bg-card: #1e1e35;
+  --color-bg-card-hover: #252540;
+
+  /* Text */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.16);
+
+  /* Status Badges */
+  --color-pending-bg: rgba(245, 158, 11, 0.15);
+  --color-pending-text: #f59e0b;
+  --color-approved-bg: rgba(16, 185, 129, 0.15);
+  --color-approved-text: #10b981;
+  --color-rejected-bg: rgba(239, 68, 68, 0.15);
+  --color-rejected-text: #ef4444;
+  --color-cancelled-bg: rgba(100, 116, 139, 0.15);
+  --color-cancelled-text: #94a3b8;
+
+  /* Dynamic inputs & hover states */
+  --color-input-bg: rgba(255, 255, 255, 0.04);
+  --color-input-bg-focus: rgba(99, 102, 241, 0.06);
+  --color-input-hover-bg: rgba(255, 255, 255, 0.06);
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+  --header-bg: rgba(15, 15, 26, 0.85);
+  --map-canvas-bg: linear-gradient(135deg, #0b0b1e 0%, #111130 100%);
 }
 

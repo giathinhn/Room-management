@@ -12,6 +12,7 @@ import {
   FiMap,
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import './Sidebar.css';
 
 const NAV_ITEMS = [
@@ -120,15 +121,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
         </ul>
       </nav>
 
-      {/* User role badge at bottom */}
-      {isOpen && (
-        <div className="sidebar__footer">
+      {/* User role badge & Theme toggle at bottom */}
+      <div className="sidebar__footer">
+        <div style={{ marginBottom: isOpen ? '12px' : '0' }}>
+          <ThemeToggle collapsed={!isOpen} />
+        </div>
+        {isOpen && (
           <div className="sidebar__role-badge">
             <span className="sidebar__role-dot" />
             <span>{role === 'admin' ? 'Quản trị viên' : role === 'approver' ? 'Người duyệt' : 'Nhân viên'}</span>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 };

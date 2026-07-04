@@ -36,13 +36,13 @@
 .notifications-page__title {
   font-size: 22px;
   font-weight: 800;
-  color: #f1f5f9;
+  color: var(--color-text-primary);
   margin: 0 0 4px;
 }
 
 .notifications-page__subtitle {
   font-size: 13px;
-  color: rgba(241, 245, 249, 0.5);
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -151,32 +151,33 @@
 
 .notifications-page__item-title {
   font-size: 14px;
-  font-weight: 700;
-  color: #f1f5f9;
+  font-weight: 600;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .notifications-page__item--unread .notifications-page__item-title {
-  color: #fff;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .notifications-page__item-time {
   font-size: 12px;
-  color: rgba(241, 245, 249, 0.35);
+  color: var(--color-text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .notifications-page__item-message {
   font-size: 13px;
-  color: rgba(241, 245, 249, 0.6);
+  color: var(--color-text-secondary);
   margin: 0 0 6px;
   line-height: 1.5;
 }
 
 .notifications-page__item-room {
   font-size: 12px;
-  color: rgba(167, 139, 250, 0.8);
+  color: var(--color-primary-light);
   font-weight: 500;
 }
 

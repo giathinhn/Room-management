@@ -114,7 +114,7 @@
 
 .sidebar__nav-link:hover {
   color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--sidebar-hover-bg, rgba(255, 255, 255, 0.05));
 }
 
 .sidebar__nav-link--active {
@@ -148,6 +148,11 @@
 .sidebar__footer {
   padding: 12px 16px;
   border-top: 1px solid var(--color-border);
+  transition: padding var(--transition-base);
+}
+
+.sidebar--collapsed .sidebar__footer {
+  padding: 12px 8px;
 }
 
 .sidebar__role-badge {
