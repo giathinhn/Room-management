@@ -95,10 +95,10 @@ async function main() {
   // Tầng 1
   const room1 = await prisma.room.create({
     data: {
-      name: 'Hoi truong Diamond',
+      name: 'Hội trường Diamond',
       capacity: 30,
-      location: 'Tang 1, Toa A',
-      equipment: ['May chieu laser', 'He thong am thanh', 'Micro khong day', 'Video conference', 'Dieu hoa trung tam', 'Bang trang dien tu'],
+      location: 'Tầng 1, Tòa A',
+      equipment: ['Máy chiếu laser', 'Hệ thống âm thanh', 'Micro không dây', 'Video conference', 'Điều hòa trung tâm', 'Bảng trắng điện tử'],
       isActive: true,
       floor: '1', building: 'A', mapX: 0, mapY: 0,
     },
@@ -106,10 +106,10 @@ async function main() {
 
   const room1b = await prisma.room.create({
     data: {
-      name: 'Phong hoi Jade',
+      name: 'Phòng hội Jade',
       capacity: 10,
-      location: 'Tang 1, Toa A',
-      equipment: ['May chieu', 'Bang trang', 'Dieu hoa'],
+      location: 'Tầng 1, Tòa A',
+      equipment: ['Máy chiếu', 'Bảng trắng', 'Điều hòa'],
       isActive: true,
       floor: '1', building: 'A', mapX: 1, mapY: 0,
     },
@@ -118,10 +118,10 @@ async function main() {
   // Tầng 2
   const room2 = await prisma.room.create({
     data: {
-      name: 'Phong hop Emerald',
+      name: 'Phòng họp Emerald',
       capacity: 6,
-      location: 'Tang 2, Toa A',
-      equipment: ['May chieu', 'Bang trang', 'TV 55"', 'Dieu hoa'],
+      location: 'Tầng 2, Tòa A',
+      equipment: ['Máy chiếu', 'Bảng trắng', 'TV 55"', 'Điều hòa'],
       isActive: true,
       floor: '2', building: 'A', mapX: 0, mapY: 0,
     },
@@ -129,10 +129,10 @@ async function main() {
 
   const room3 = await prisma.room.create({
     data: {
-      name: 'Phong hop Ruby',
+      name: 'Phòng họp Ruby',
       capacity: 4,
-      location: 'Tang 2, Toa A',
-      equipment: ['TV 43"', 'Bang trang', 'Dieu hoa'],
+      location: 'Tầng 2, Tòa A',
+      equipment: ['TV 43"', 'Bảng trắng', 'Điều hòa'],
       isActive: true,
       floor: '2', building: 'A', mapX: 1, mapY: 0,
     },
@@ -140,10 +140,10 @@ async function main() {
 
   const room4 = await prisma.room.create({
     data: {
-      name: 'Phong hop Topaz',
+      name: 'Phòng họp Topaz',
       capacity: 8,
-      location: 'Tang 2, Toa A',
-      equipment: ['May chieu', 'Webcam', 'Dieu hoa', 'Bang trang'],
+      location: 'Tầng 2, Tòa A',
+      equipment: ['Máy chiếu', 'Webcam', 'Điều hòa', 'Bảng trắng'],
       isActive: true,
       floor: '2', building: 'A', mapX: 2, mapY: 0,
     },
@@ -152,10 +152,10 @@ async function main() {
   // Tầng 3
   const room5 = await prisma.room.create({
     data: {
-      name: 'Phong hop Sapphire',
+      name: 'Phòng họp Sapphire',
       capacity: 12,
-      location: 'Tang 3, Toa A',
-      equipment: ['May chieu 4K', 'Video conference', 'Bang trang', 'Dieu hoa', 'Mini bar'],
+      location: 'Tầng 3, Tòa A',
+      equipment: ['Máy chiếu 4K', 'Video conference', 'Bảng trắng', 'Điều hòa', 'Mini bar'],
       isActive: true,
       floor: '3', building: 'A', mapX: 0, mapY: 0,
     },
@@ -163,10 +163,10 @@ async function main() {
 
   const room6 = await prisma.room.create({
     data: {
-      name: 'Phong hop Opal',
+      name: 'Phòng họp Opal',
       capacity: 6,
-      location: 'Tang 3, Toa A',
-      equipment: ['TV 55"', 'Webcam', 'Dieu hoa'],
+      location: 'Tầng 3, Tòa A',
+      equipment: ['TV 55"', 'Webcam', 'Điều hòa'],
       isActive: true,
       floor: '3', building: 'A', mapX: 1, mapY: 0,
     },
@@ -174,10 +174,10 @@ async function main() {
 
   const room7 = await prisma.room.create({
     data: {
-      name: 'Phong thao luan Amber',
+      name: 'Phòng thảo luận Amber',
       capacity: 4,
-      location: 'Tang 3, Toa A',
-      equipment: ['TV 43"', 'Bang trang', 'Dieu hoa'],
+      location: 'Tầng 3, Tòa A',
+      equipment: ['TV 43"', 'Bảng trắng', 'Điều hòa'],
       isActive: true,
       floor: '3', building: 'A', mapX: 2, mapY: 0,
     },
@@ -186,10 +186,10 @@ async function main() {
   // Tầng 4
   const room8 = await prisma.room.create({
     data: {
-      name: 'Phong brainstorm Pearl',
+      name: 'Phòng brainstorm Pearl',
       capacity: 8,
-      location: 'Tang 4, Toa A',
-      equipment: ['Bang trang lon', 'Post-it boards', 'TV 65"', 'Dieu hoa', 'Ghe bean bag'],
+      location: 'Tầng 4, Tòa A',
+      equipment: ['Bảng trắng lớn', 'Post-it boards', 'TV 65"', 'Điều hòa', 'Ghế bean bag'],
       isActive: true,
       floor: '4', building: 'A', mapX: 0, mapY: 0,
     },
@@ -198,10 +198,10 @@ async function main() {
   // Tòa B
   const room9 = await prisma.room.create({
     data: {
-      name: 'Phong hop Coral',
+      name: 'Phòng họp Coral',
       capacity: 6,
-      location: 'Tang 1, Toa B',
-      equipment: ['TV 43"', 'Bang trang', 'Dieu hoa'],
+      location: 'Tầng 1, Tòa B',
+      equipment: ['TV 43"', 'Bảng trắng', 'Điều hòa'],
       isActive: true,
       floor: '1', building: 'B', mapX: 0, mapY: 0,
     },
@@ -209,10 +209,10 @@ async function main() {
 
   const room10 = await prisma.room.create({
     data: {
-      name: 'Phong hop Slate',
+      name: 'Phòng họp Slate',
       capacity: 8,
-      location: 'Tang 2, Toa B',
-      equipment: ['May chieu', 'Webcam', 'Dieu hoa'],
+      location: 'Tầng 2, Tòa B',
+      equipment: ['Máy chiếu', 'Webcam', 'Điều hòa'],
       isActive: true,
       floor: '2', building: 'B', mapX: 0, mapY: 0,
     },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { translateRoom } from '../../utils/roomTranslate';
 import './AvailableRoomCard.css';
 
 /**
@@ -11,8 +12,9 @@ import './AvailableRoomCard.css';
  *   searchParams: { startTime?: string, endTime?: string },
  * }} props
  */
-function AvailableRoomCard({ room, searchParams = {} }) {
+function AvailableRoomCard({ room: rawRoom, searchParams = {} }) {
   const { t } = useTranslation();
+  const room = translateRoom(rawRoom, t);
   const navigate = useNavigate();
 
   const handleBooking = () => {

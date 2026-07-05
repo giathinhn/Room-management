@@ -48,6 +48,10 @@
   --sidebar-hover-bg: rgba(15, 23, 42, 0.05);
   --header-bg: rgba(255, 255, 255, 0.85);
   --map-canvas-bg: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --calendar-picker-filter: none;
+  --fc-button-text: var(--color-primary-light);
+  --fc-button-bg: rgba(99, 102, 241, 0.08);
+  --fc-button-hover-bg: rgba(99, 102, 241, 0.15);
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -647,5 +651,9 @@ html.dark {
   --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
   --header-bg: rgba(15, 15, 26, 0.85);
   --map-canvas-bg: linear-gradient(135deg, #0b0b1e 0%, #111130 100%);
+  --calendar-picker-filter: invert(0.7);
+  --fc-button-text: #f1f5f9;
+  --fc-button-bg: rgba(99, 102, 241, 0.15);
+  --fc-button-hover-bg: rgba(99, 102, 241, 0.3);
 }
 

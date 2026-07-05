@@ -1012,5 +1012,50 @@
       "bookRoomTomorrow": "Book a room for 5 people tomorrow at 9 AM",
       "myBookingsToday": "What meetings do I have scheduled for today?"
     }
+  },
+  "roomsData": {
+    "names": {
+      "Hoi truong Diamond": "Diamond Hall",
+      "Phong hoi Jade": "Jade Conference Room",
+      "Phong hop Emerald": "Emerald Meeting Room",
+      "Phong hop Ruby": "Ruby Meeting Room",
+      "Phong hop Topaz": "Topaz Meeting Room",
+      "Phong hop Sapphire": "Sapphire Meeting Room",
+      "Phong hop Opal": "Opal Meeting Room",
+      "Phong thao luan Amber": "Amber Discussion Room",
+      "Phong brainstorm Pearl": "Pearl Brainstorm Room",
+      "Phong hop Coral": "Coral Meeting Room",
+      "Phong hop Slate": "Slate Meeting Room",
+      "Phòng họp Sapphire": "Sapphire Meeting Room"
+    },
+    "locations": {
+      "Tang 1, Toa A": "1st Floor, Building A",
+      "Tang 2, Toa A": "2nd Floor, Building A",
+      "Tang 3, Toa A": "3rd Floor, Building A",
+      "Tang 4, Toa A": "4th Floor, Building A",
+      "Tang 1, Toa B": "1st Floor, Building B",
+      "Tang 2, Toa B": "2nd Floor, Building B",
+      "Tang 3, Toa A, Thiet bi: ...": "3rd Floor, Building A"
+    },
+    "equipment": {
+      "May chieu laser": "Laser Projector",
+      "He thong am thanh": "Sound System",
+      "Micro khong day": "Wireless Mic",
+      "Video conference": "Video Conference",
+      "Dieu hoa trung tam": "Central AC",
+      "Bang trang dien tu": "Electronic Whiteboard",
+      "May chieu": "Projector",
+      "Bang trang": "Whiteboard",
+      "Dieu hoa": "Air Conditioner",
+      "TV 55\"": "55\" TV",
+      "TV 43\"": "43\" TV",
+      "TV 65\"": "65\" TV",
+      "Webcam": "Webcam",
+      "Loa": "Speaker",
+      "Mini bar": "Mini Bar",
+      "Bang trang lon": "Large Whiteboard",
+      "Post-it boards": "Post-it Boards",
+      "Ghe bean bag": "Bean Bag Chairs"
+    }
   }
 }

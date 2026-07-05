@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import roomService from '../../services/room.service';
 import RoomQRModal from './RoomQRModal';
+import { translateRoom } from '../../utils/roomTranslate';
 
 const EQUIPMENT_ICONS = {
   'Máy chiếu': '📽️',
@@ -29,8 +30,9 @@ export { EQUIPMENT_ICONS };
  *   isAdmin  {boolean}  Show admin controls
  *   onFavoriteToggle {Function} Called when favorite status changes (optional)
  */
-function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle }) {
+function RoomCard({ room: rawRoom, onEdit, onDelete, onView, isAdmin, onFavoriteToggle }) {
   const { t } = useTranslation();
+  const room = translateRoom(rawRoom, t);
   const [isFavorite, setIsFavorite] = useState(room.isFavorite || false);
   const [qrOpen, setQrOpen] = useState(false);
 

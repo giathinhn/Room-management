@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
 import DateTimePicker from '../common/DateTimePicker';
 import ConflictAlert from './ConflictAlert';
+import { translateRoom } from '../../utils/roomTranslate';
 import './BookingForm.css';
 
 /**
@@ -122,7 +123,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
   const canSearch = date && startTime && endTime && (new Date(startISO) < new Date(endISO));
 
   // Find Room info
-  const selectedRoom = availableRooms.find((r) => r.id === selectedRoomId);
+  const selectedRoom = translateRoom(availableRooms.find((r) => r.id === selectedRoomId), t);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const loadAvailableRooms = useCallback(async () => {
@@ -306,37 +307,40 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
                   if (!a.isFavorite && b.isFavorite) return 1;
                   return 0;
                 });
-                return sorted.map((room) => (
-                  <button
-                    key={room.id}
-                    type="button"
-                    id={`room-option-${room.id}`}
-                    className={`booking-form__room-card ${selectedRoomId === room.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedRoomId(room.id)}
-                  >
-                    <div className="booking-form__room-name">
-                      {room.isFavorite && <span style={{ marginRight: '4px', color: '#fbbf24' }}>⭐</span>}
-                      {room.name}
-                    </div>
-                    <div className="booking-form__room-info">
-                      <span>👥 {room.capacity} {t('rooms.capacityUnit')}</span>
-                      {room.location && <span>📍 {room.location}</span>}
-                    </div>
-                  {room.equipment && room.equipment.length > 0 && (
-                    <div className="booking-form__room-tags">
-                      {room.equipment.slice(0, 3).map((eq) => (
-                        <span key={eq} className="booking-form__room-tag">{eq}</span>
-                      ))}
-                      {room.equipment.length > 3 && (
-                        <span className="booking-form__room-tag">+{room.equipment.length - 3}</span>
+                return sorted.map((rawRoom) => {
+                  const room = translateRoom(rawRoom, t);
+                  return (
+                    <button
+                      key={room.id}
+                      type="button"
+                      id={`room-option-${room.id}`}
+                      className={`booking-form__room-card ${selectedRoomId === room.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedRoomId(room.id)}
+                    >
+                      <div className="booking-form__room-name">
+                        {room.isFavorite && <span style={{ marginRight: '4px', color: '#fbbf24' }}>⭐</span>}
+                        {room.name}
+                      </div>
+                      <div className="booking-form__room-info">
+                        <span>👥 {room.capacity} {t('rooms.capacityUnit')}</span>
+                        {room.location && <span>📍 {room.location}</span>}
+                      </div>
+                      {room.equipment && room.equipment.length > 0 && (
+                        <div className="booking-form__room-tags">
+                          {room.equipment.slice(0, 3).map((eq) => (
+                            <span key={eq} className="booking-form__room-tag">{eq}</span>
+                          ))}
+                          {room.equipment.length > 3 && (
+                            <span className="booking-form__room-tag">+{room.equipment.length - 3}</span>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  )}
-                  {selectedRoomId === room.id && (
-                    <div className="booking-form__room-check">✓</div>
-                  )}
-                </button>
-              ));
+                      {selectedRoomId === room.id && (
+                        <div className="booking-form__room-check">✓</div>
+                      )}
+                    </button>
+                  );
+                });
             })()}
           </div>
           )}

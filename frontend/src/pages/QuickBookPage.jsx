@@ -8,6 +8,7 @@ import Input from '../components/common/Input';
 import toast from 'react-hot-toast';
 import { FiClock, FiUsers, FiLayers, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { translateRoom } from '../utils/roomTranslate';
 import './QuickBookPage.css';
 
 function QuickBookPage() {
@@ -16,7 +17,8 @@ function QuickBookPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [room, setRoom] = useState(null);
+  const [rawRoom, setRoom] = useState(null);
+  const room = translateRoom(rawRoom, t);
   const [todayBookings, setTodayBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

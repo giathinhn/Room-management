@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { translateRoom } from '../../utils/roomTranslate';
 import './TemplateCard.css';
 
 /**
@@ -25,6 +26,7 @@ function formatTime(timeStr, locale) {
 function TemplateCard({ template, onUse, onEdit, onDelete }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+  const room = translateRoom(template.room, t);
 
   const timeRange = `${formatTime(template.startTime, locale)} – ${formatTime(template.endTime, locale)}`;
 
@@ -38,8 +40,8 @@ function TemplateCard({ template, onUse, onEdit, onDelete }) {
 
       {/* Meta */}
       <div className="tpl-card__meta">
-        {template.room ? (
-          <span className="tpl-card__room">📍 {template.room.name}</span>
+        {room ? (
+          <span className="tpl-card__room">📍 {room.name}</span>
         ) : (
           <span className="tpl-card__room tpl-card__room--none">📍 {t('templates.noRoomSelected')}</span>
         )}

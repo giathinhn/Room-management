@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { translateRoom } from '../../utils/roomTranslate';
 import './RoomQuickViewModal.css';
 
 const formatTime = (isoString, locale) => {
@@ -29,8 +30,9 @@ const EQUIPMENT_ICONS = {
   'Điều hòa': '❄️',
 };
 
-const RoomQuickViewModal = ({ room, onClose }) => {
+const RoomQuickViewModal = ({ room: rawRoom, onClose }) => {
   const { t, i18n } = useTranslation();
+  const room = translateRoom(rawRoom, t);
   const navigate = useNavigate();
   
   const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';

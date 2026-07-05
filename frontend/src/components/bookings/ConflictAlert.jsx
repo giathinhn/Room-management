@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import suggestionService from '../../services/suggestion.service';
+import { translateRoom } from '../../utils/roomTranslate';
 import './ConflictAlert.css';
 
 /**
@@ -150,39 +151,42 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
             <div className="conflict-alert__loading">{t('comments.loading')}</div>
           ) : (
             <div className="conflict-alert__alt-rooms">
-              {altRooms.map((room) => (
-                <div
-                  key={room.id}
-                  className={`conflict-alert__room-card ${room.score >= 10 ? 'conflict-alert__room-card--highlight' : ''}`}
-                >
-                  <div className="conflict-alert__room-info">
-                    <div className="conflict-alert__room-name">
-                      {room.score >= 10 ? '✨ ' : ''}{room.name}
-                    </div>
-                    <div className="conflict-alert__room-meta">
-                      {room.location} · {room.capacity} {t('rooms.capacityUnit')}
-                    </div>
-                    {room.equipment && room.equipment.length > 0 && (
-                      <div className="conflict-alert__room-equipment">
-                        {room.equipment.map((eq) => (
-                          <span key={eq} className="conflict-alert__equip-tag">
-                            {equipmentIcons[eq] || '🔧'} {equipmentLabel[eq] || eq}
-                          </span>
-                        ))}
+              {altRooms.map((rawRoom) => {
+                const room = translateRoom(rawRoom, t);
+                return (
+                  <div
+                    key={room.id}
+                    className={`conflict-alert__room-card ${room.score >= 10 ? 'conflict-alert__room-card--highlight' : ''}`}
+                  >
+                    <div className="conflict-alert__room-info">
+                      <div className="conflict-alert__room-name">
+                        {room.score >= 10 ? '✨ ' : ''}{room.name}
                       </div>
+                      <div className="conflict-alert__room-meta">
+                        {room.location} · {room.capacity} {t('rooms.capacityUnit')}
+                      </div>
+                      {room.equipment && room.equipment.length > 0 && (
+                        <div className="conflict-alert__room-equipment">
+                          {room.equipment.map((eq) => (
+                            <span key={eq} className="conflict-alert__equip-tag">
+                              {equipmentIcons[eq] || '🔧'} {equipmentLabel[eq] || eq}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {onSelectRoom && (
+                      <button
+                        id={`suggest-room-${room.id}`}
+                        className="conflict-alert__select-btn"
+                        onClick={() => onSelectRoom(room)}
+                      >
+                        {t('bookings.selectBtn')} →
+                      </button>
                     )}
                   </div>
-                  {onSelectRoom && (
-                    <button
-                      id={`suggest-room-${room.id}`}
-                      className="conflict-alert__select-btn"
-                      onClick={() => onSelectRoom(room)}
-                    >
-                      {t('bookings.selectBtn')} →
-                    </button>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

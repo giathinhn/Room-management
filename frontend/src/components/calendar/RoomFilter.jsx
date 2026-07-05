@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FiFilter, FiChevronDown } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
+import { translateRoom } from '../../utils/roomTranslate';
 
 /**
  * RoomFilter — dropdown to filter calendar events by room.
@@ -28,7 +29,7 @@ function RoomFilter({ roomId, onChange }) {
     fetchRooms();
   }, []);
 
-  const selectedRoom = rooms.find((r) => r.id === roomId);
+  const selectedRoom = translateRoom(rooms.find((r) => r.id === roomId), t);
   const label = selectedRoom ? selectedRoom.name : t('calendar.allRooms');
 
   const handleSelect = (id) => {
@@ -66,20 +67,23 @@ function RoomFilter({ roomId, onChange }) {
                if (!a.isFavorite && b.isFavorite) return 1;
                return 0;
             });
-            return sorted.map((room) => (
-              <button
-                key={room.id}
-                className={`room-filter__option ${roomId === room.id ? 'room-filter__option--active' : ''}`}
-                role="option"
-                aria-selected={roomId === room.id}
-                onClick={() => handleSelect(room.id)}
-              >
-                {room.isFavorite ? '⭐' : '📍'} {room.name}
-                {room.capacity && (
-                  <span className="room-filter__capacity">{room.capacity} {t('rooms.capacityUnit')}</span>
-                )}
-              </button>
-            ));
+            return sorted.map((rawRoom) => {
+              const room = translateRoom(rawRoom, t);
+              return (
+                <button
+                  key={room.id}
+                  className={`room-filter__option ${roomId === room.id ? 'room-filter__option--active' : ''}`}
+                  role="option"
+                  aria-selected={roomId === room.id}
+                  onClick={() => handleSelect(room.id)}
+                >
+                  {room.isFavorite ? '⭐' : '📍'} {room.name}
+                  {room.capacity && (
+                    <span className="room-filter__capacity">{room.capacity} {t('rooms.capacityUnit')}</span>
+                  )}
+                </button>
+              );
+            });
           })()}
         </div>
       )}

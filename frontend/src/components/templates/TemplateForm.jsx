@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
+import { translateRoom } from '../../utils/roomTranslate';
 import './TemplateForm.css';
 
 /**
@@ -161,11 +162,14 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
                   if (!a.isFavorite && b.isFavorite) return 1;
                   return 0;
                 });
-                return sorted.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.isFavorite ? '⭐ ' : ''}{room.name} ({room.location})
-                  </option>
-                ));
+                return sorted.map((rawRoom) => {
+                  const room = translateRoom(rawRoom, t);
+                  return (
+                    <option key={room.id} value={room.id}>
+                      {room.isFavorite ? '⭐ ' : ''}{room.name} ({room.location})
+                    </option>
+                  );
+                });
               })()}
             </select>
           </div>

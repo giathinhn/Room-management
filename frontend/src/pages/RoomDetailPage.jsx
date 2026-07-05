@@ -7,6 +7,7 @@ import RoomForm from '../components/rooms/RoomForm';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import { EQUIPMENT_ICONS } from '../components/rooms/RoomCard';
 import RoomQRModal from '../components/rooms/RoomQRModal';
+import { translateRoom } from '../utils/roomTranslate';
 import { BsQrCode } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
 import '../components/rooms/RoomCard.css';
@@ -19,7 +20,8 @@ function RoomDetailPage() {
   const { user }  = useAuth();
   const isAdmin   = user?.role === 'admin';
 
-  const [room,    setRoom]    = useState(null);
+  const [rawRoom, setRoom] = useState(null);
+  const room = translateRoom(rawRoom, t);
   const [loading, setLoading] = useState(true);
 
   const equipmentLabel = {

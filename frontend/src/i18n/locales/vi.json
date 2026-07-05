@@ -1006,5 +1006,50 @@
       "bookRoomTomorrow": "Đặt phòng cho 5 người ngày mai lúc 9h",
       "myBookingsToday": "Tôi có lịch họp gì hôm nay?"
     }
+  },
+  "roomsData": {
+    "names": {
+      "Hoi truong Diamond": "Hội trường Diamond",
+      "Phong hoi Jade": "Phòng hội Jade",
+      "Phong hop Emerald": "Phòng họp Emerald",
+      "Phong hop Ruby": "Phòng họp Ruby",
+      "Phong hop Topaz": "Phòng họp Topaz",
+      "Phong hop Sapphire": "Phòng họp Sapphire",
+      "Phong hop Opal": "Phòng họp Opal",
+      "Phong thao luan Amber": "Phòng thảo luận Amber",
+      "Phong brainstorm Pearl": "Phòng brainstorm Pearl",
+      "Phong hop Coral": "Phòng họp Coral",
+      "Phong hop Slate": "Phòng họp Slate",
+      "Phòng họp Sapphire": "Phòng họp Sapphire"
+    },
+    "locations": {
+      "Tang 1, Toa A": "Tầng 1, Tòa A",
+      "Tang 2, Toa A": "Tầng 2, Tòa A",
+      "Tang 3, Toa A": "Tầng 3, Tòa A",
+      "Tang 4, Toa A": "Tầng 4, Tòa A",
+      "Tang 1, Toa B": "Tầng 1, Tòa B",
+      "Tang 2, Toa B": "Tầng 2, Tòa B",
+      "Tang 3, Toa A, Thiet bi: ...": "Tầng 3, Tòa A"
+    },
+    "equipment": {
+      "May chieu laser": "Máy chiếu laser",
+      "He thong am thanh": "Hệ thống âm thanh",
+      "Micro khong day": "Micro không dây",
+      "Video conference": "Hội nghị truyền hình",
+      "Dieu hoa trung tam": "Điều hòa trung tâm",
+      "Bang trang dien tu": "Bảng trắng điện tử",
+      "May chieu": "Máy chiếu",
+      "Bang trang": "Bảng trắng",
+      "Dieu hoa": "Điều hòa",
+      "TV 55\"": "TV 55\"",
+      "TV 43\"": "TV 43\"",
+      "TV 65\"": "TV 65\"",
+      "Webcam": "Webcam",
+      "Loa": "Loa",
+      "Mini bar": "Mini bar",
+      "Bang trang lon": "Bảng trắng lớn",
+      "Post-it boards": "Bảng Post-it",
+      "Ghe bean bag": "Ghế lười bean bag"
+    }
   }
 }
