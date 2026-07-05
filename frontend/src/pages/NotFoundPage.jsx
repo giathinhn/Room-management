@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { FiHome, FiArrowLeft } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './NotFoundPage.css';
 
 const NotFoundPage = () => {
+  const { t } = useTranslation();
   return (
     <div className="notfound-page">
       <div className="notfound-bg">
@@ -12,22 +14,21 @@ const NotFoundPage = () => {
 
       <div className="notfound-content animate-fade-in-up">
         <div className="notfound-code">404</div>
-        <h1 className="notfound-title">Trang không tìm thấy</h1>
+        <h1 className="notfound-title">{t('notFound.title')}</h1>
         <p className="notfound-desc">
-          Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
-          Hãy quay lại trang chủ nhé!
+          {t('notFound.desc')}
         </p>
 
         <div className="notfound-actions">
           <Link to="/dashboard" className="btn btn--primary btn--md" id="notfound-home-btn">
-            <FiHome /> Về trang chủ
+            <FiHome /> {t('notFound.backHome')}
           </Link>
           <button
             className="btn btn--ghost btn--md"
             onClick={() => window.history.back()}
             id="notfound-back-btn"
           >
-            <FiArrowLeft /> Quay lại
+            <FiArrowLeft /> {t('notFound.back')}
           </button>
         </div>
       </div>

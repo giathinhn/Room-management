@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import bookingService from '../../services/booking.service';
 import StatusBadge from '../common/StatusBadge';
 import RecurringBadge from './RecurringBadge';
@@ -8,13 +9,13 @@ import './BookingCard.css';
 /**
  * Format a date range string like "20/06 09:00 – 10:30"
  */
-function formatDateRange(startTime, endTime) {
+function formatDateRange(startTime, endTime, locale) {
   const start = new Date(startTime);
   const end = new Date(endTime);
 
-  const date = start.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-  const startStr = start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-  const endStr = end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const date = start.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+  const startStr = start.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  const endStr = end.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
   return `${date} • ${startStr} – ${endStr}`;
 }
@@ -22,14 +23,18 @@ function formatDateRange(startTime, endTime) {
 /**
  * Calculate human-readable duration.
  */
-function formatDuration(startTime, endTime) {
+function formatDuration(startTime, endTime, t, language) {
   const diffMs = new Date(endTime) - new Date(startTime);
   const totalMins = Math.round(diffMs / 60000);
   const h = Math.floor(totalMins / 60);
   const m = totalMins % 60;
-  if (h > 0 && m > 0) return `${h}h${m}p`;
-  if (h > 0) return `${h} giờ`;
-  return `${m} phút`;
+  
+  const hLabel = 'h';
+  const mLabel = language === 'en' ? 'm' : 'p';
+
+  if (h > 0 && m > 0) return `${h}${hLabel} ${m}${mLabel}`;
+  if (h > 0) return `${h} ${h > 1 ? t('common.hours') : t('common.hour')}`;
+  return `${m} ${m > 1 ? t('common.minutes') : t('common.minute')}`;
 }
 
 /**
@@ -45,6 +50,7 @@ function formatDuration(startTime, endTime) {
  * }} props
  */
 function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onClick, onCheckInSuccess }) {
+  const { t, i18n } = useTranslation();
   const { id, title, status, startTime, endTime, room, user, recurringId, recurring, checkedIn, checkInTime, cancelReason } = booking;
 
   const [now, setNow] = useState(new Date());
@@ -83,18 +89,20 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
     setCheckingIn(true);
     try {
       const res = await bookingService.checkInBooking(id);
-      toast.success('Check-in thành công!');
+      toast.success(t('dashboard.checkInSuccess'));
       if (onCheckInSuccess) {
         onCheckInSuccess(id, res.data);
       } else {
         window.location.reload();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Check-in thất bại');
+      toast.error(err.response?.data?.message || t('dashboard.checkInFailed'));
     } finally {
       setCheckingIn(false);
     }
   };
+
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
 
   return (
     <div
@@ -115,7 +123,7 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
               frequency={recurring?.frequency}
             />
           )}
-          <span className="booking-card__duration">{formatDuration(startTime, endTime)}</span>
+          <span className="booking-card__duration">{formatDuration(startTime, endTime, t, i18n.language)}</span>
         </div>
       </div>
 
@@ -128,7 +136,7 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
           </span>
           <span className="booking-card__info-item">
             <span className="booking-card__icon">🕐</span>
-            {formatDateRange(startTime, endTime)}
+            {formatDateRange(startTime, endTime, locale)}
           </span>
           <span className="booking-card__info-item">
             <span className="booking-card__icon">👤</span>
@@ -137,13 +145,13 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
           {checkedIn && (
             <span className="booking-card__info-item" style={{ color: '#10b981', fontWeight: 600 }}>
               <span className="booking-card__icon">✅</span>
-              Đã check-in lúc {new Date(checkInTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+              {t('bookingDetail.checkedInAt', { time: new Date(checkInTime).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) })}
             </span>
           )}
           {status === 'cancelled' && cancelReason && (
             <span className="booking-card__info-item" style={{ color: '#f87171', fontSize: '0.85rem' }}>
               <span className="booking-card__icon">⚠️</span>
-              Lý do: {cancelReason}
+              {t('bookings.rejectionReason')}: {cancelReason}
             </span>
           )}
         </div>
@@ -169,14 +177,14 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
                 className="btn-action btn-approve"
                 onClick={() => onApprove?.(id)}
               >
-                ✓ Duyệt
+                ✓ {t('common.approve')}
               </button>
               <button
                 id={`reject-btn-${id}`}
                 className="btn-action btn-reject"
                 onClick={() => onReject?.(id)}
               >
-                ✗ Từ chối
+                ✗ {t('common.reject')}
               </button>
             </>
           )}
@@ -186,7 +194,7 @@ function BookingCard({ booking, currentUser, onApprove, onReject, onCancel, onCl
               className="btn-action btn-cancel"
               onClick={() => onCancel?.(id)}
             >
-              Hủy
+              {t('common.cancel')}
             </button>
           )}
         </div>

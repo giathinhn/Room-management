@@ -4,9 +4,12 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import useNotifications from '../../hooks/useNotifications';
 import NotificationBell from '../notifications/NotificationBell';
+import LanguageSwitcher from '../common/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 import './Header.css';
 
 const Header = ({ onMenuToggle, sidebarOpen }) => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -34,9 +37,9 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
   };
 
   const roleLabel = {
-    admin: 'Quản trị viên',
-    approver: 'Người duyệt',
-    user: 'Nhân viên',
+    admin: t('roles.admin'),
+    approver: t('roles.approver'),
+    user: t('roles.user'),
   };
 
   return (
@@ -55,6 +58,9 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
 
       {/* Right: actions */}
       <div className="app-header__right">
+        {/* Language switcher */}
+        <LanguageSwitcher />
+
         {/* Notification bell */}
         <NotificationBell
           notifications={notifications}
@@ -119,14 +125,14 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
                 className="user-dropdown__item"
                 onClick={() => setDropdownOpen(false)}
               >
-                <FiUser /> Hồ sơ cá nhân
+                <FiUser /> {t('common.profile')}
               </Link>
               <Link
                 to="/settings"
                 className="user-dropdown__item"
                 onClick={() => setDropdownOpen(false)}
               >
-                <FiSettings /> Cài đặt
+                <FiSettings /> {t('common.settings')}
               </Link>
 
               <div className="user-dropdown__divider" />
@@ -136,7 +142,7 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
                 onClick={() => { setDropdownOpen(false); logout(); }}
                 id="header-logout-btn"
               >
-                <FiLogOut /> Đăng xuất
+                <FiLogOut /> {t('common.logout')}
               </button>
             </div>
           )}

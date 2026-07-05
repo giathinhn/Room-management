@@ -5,9 +5,11 @@ import { useAuth } from '../context/AuthContext';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import './LoginPage.css';
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
@@ -20,12 +22,12 @@ const LoginPage = () => {
   const validate = () => {
     const errs = {};
     if (!form.email) {
-      errs.email = 'Vui lòng nhập email';
+      errs.email = t('validation.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errs.email = 'Email không hợp lệ';
+      errs.email = t('validation.emailInvalid');
     }
     if (!form.password) {
-      errs.password = 'Vui lòng nhập mật khẩu';
+      errs.password = t('validation.passwordRequired');
     }
     return errs;
   };
@@ -47,15 +49,15 @@ const LoginPage = () => {
     setLoading(true);
     try {
       await login(form.email, form.password);
-      toast.success('Đăng nhập thành công! Chào mừng trở lại 👋');
+      toast.success(t('auth.loginSuccess'));
       const redirectPath = searchParams.get('redirect') || '/dashboard';
       navigate(redirectPath, { replace: true });
     } catch (err) {
-      const msg =
-        err?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+      const errorCode = err?.response?.data?.error?.code || 'INVALID_CREDENTIALS';
+      const msg = t(`errors.${errorCode}`);
       toast.error(msg);
       if (err?.response?.status === 401) {
-        setErrors({ password: 'Email hoặc mật khẩu không đúng' });
+        setErrors({ password: t('errors.INVALID_CREDENTIALS') });
       }
     } finally {
       setLoading(false);
@@ -89,15 +91,15 @@ const LoginPage = () => {
           <span className="auth-logo-text">RoomBook</span>
         </div>
 
-        <h1 className="auth-title">Chào mừng trở lại</h1>
-        <p className="auth-subtitle">Đăng nhập để quản lý lịch phòng họp của bạn</p>
+        <h1 className="auth-title">{t('auth.welcomeBack')}</h1>
+        <p className="auth-subtitle">{t('auth.loginSubtitle')}</p>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <Input
             id="login-email"
             type="email"
             name="email"
-            label="Email"
+            label={t('auth.email')}
             placeholder="you@company.com"
             value={form.email}
             onChange={handleChange}
@@ -110,7 +112,7 @@ const LoginPage = () => {
             id="login-password"
             type="password"
             name="password"
-            label="Mật khẩu"
+            label={t('auth.password')}
             placeholder="••••••••"
             value={form.password}
             onChange={handleChange}
@@ -127,14 +129,14 @@ const LoginPage = () => {
             className="auth-submit-btn"
             leftIcon={!loading && <FiLogIn />}
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {loading ? `${t('common.loading')}` : t('auth.login')}
           </Button>
         </form>
 
         <p className="auth-footer">
-          Chưa có tài khoản?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="auth-link">
-            Đăng ký ngay
+            {t('auth.register')}
           </Link>
         </p>
       </div>

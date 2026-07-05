@@ -4,12 +4,12 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import settingsService from '../services/settings.service';
 import toast from 'react-hot-toast';
-import { FiSettings, FiBell, FiMonitor, FiSliders, FiSave, FiGlobe, FiSun } from 'react-icons/fi';
+import { FiSettings, FiBell, FiMonitor, FiSliders, FiSave, FiGlobe } from 'react-icons/fi';
 import './SettingsPage.css';
 
 const SettingsPage = () => {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState('personal');
@@ -49,10 +49,6 @@ const SettingsPage = () => {
         const userRes = await settingsService.getUserSettings();
         if (userRes.success && userRes.data) {
           setUserSettingsState(userRes.data);
-          // Set language locally if defined
-          if (userRes.data.language) {
-            i18n.changeLanguage(userRes.data.language);
-          }
           // Sync theme context
           if (userRes.data.theme) {
             setTheme(userRes.data.theme);
@@ -70,13 +66,15 @@ const SettingsPage = () => {
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
-        toast.error('Không thể tải cấu hình cài đặt');
+        toast.error(t('settings.loadError'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
+    // Do not include 't' in dependencies as language change updates 't' 
+    // and would trigger infinite loop when changeLanguage is invoked.
   }, [user, i18n, setTheme]);
 
   const handleUserToggle = (field) => {
@@ -114,7 +112,7 @@ const SettingsPage = () => {
       }
     } catch (err) {
       console.error(err);
-      toast.error('Có lỗi xảy ra khi lưu cấu hình cài đặt');
+      toast.error(t('settings.saveError'));
     } finally {
       setSaving(false);
     }
@@ -153,7 +151,7 @@ const SettingsPage = () => {
     return (
       <div className="settings-loading-container">
         <div className="spinner"></div>
-        <p className="loading-text">Đang tải cài đặt...</p>
+        <p className="loading-text">{t('settings.loading')}</p>
       </div>
     );
   }
@@ -165,7 +163,7 @@ const SettingsPage = () => {
           <FiSettings className="settings-icon-large" />
           <div>
             <h1>{t('settings.title')}</h1>
-            <p className="settings-subtitle">Cấu hình các thiết lập tài khoản và quy tắc vận hành</p>
+            <p className="settings-subtitle">{t('settings.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -258,7 +256,7 @@ const SettingsPage = () => {
               <div className="settings-action-row">
                 <button type="submit" className="save-settings-btn" disabled={saving}>
                   <FiSave className="btn-icon" />
-                  <span>{saving ? 'Đang lưu...' : t('settings.saveBtn')}</span>
+                  <span>{saving ? t('settings.saving') : t('settings.saveBtn')}</span>
                 </button>
               </div>
             </form>
@@ -277,7 +275,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.approved')}</span>
-                      <span className="switch-desc">Nhận email thông báo khi đơn đặt phòng của bạn được quản trị viên duyệt</span>
+                      <span className="switch-desc">{t('settings.notifications.emailApprovedDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -292,7 +290,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.rejected')}</span>
-                      <span className="switch-desc">Nhận email thông báo khi đơn đặt phòng của bạn bị từ chối</span>
+                      <span className="switch-desc">{t('settings.notifications.emailRejectedDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -307,7 +305,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.cancelled')}</span>
-                      <span className="switch-desc">Nhận email thông báo khi phòng họp bị hủy</span>
+                      <span className="switch-desc">{t('settings.notifications.emailCancelledDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -322,7 +320,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.reminder')}</span>
-                      <span className="switch-desc">Nhận nhắc nhở lịch họp qua email trước khi cuộc họp bắt đầu</span>
+                      <span className="switch-desc">{t('settings.notifications.emailReminderDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -347,7 +345,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.approved')}</span>
-                      <span className="switch-desc">Nhận thông báo in-app khi đơn đặt được duyệt</span>
+                      <span className="switch-desc">{t('settings.notifications.inAppApprovedDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -362,7 +360,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.rejected')}</span>
-                      <span className="switch-desc">Nhận thông báo in-app khi đơn đặt bị từ chối</span>
+                      <span className="switch-desc">{t('settings.notifications.inAppRejectedDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -377,7 +375,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.cancelled')}</span>
-                      <span className="switch-desc">Nhận thông báo in-app khi lịch họp bị hủy</span>
+                      <span className="switch-desc">{t('settings.notifications.inAppCancelledDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -392,7 +390,7 @@ const SettingsPage = () => {
                   <div className="switch-item">
                     <div className="switch-info">
                       <span className="switch-label">{t('settings.notifications.reminder')}</span>
-                      <span className="switch-desc">Nhận thông báo check-in và nhắc nhở trên giao diện app</span>
+                      <span className="switch-desc">{t('settings.notifications.inAppReminderDesc')}</span>
                     </div>
                     <label className="toggle-switch">
                       <input 
@@ -409,7 +407,7 @@ const SettingsPage = () => {
               <div className="settings-action-row">
                 <button type="submit" className="save-settings-btn" disabled={saving}>
                   <FiSave className="btn-icon" />
-                  <span>{saving ? 'Đang lưu...' : t('settings.saveBtn')}</span>
+                  <span>{saving ? t('settings.saving') : t('settings.saveBtn')}</span>
                 </button>
               </div>
             </form>
@@ -500,7 +498,7 @@ const SettingsPage = () => {
                 <div className="form-item full-width switch-item border-none pb-0">
                   <div className="switch-info">
                     <span className="switch-label">{t('settings.system.allowCancelApproved')}</span>
-                    <span className="switch-desc">Nếu tắt, người dùng không thể tự hủy lịch họp khi đã được duyệt (chỉ admin được phép hủy)</span>
+                    <span className="switch-desc">{t('settings.system.allowCancelApprovedDesc')}</span>
                   </div>
                   <label className="toggle-switch">
                     <input 
@@ -516,7 +514,7 @@ const SettingsPage = () => {
               <div className="settings-action-row">
                 <button type="submit" className="save-settings-btn" disabled={saving}>
                   <FiSave className="btn-icon" />
-                  <span>{saving ? 'Đang lưu...' : t('settings.saveBtn')}</span>
+                  <span>{saving ? t('settings.saving') : t('settings.saveBtn')}</span>
                 </button>
               </div>
             </form>

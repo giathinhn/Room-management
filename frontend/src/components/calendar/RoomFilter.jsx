@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiFilter, FiChevronDown } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
 
 /**
@@ -7,6 +8,7 @@ import roomService from '../../services/room.service';
  * @param {{ roomId: string, onChange: (roomId: string) => void }} props
  */
 function RoomFilter({ roomId, onChange }) {
+  const { t } = useTranslation();
   const [rooms, setRooms] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ function RoomFilter({ roomId, onChange }) {
   }, []);
 
   const selectedRoom = rooms.find((r) => r.id === roomId);
-  const label = selectedRoom ? selectedRoom.name : 'Tất cả phòng';
+  const label = selectedRoom ? selectedRoom.name : t('calendar.allRooms');
 
   const handleSelect = (id) => {
     onChange(id);
@@ -44,25 +46,25 @@ function RoomFilter({ roomId, onChange }) {
         aria-expanded={isOpen}
       >
         <FiFilter className="room-filter__icon" />
-        <span className="room-filter__label">{loading ? 'Đang tải...' : label}</span>
+        <span className="room-filter__label">{loading ? t('common.loading') : label}</span>
         <FiChevronDown className={`room-filter__chevron ${isOpen ? 'rotated' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="room-filter__dropdown" role="listbox" aria-label="Chọn phòng">
+        <div className="room-filter__dropdown" role="listbox" aria-label={t('bookings.selectRoom')}>
           <button
             className={`room-filter__option ${!roomId ? 'room-filter__option--active' : ''}`}
             role="option"
             aria-selected={!roomId}
             onClick={() => handleSelect('')}
           >
-            🏢 Tất cả phòng
+            🏢 {t('calendar.allRooms')}
           </button>
           {(() => {
             const sorted = [...rooms].sort((a, b) => {
-              if (a.isFavorite && !b.isFavorite) return -1;
-              if (!a.isFavorite && b.isFavorite) return 1;
-              return 0;
+               if (a.isFavorite && !b.isFavorite) return -1;
+               if (!a.isFavorite && b.isFavorite) return 1;
+               return 0;
             });
             return sorted.map((room) => (
               <button
@@ -74,7 +76,7 @@ function RoomFilter({ roomId, onChange }) {
               >
                 {room.isFavorite ? '⭐' : '📍'} {room.name}
                 {room.capacity && (
-                  <span className="room-filter__capacity">{room.capacity} người</span>
+                  <span className="room-filter__capacity">{room.capacity} {t('rooms.capacityUnit')}</span>
                 )}
               </button>
             ));

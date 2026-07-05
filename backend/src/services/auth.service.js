@@ -40,7 +40,7 @@ const authService = {
     // Check for duplicate email
     const existing = await userRepository.findByEmail(email);
     if (existing) {
-      throw ApiError.conflict('Email is already registered');
+      throw ApiError.conflict('EMAIL_ALREADY_EXISTS');
     }
 
     // Hash password
@@ -69,16 +69,16 @@ const authService = {
   async login(email, password) {
     const user = await userRepository.findByEmail(email);
     if (!user) {
-      throw ApiError.unauthorized('Invalid email or password');
+      throw ApiError.unauthorized('INVALID_CREDENTIALS');
     }
 
     if (!user.isActive) {
-      throw ApiError.forbidden('Your account has been deactivated');
+      throw ApiError.forbidden('ACCOUNT_DISABLED');
     }
 
     const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) {
-      throw ApiError.unauthorized('Invalid email or password');
+      throw ApiError.unauthorized('INVALID_CREDENTIALS');
     }
 
     const tokenPayload = { id: user.id, email: user.email, role: user.role };
@@ -97,18 +97,18 @@ const authService = {
    */
   async refreshToken(token) {
     if (!token) {
-      throw ApiError.unauthorized('Refresh token is required');
+      throw ApiError.unauthorized('TOKEN_INVALID');
     }
 
     const record = await tokenRepository.findByToken(token);
     if (!record) {
-      throw ApiError.unauthorized('Refresh token not found');
+      throw ApiError.unauthorized('TOKEN_INVALID');
     }
     if (record.isRevoked) {
-      throw ApiError.unauthorized('Refresh token has been revoked');
+      throw ApiError.unauthorized('TOKEN_INVALID');
     }
     if (record.expiresAt < new Date()) {
-      throw ApiError.unauthorized('Refresh token has expired');
+      throw ApiError.unauthorized('TOKEN_EXPIRED');
     }
 
     // Verify JWT signature
@@ -116,7 +116,7 @@ const authService = {
 
     const user = await userRepository.findById(decoded.id);
     if (!user || !user.isActive) {
-      throw ApiError.unauthorized('User not found or inactive');
+      throw ApiError.unauthorized('ACCOUNT_DISABLED');
     }
 
     const tokenPayload = { id: user.id, email: user.email, role: user.role };
@@ -131,7 +131,7 @@ const authService = {
    */
   async logout(token) {
     if (!token) {
-      throw ApiError.badRequest('Refresh token is required');
+      throw ApiError.badRequest('TOKEN_INVALID');
     }
     await tokenRepository.revokeByToken(token);
   },

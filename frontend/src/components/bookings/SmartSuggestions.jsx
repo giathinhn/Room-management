@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import suggestionService from '../../services/suggestion.service';
 import './SmartSuggestions.css';
 
@@ -12,6 +13,7 @@ import './SmartSuggestions.css';
  * }} props
  */
 function SmartSuggestions({ onSelect }) {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading]         = useState(true);
@@ -40,16 +42,30 @@ function SmartSuggestions({ onSelect }) {
     }
   };
 
+  const getSuggestionMessage = (suggestion) => {
+    const dayIndex = new Date(suggestion.startTime).getDay();
+    const dayNames = i18n.language === 'en'
+      ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      : ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    
+    const dayName = dayNames[dayIndex];
+    return t('bookings.suggestions.pattern', {
+      day: dayName,
+      time: suggestion.startLabel,
+      roomName: suggestion.room?.name || ''
+    });
+  };
+
   return (
     <div className="smart-suggestions">
       <div className="smart-suggestions__header">
         <span className="smart-suggestions__icon">💡</span>
-        <h3 className="smart-suggestions__title">Gợi ý cho bạn</h3>
+        <h3 className="smart-suggestions__title">{t('bookings.suggestions.title')}</h3>
         <button
           id="smart-suggestions-close"
           className="smart-suggestions__close"
           onClick={() => setVisible(false)}
-          aria-label="Đóng gợi ý"
+          aria-label={t('bookings.suggestions.close')}
         >
           ×
         </button>
@@ -57,7 +73,7 @@ function SmartSuggestions({ onSelect }) {
 
       {loading ? (
         <div className="smart-suggestions__loading">
-          <span className="spinner-sm" /> Đang tải gợi ý...
+          <span className="spinner-sm" /> {t('bookings.suggestions.loading')}
         </div>
       ) : (
         <div className="smart-suggestions__list">
@@ -68,7 +84,7 @@ function SmartSuggestions({ onSelect }) {
             >
               <div className="smart-suggestions__item-info">
                 <div className="smart-suggestions__item-message">
-                  {s.available ? '🔄' : '📅'} {s.message}
+                  {s.available ? '🔄' : '📅'} {getSuggestionMessage(s)}
                 </div>
                 <div className="smart-suggestions__item-detail">
                   <span className="smart-suggestions__room">{s.room?.name}</span>
@@ -91,10 +107,10 @@ function SmartSuggestions({ onSelect }) {
                   className="smart-suggestions__book-btn"
                   onClick={() => handleSelect(s)}
                 >
-                  Đặt ngay →
+                  {t('bookings.suggestions.bookNow')}
                 </button>
               ) : (
-                <span className="smart-suggestions__unavailable-badge">Đã có lịch</span>
+                <span className="smart-suggestions__unavailable-badge">{t('bookings.suggestions.unavailable')}</span>
               )}
             </div>
           ))}

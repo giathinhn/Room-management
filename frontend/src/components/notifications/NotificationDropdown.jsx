@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NotificationItem from './NotificationItem';
 import './NotificationDropdown.css';
 
@@ -21,6 +22,7 @@ const NotificationDropdown = ({
   onMarkAllAsRead,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const dropdownRef = useRef(null);
 
   // Close on outside click
@@ -42,13 +44,13 @@ const NotificationDropdown = ({
       className="notif-dropdown"
       ref={dropdownRef}
       role="dialog"
-      aria-label="Thông báo"
+      aria-label={t('notifications.title')}
       id="notification-dropdown"
     >
       {/* Header */}
       <div className="notif-dropdown__header">
         <h3 className="notif-dropdown__title">
-          Thông báo
+          {t('notifications.title')}
           {unreadCount > 0 && (
             <span className="notif-dropdown__count">{unreadCount}</span>
           )}
@@ -60,7 +62,7 @@ const NotificationDropdown = ({
             onClick={onMarkAllAsRead}
             id="notification-mark-all-btn"
           >
-            Đọc tất cả
+            {t('notifications.markAllRead')}
           </button>
         )}
       </div>
@@ -70,7 +72,7 @@ const NotificationDropdown = ({
         {recent.length === 0 ? (
           <div className="notif-dropdown__empty">
             <span className="notif-dropdown__empty-icon">🔕</span>
-            <p>Không có thông báo</p>
+            <p>{t('notifications.noNotifications')}</p>
           </div>
         ) : (
           recent.map((n) => (
@@ -92,7 +94,7 @@ const NotificationDropdown = ({
           onClick={onClose}
           id="notification-view-all-link"
         >
-          Xem tất cả thông báo
+          {t('notifications.viewAll')}
         </Link>
       </div>
     </div>

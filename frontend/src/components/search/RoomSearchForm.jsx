@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './RoomSearchForm.css';
-
-const EQUIPMENT_OPTIONS = [
-  { value: 'Máy chiếu', icon: '📽️' },
-  { value: 'Micro',     icon: '🎤' },
-  { value: 'Bảng trắng', icon: '📋' },
-  { value: 'TV',        icon: '🖥️' },
-  { value: 'Webcam',    icon: '📷' },
-  { value: 'Loa',       icon: '🔊' },
-  { value: 'Điều hòa',  icon: '❄️' },
-];
 
 /**
  * RoomSearchForm — form to search for available rooms.
@@ -17,6 +8,7 @@ const EQUIPMENT_OPTIONS = [
  * @param {{ onSearch: (params) => void, isLoading?: boolean }} props
  */
 function RoomSearchForm({ onSearch, isLoading = false }) {
+  const { t } = useTranslation();
   const today = new Date().toISOString().slice(0, 10);
 
   const [date,      setDate]      = useState(today);
@@ -25,6 +17,16 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
   const [capacity,  setCapacity]  = useState('');
   const [location,  setLocation]  = useState('');
   const [equipment, setEquipment] = useState([]);
+
+  const equipmentOptions = [
+    { value: 'Máy chiếu', icon: '📽️', label: t('rooms.equipmentOptions.projector') },
+    { value: 'Micro',     icon: '🎤', label: t('rooms.equipmentOptions.microphone') },
+    { value: 'Bảng trắng', icon: '📋', label: t('rooms.equipmentOptions.whiteboard') },
+    { value: 'TV',        icon: '🖥️', label: t('rooms.equipmentOptions.tv') },
+    { value: 'Webcam',    icon: '📷', label: t('rooms.equipmentOptions.webcam') },
+    { value: 'Loa',       icon: '🔊', label: t('rooms.equipmentOptions.speaker') },
+    { value: 'Điều hòa',  icon: '❄️', label: t('rooms.equipmentOptions.airConditioner') },
+  ];
 
   const toggleEquipment = (value) => {
     setEquipment((prev) =>
@@ -41,7 +43,7 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
 
     // Validate times
     if (startLocal >= endLocal) {
-      alert('Giờ bắt đầu phải nhỏ hơn giờ kết thúc');
+      alert(t('roomSearch.form.validation.timeRangeError'));
       return;
     }
 
@@ -59,7 +61,7 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
       {/* Date & Time */}
       <div className="rsf__row">
         <div className="rsf__field">
-          <label htmlFor="rsf-date" className="rsf__label">📅 Ngày</label>
+          <label htmlFor="rsf-date" className="rsf__label">📅 {t('roomSearch.form.date')}</label>
           <input
             id="rsf-date"
             type="date"
@@ -72,7 +74,7 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
         </div>
 
         <div className="rsf__field">
-          <label htmlFor="rsf-start" className="rsf__label">🕐 Từ giờ</label>
+          <label htmlFor="rsf-start" className="rsf__label">🕐 {t('roomSearch.form.fromTime')}</label>
           <input
             id="rsf-start"
             type="time"
@@ -84,7 +86,7 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
         </div>
 
         <div className="rsf__field">
-          <label htmlFor="rsf-end" className="rsf__label">🕓 Đến giờ</label>
+          <label htmlFor="rsf-end" className="rsf__label">🕓 {t('roomSearch.form.toTime')}</label>
           <input
             id="rsf-end"
             type="time"
@@ -99,12 +101,12 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
       {/* Capacity & Location */}
       <div className="rsf__row">
         <div className="rsf__field">
-          <label htmlFor="rsf-capacity" className="rsf__label">👥 Sức chứa tối thiểu</label>
+          <label htmlFor="rsf-capacity" className="rsf__label">👥 {t('roomSearch.form.minCapacity')}</label>
           <input
             id="rsf-capacity"
             type="number"
             className="rsf__input"
-            placeholder="Ví dụ: 10"
+            placeholder={t('roomSearch.form.capacityPlaceholder')}
             min={1}
             max={500}
             value={capacity}
@@ -113,12 +115,12 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
         </div>
 
         <div className="rsf__field rsf__field--grow">
-          <label htmlFor="rsf-location" className="rsf__label">📍 Vị trí / Tòa nhà</label>
+          <label htmlFor="rsf-location" className="rsf__label">📍 {t('roomSearch.form.location')}</label>
           <input
             id="rsf-location"
             type="text"
             className="rsf__input"
-            placeholder="Ví dụ: Tòa A, Tầng 3..."
+            placeholder={t('roomSearch.form.locationPlaceholder')}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
@@ -127,9 +129,9 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
 
       {/* Equipment */}
       <div className="rsf__field">
-        <span className="rsf__label">🔧 Thiết bị cần có</span>
+        <span className="rsf__label">🔧 {t('roomSearch.form.equipmentRequired')}</span>
         <div className="rsf__equipment-grid">
-          {EQUIPMENT_OPTIONS.map(({ value, icon }) => (
+          {equipmentOptions.map(({ value, icon, label }) => (
             <label
               key={value}
               className={`rsf__equip-tag ${equipment.includes(value) ? 'selected' : ''}`}
@@ -142,7 +144,7 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
                 onChange={() => toggleEquipment(value)}
                 className="rsf__equip-checkbox"
               />
-              {icon} {value}
+              {icon} {label}
             </label>
           ))}
         </div>
@@ -159,7 +161,7 @@ function RoomSearchForm({ onSearch, isLoading = false }) {
           {isLoading ? (
             <span className="rsf__spinner" />
           ) : (
-            <>🔍 Tìm phòng trống</>
+            <>🔍 {t('roomSearch.form.submitBtn')}</>
           )}
         </button>
       </div>

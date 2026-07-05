@@ -2,16 +2,10 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiX, FiMapPin, FiUser, FiClock, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import bookingService from '../../services/booking.service';
 import toast from 'react-hot-toast';
 import './EventPopover.css';
-
-const STATUS_LABEL = {
-  pending: 'Chờ duyệt',
-  approved: 'Đã duyệt',
-  rejected: 'Bị từ chối',
-  cancelled: 'Đã hủy',
-};
 
 const STATUS_CLASS = {
   pending: 'badge-pending',
@@ -20,18 +14,6 @@ const STATUS_CLASS = {
   cancelled: 'badge-cancelled',
 };
 
-function formatDateTime(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleString('vi-VN', {
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 /**
  * EventPopover — shown when user clicks a calendar event.
  * Displays booking details with actions (view detail, cancel).
@@ -39,6 +21,7 @@ function formatDateTime(dateStr) {
  * @param {{ event: object, position: {x: number, y: number}, onClose: () => void, onRefresh: () => void }} props
  */
 function EventPopover({ event, position, onClose, onRefresh }) {
+  const { t, i18n } = useTranslation();
   const popoverRef = useRef(null);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -47,6 +30,26 @@ function EventPopover({ event, position, onClose, onRefresh }) {
   const isAdminOrApprover = user?.role === 'admin' || user?.role === 'approver';
   const canCancel = (isOwner || isAdminOrApprover) && (event.status === 'pending' || event.status === 'approved');
   const canApprove = isAdminOrApprover && event.status === 'pending';
+
+  const statusLabel = {
+    pending: t('bookings.status.pending'),
+    approved: t('bookings.status.approved'),
+    rejected: t('bookings.status.rejected'),
+    cancelled: t('bookings.status.cancelled'),
+  };
+
+  const formatDateTime = (dateStr) => {
+    const d = new Date(dateStr);
+    const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+    return d.toLocaleString(locale, {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   // Adjust position so popover doesn't overflow viewport
   useEffect(() => {
@@ -70,22 +73,22 @@ function EventPopover({ event, position, onClose, onRefresh }) {
   const handleCancel = async () => {
     try {
       await bookingService.cancelBooking(event.id);
-      toast.success('Đã hủy booking');
+      toast.success(t('calendar.popover.cancelSuccess'));
       onRefresh();
       onClose();
     } catch {
-      toast.error('Không thể hủy booking');
+      toast.error(t('calendar.popover.cancelError'));
     }
   };
 
   const handleApprove = async () => {
     try {
       await bookingService.approveBooking(event.id);
-      toast.success('Đã duyệt booking');
+      toast.success(t('calendar.popover.approveSuccess'));
       onRefresh();
       onClose();
     } catch {
-      toast.error('Không thể duyệt booking');
+      toast.error(t('calendar.popover.approveError'));
     }
   };
 
@@ -99,14 +102,14 @@ function EventPopover({ event, position, onClose, onRefresh }) {
         ref={popoverRef}
         className="ep"
         role="dialog"
-        aria-label="Chi tiết booking"
+        aria-label={t('calendar.bookingDetails')}
         style={{ left: position.x, top: position.y }}
       >
         {/* Header */}
         <div className="ep__header">
           <div className="ep__status-dot" data-status={event.status} />
           <h3 className="ep__title" title={event.title}>{event.title}</h3>
-          <button className="ep__close" onClick={onClose} aria-label="Đóng">
+          <button className="ep__close" onClick={onClose} aria-label={t('common.close')}>
             <FiX />
           </button>
         </div>
@@ -131,10 +134,10 @@ function EventPopover({ event, position, onClose, onRefresh }) {
 
           <div className="ep__status-row">
             <span className={`badge ${STATUS_CLASS[event.status]}`}>
-              {STATUS_LABEL[event.status] || event.status}
+              {statusLabel[event.status] || event.status}
             </span>
             {event.isRecurring && (
-              <span className="badge badge--info ep__recurring-badge">🔄 Định kỳ</span>
+              <span className="badge badge--info ep__recurring-badge">🔄 {t('calendar.popover.recurring')}</span>
             )}
           </div>
         </div>
@@ -145,7 +148,7 @@ function EventPopover({ event, position, onClose, onRefresh }) {
             className="btn btn--secondary btn--sm ep__action-btn"
             onClick={() => navigate(`/bookings/${event.id}`)}
           >
-            <FiArrowRight /> Xem chi tiết
+            <FiArrowRight /> {t('calendar.popover.viewDetails')}
           </button>
 
           {canApprove && (
@@ -153,7 +156,7 @@ function EventPopover({ event, position, onClose, onRefresh }) {
               className="btn btn--sm ep__action-btn ep__action-btn--approve"
               onClick={handleApprove}
             >
-              ✅ Duyệt
+              ✅ {t('bookings.approve')}
             </button>
           )}
 
@@ -162,7 +165,7 @@ function EventPopover({ event, position, onClose, onRefresh }) {
               className="btn btn--danger btn--sm ep__action-btn"
               onClick={handleCancel}
             >
-              ✕ Hủy
+              ✕ {t('common.cancel')}
             </button>
           )}
         </div>

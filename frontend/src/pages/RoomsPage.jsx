@@ -8,6 +8,7 @@ import RoomForm from '../components/rooms/RoomForm';
 import RoomFilter from '../components/rooms/RoomFilter';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import Pagination from '../components/common/Pagination';
+import { useTranslation } from 'react-i18next';
 import '../components/rooms/RoomCard.css';
 import './RoomsPage.css';
 
@@ -21,6 +22,7 @@ const DEFAULT_FILTERS = {
 };
 
 function RoomsPage() {
+  const { t } = useTranslation();
   const navigate  = useNavigate();
   const { user }  = useAuth();
   const isAdmin   = user?.role === 'admin';
@@ -54,11 +56,12 @@ function RoomsPage() {
       setRooms(result.data);
       setPagination(result.pagination);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể tải danh sách phòng');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchRooms(filters);
@@ -86,6 +89,7 @@ function RoomsPage() {
     setFormOpen(true);
   }
 
+  // eslint-disable-next-line no-unused-vars
   function openEdit(room) {
     setEditRoom(room);
     setFormOpen(true);
@@ -96,15 +100,16 @@ function RoomsPage() {
     try {
       if (editRoom) {
         await roomService.updateRoom(editRoom.id, data);
-        toast.success('Cập nhật phòng thành công!');
+        toast.success(t('rooms.updateSuccess'));
       } else {
         await roomService.createRoom(data);
-        toast.success('Tạo phòng thành công!');
+        toast.success(t('rooms.createSuccess'));
       }
       setFormOpen(false);
       fetchRooms(filters);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setFormLoading(false);
     }
@@ -120,11 +125,12 @@ function RoomsPage() {
     setDeleteLoading(true);
     try {
       await roomService.deleteRoom(deleteRoom.id);
-      toast.success(`Đã vô hiệu hóa phòng "${deleteRoom.name}"`);
+      toast.success(t('rooms.deleteSuccess', { name: deleteRoom.name }));
       setDeleteRoom(null);
       fetchRooms(filters);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể xóa phòng');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setDeleteLoading(false);
     }
@@ -149,10 +155,10 @@ function RoomsPage() {
       {/* Header */}
       <div className="rooms-page__header">
         <div>
-          <h1 className="rooms-page__title">🏢 Phòng họp</h1>
+          <h1 className="rooms-page__title">🏢 {t('rooms.title')}</h1>
           <p className="rooms-page__subtitle">
-            {pagination.total} phòng họp{' '}
-            {!isAdmin && 'đang hoạt động'}
+            {pagination.total} {t('rooms.countLabel')}{' '}
+            {!isAdmin && t('rooms.activeOnly')}
           </p>
         </div>
         {isAdmin && (
@@ -161,7 +167,7 @@ function RoomsPage() {
             className="btn btn--primary"
             onClick={openCreate}
           >
-            + Thêm phòng
+            {t('rooms.addRoom')}
           </button>
         )}
       </div>
@@ -173,15 +179,15 @@ function RoomsPage() {
       {loading ? (
         <div className="rooms-page__loading">
           <div className="spinner" />
-          <p>Đang tải danh sách phòng…</p>
+          <p>{t('rooms.loadingRooms')}</p>
         </div>
       ) : displayedRooms.length === 0 ? (
         <div className="rooms-page__empty">
           <div className="rooms-page__empty-icon">🏚️</div>
-          <p>Không tìm thấy phòng nào phù hợp.</p>
+          <p>{t('rooms.noRoomsFound')}</p>
           {isAdmin && (
             <button className="btn btn--primary" onClick={openCreate}>
-              + Thêm phòng đầu tiên
+              {t('rooms.addFirstRoom')}
             </button>
           )}
         </div>
@@ -226,9 +232,9 @@ function RoomsPage() {
         isOpen={Boolean(deleteRoom)}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteRoom(null)}
-        title="Vô hiệu hóa phòng"
-        message={`Bạn có chắc muốn vô hiệu hóa phòng "${deleteRoom?.name}"? Phòng sẽ không xuất hiện với người dùng thông thường.`}
-        confirmLabel="Vô hiệu hóa"
+        title={t('rooms.disableRoomTitle')}
+        message={t('rooms.disableRoomConfirm', { name: deleteRoom?.name })}
+        confirmLabel={t('rooms.disableLabel')}
         isLoading={deleteLoading}
       />
     </div>

@@ -3,9 +3,11 @@ import { FiBell, FiCheckCircle, FiLoader } from 'react-icons/fi';
 import useNotifications, { getNotificationIcon } from '../hooks/useNotifications';
 import { formatRelativeTime } from '../components/notifications/NotificationItem';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './NotificationsPage.css';
 
 const NotificationsPage = () => {
+  const { t } = useTranslation();
   const {
     notifications,
     unreadCount,
@@ -42,9 +44,11 @@ const NotificationsPage = () => {
             <FiBell />
           </div>
           <div>
-            <h1 className="notifications-page__title">Thông báo</h1>
+            <h1 className="notifications-page__title">{t('notifications.title')}</h1>
             <p className="notifications-page__subtitle">
-              {unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Tất cả đã đọc'}
+              {unreadCount > 0
+                ? t('notifications.unreadCount', { count: unreadCount })
+                : t('notifications.allRead')}
             </p>
           </div>
         </div>
@@ -56,7 +60,7 @@ const NotificationsPage = () => {
             id="notifications-page-mark-all-btn"
           >
             <FiCheckCircle />
-            Đánh dấu tất cả đã đọc
+            {t('notifications.markAllReadLong')}
           </button>
         )}
       </div>
@@ -66,8 +70,8 @@ const NotificationsPage = () => {
         {notifications.length === 0 && !loading ? (
           <div className="notifications-page__empty">
             <div className="notifications-page__empty-icon">🔕</div>
-            <h3>Không có thông báo nào</h3>
-            <p>Các thông báo về booking sẽ xuất hiện ở đây</p>
+            <h3>{t('notifications.noNotifications')}</h3>
+            <p>{t('notifications.noNotificationsDesc')}</p>
           </div>
         ) : (
           <div className="notifications-page__list">
@@ -108,7 +112,7 @@ const NotificationsPage = () => {
         {loading && (
           <div className="notifications-page__loading">
             <FiLoader className="spin" />
-            <span>Đang tải...</span>
+            <span>{t('common.loading')}</span>
           </div>
         )}
 
@@ -121,7 +125,7 @@ const NotificationsPage = () => {
               onClick={fetchMore}
               id="notifications-page-load-more-btn"
             >
-              Tải thêm thông báo
+              {t('notifications.loadMore')}
             </button>
           </div>
         )}

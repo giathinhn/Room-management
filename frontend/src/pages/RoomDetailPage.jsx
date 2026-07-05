@@ -8,10 +8,12 @@ import ConfirmDialog from '../components/common/ConfirmDialog';
 import { EQUIPMENT_ICONS } from '../components/rooms/RoomCard';
 import RoomQRModal from '../components/rooms/RoomQRModal';
 import { BsQrCode } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
 import '../components/rooms/RoomCard.css';
 import './RoomDetailPage.css';
 
 function RoomDetailPage() {
+  const { t } = useTranslation();
   const { id }    = useParams();
   const navigate  = useNavigate();
   const { user }  = useAuth();
@@ -19,6 +21,16 @@ function RoomDetailPage() {
 
   const [room,    setRoom]    = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const equipmentLabel = {
+    'Máy chiếu': t('rooms.equipmentOptions.projector'),
+    'Micro':     t('rooms.equipmentOptions.microphone'),
+    'Bảng trắng': t('rooms.equipmentOptions.whiteboard'),
+    'TV':        t('rooms.equipmentOptions.tv'),
+    'Webcam':    t('rooms.equipmentOptions.webcam'),
+    'Loa':       t('rooms.equipmentOptions.speaker'),
+    'Điều hòa':  t('rooms.equipmentOptions.airConditioner'),
+  };
 
   // Edit modal
   const [editOpen,   setEditOpen]   = useState(false);
@@ -39,14 +51,14 @@ function RoomDetailPage() {
         const result = await roomService.getRoom(id);
         setRoom(result.data);
       } catch (err) {
-        toast.error('Không thể tải thông tin phòng');
+        toast.error(t('roomDetail.loadFailed'));
         navigate('/rooms');
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [id, navigate]);
+  }, [id, navigate, t]);
 
   async function handleEdit(data) {
     setEditLoading(true);
@@ -54,9 +66,9 @@ function RoomDetailPage() {
       const result = await roomService.updateRoom(id, data);
       setRoom(result.data);
       setEditOpen(false);
-      toast.success('Cập nhật phòng thành công!');
+      toast.success(t('roomDetail.updateSuccess'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra');
+      toast.error(err.response?.data?.message || t('common.error'));
     } finally {
       setEditLoading(false);
     }
@@ -66,10 +78,10 @@ function RoomDetailPage() {
     setDeleteLoading(true);
     try {
       await roomService.deleteRoom(id);
-      toast.success(`Đã vô hiệu hóa phòng "${room.name}"`);
+      toast.success(t('roomDetail.disableSuccess', { name: room.name }));
       navigate('/rooms');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể xóa phòng');
+      toast.error(err.response?.data?.message || t('roomDetail.deleteFailed'));
     } finally {
       setDeleteLoading(false);
     }
@@ -79,7 +91,7 @@ function RoomDetailPage() {
     return (
       <div className="room-detail-page room-detail-page--loading">
         <div className="spinner" />
-        <p>Đang tải…</p>
+        <p>{t('roomDetail.loading')}</p>
       </div>
     );
   }
@@ -96,16 +108,16 @@ function RoomDetailPage() {
             className="btn btn--ghost btn--sm"
             onClick={() => navigate('/rooms')}
           >
-            ← Quay lại
+            ← {t('roomDetail.back')}
           </button>
           <button
             id="room-detail-qr-btn"
             className="btn btn--ghost btn--sm"
             onClick={() => setQrOpen(true)}
-            title="Xem mã QR đặt phòng"
+            title={t('roomDetail.qrCodeTooltip')}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            <BsQrCode /> Mã QR
+            <BsQrCode /> {t('roomDetail.qrCode')}
           </button>
         </div>
 
@@ -116,14 +128,14 @@ function RoomDetailPage() {
               className="btn btn--primary btn--sm"
               onClick={() => setEditOpen(true)}
             >
-              ✏️ Sửa
+              ✏️ {t('roomDetail.edit')}
             </button>
             <button
               id="room-detail-delete-btn"
               className="btn btn--danger btn--sm"
               onClick={() => setDeleteOpen(true)}
             >
-              🗑️ Xóa
+              🗑️ {t('roomDetail.delete')}
             </button>
           </div>
         )}
@@ -135,7 +147,7 @@ function RoomDetailPage() {
         <div className="room-detail__name-row">
           <h1 className="room-detail__name">{room.name}</h1>
           <span className={`room-detail__status ${room.isActive ? 'active' : 'inactive'}`}>
-            {room.isActive ? '● Hoạt động' : '● Không hoạt động'}
+            {room.isActive ? t('roomDetail.status.active') : t('roomDetail.status.inactive')}
           </span>
         </div>
 
@@ -144,23 +156,23 @@ function RoomDetailPage() {
           <div className="room-detail__meta-item">
             <span className="room-detail__meta-icon">📍</span>
             <div>
-              <span className="room-detail__meta-label">Vị trí</span>
+              <span className="room-detail__meta-label">{t('roomDetail.location')}</span>
               <span className="room-detail__meta-value">{room.location}</span>
             </div>
           </div>
           <div className="room-detail__meta-item">
             <span className="room-detail__meta-icon">👥</span>
             <div>
-              <span className="room-detail__meta-label">Sức chứa</span>
-              <span className="room-detail__meta-value">{room.capacity} người</span>
+              <span className="room-detail__meta-label">{t('roomDetail.capacity')}</span>
+              <span className="room-detail__meta-value">{t('roomDetail.people', { count: room.capacity })}</span>
             </div>
           </div>
           <div className="room-detail__meta-item">
             <span className="room-detail__meta-icon">📅</span>
             <div>
-              <span className="room-detail__meta-label">Ngày tạo</span>
+              <span className="room-detail__meta-label">{t('roomDetail.createdAt')}</span>
               <span className="room-detail__meta-value">
-                {new Date(room.createdAt).toLocaleDateString('vi-VN')}
+                {new Date(room.createdAt).toLocaleDateString(navigator.language)}
               </span>
             </div>
           </div>
@@ -168,7 +180,7 @@ function RoomDetailPage() {
 
         {/* Equipment */}
         <div className="room-detail__section">
-          <h2 className="room-detail__section-title">Thiết bị</h2>
+          <h2 className="room-detail__section-title">{t('roomDetail.equipment')}</h2>
           {room.equipment && room.equipment.length > 0 ? (
             <div className="room-detail__equipment">
               {room.equipment.map((item) => (
@@ -176,21 +188,21 @@ function RoomDetailPage() {
                   <span className="room-detail__equipment-icon">
                     {EQUIPMENT_ICONS[item] || '🔧'}
                   </span>
-                  <span>{item}</span>
+                  <span>{equipmentLabel[item] || item}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="room-detail__no-equipment">Chưa có thiết bị nào được ghi nhận.</p>
+            <p className="room-detail__no-equipment">{t('roomDetail.noEquipment')}</p>
           )}
         </div>
 
-        {/* Placeholder for today's usage timeline (plan-04 will fill this) */}
+        {/* Placeholder for today's usage timeline */}
         <div className="room-detail__section">
-          <h2 className="room-detail__section-title">Lịch sử dụng hôm nay</h2>
+          <h2 className="room-detail__section-title">{t('roomDetail.usageHistory')}</h2>
           <div className="room-detail__timeline-placeholder">
             <span>📆</span>
-            <p>Lịch đặt phòng sẽ hiển thị ở đây sau khi tích hợp hệ thống đặt phòng.</p>
+            <p>{t('roomDetail.usagePlaceholder')}</p>
           </div>
         </div>
       </div>
@@ -209,9 +221,9 @@ function RoomDetailPage() {
         isOpen={deleteOpen}
         onConfirm={handleDelete}
         onCancel={() => setDeleteOpen(false)}
-        title="Vô hiệu hóa phòng"
-        message={`Bạn có chắc muốn vô hiệu hóa phòng "${room.name}"?`}
-        confirmLabel="Vô hiệu hóa"
+        title={t('roomDetail.disableTitle')}
+        message={t('roomDetail.disableConfirm', { name: room.name })}
+        confirmLabel={t('roomDetail.delete')}
         isLoading={deleteLoading}
       />
 

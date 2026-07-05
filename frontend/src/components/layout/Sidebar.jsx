@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   FiHome,
   FiCalendar,
@@ -17,55 +18,55 @@ import './Sidebar.css';
 
 const NAV_ITEMS = [
   {
-    label: 'Dashboard',
+    key: 'dashboard',
     icon: <FiHome />,
     to: '/dashboard',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Lịch đặt phòng',
+    key: 'calendar',
     icon: <FiCalendar />,
     to: '/bookings',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Xem lịch',
+    key: 'calendarView',
     icon: <FiLayout />,
     to: '/calendar',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Phòng họp',
+    key: 'rooms',
     icon: <FiGrid />,
     to: '/rooms',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Tìm phòng trống',
+    key: 'search',
     icon: <FiSearch />,
     to: '/rooms/search',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Sơ đồ tầng',
+    key: 'floorMap',
     icon: <FiMap />,
     to: '/floor-map',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Đặt phòng mới',
+    key: 'newBooking',
     icon: <FiPlusSquare />,
     to: '/bookings/new',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Mẫu đặt phòng',
+    key: 'templates',
     icon: <FiBookmark />,
     to: '/templates',
     roles: ['admin', 'approver', 'user'],
   },
   {
-    label: 'Quản lý users',
+    key: 'manageUsers',
     icon: <FiUsers />,
     to: '/admin/users',
     roles: ['admin'],
@@ -73,6 +74,7 @@ const NAV_ITEMS = [
 ];
 
 const Sidebar = ({ isOpen, onToggle }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const role = user?.role || 'user';
 
@@ -111,10 +113,10 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 className={({ isActive }) =>
                   `sidebar__nav-link ${isActive ? 'sidebar__nav-link--active' : ''}`
                 }
-                title={!isOpen ? item.label : undefined}
+                title={!isOpen ? t(`sidebar.${item.key}`) : undefined}
               >
                 <span className="sidebar__nav-icon">{item.icon}</span>
-                {isOpen && <span className="sidebar__nav-label">{item.label}</span>}
+                {isOpen && <span className="sidebar__nav-label">{t(`sidebar.${item.key}`)}</span>}
               </NavLink>
             </li>
           ))}
@@ -129,7 +131,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
         {isOpen && (
           <div className="sidebar__role-badge">
             <span className="sidebar__role-dot" />
-            <span>{role === 'admin' ? 'Quản trị viên' : role === 'approver' ? 'Người duyệt' : 'Nhân viên'}</span>
+            <span>{t(`roles.${role}`)}</span>
           </div>
         )}
       </div>

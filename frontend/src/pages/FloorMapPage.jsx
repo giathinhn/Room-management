@@ -8,11 +8,13 @@ import StatusLegend from '../components/floormap/StatusLegend';
 import RoomBlock from '../components/floormap/RoomBlock';
 import RoomQuickViewModal from '../components/floormap/RoomQuickViewModal';
 import RoomPositionEditor from '../components/floormap/RoomPositionEditor';
+import { useTranslation } from 'react-i18next';
 import './FloorMapPage.css';
 
 const AUTO_REFRESH_SEC = 30;
 
 const FloorMapPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
@@ -85,12 +87,9 @@ const FloorMapPage = () => {
         
         // Ensure every room has valid mapX and mapY grid values
         const positioned = [];
-        const unpositioned = [];
         data.forEach(r => {
           if (r.mapX != null && r.mapY != null) {
             positioned.push(r);
-          } else {
-            unpositioned.push(r);
           }
         });
 
@@ -119,13 +118,13 @@ const FloorMapPage = () => {
 
         setRooms(finalizedRooms);
       } catch (err) {
-        setError('Không thể tải dữ liệu sơ đồ tầng. Vui lòng thử lại.');
+        setError(t('floorMap.error'));
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [selectedFloor, selectedBuilding]
+    [selectedFloor, selectedBuilding, t]
   );
 
   // ── Init ──
@@ -264,10 +263,10 @@ const FloorMapPage = () => {
           <div className="fmp__title-group">
             <h1 className="fmp__title">
               <span className="fmp__title-icon">🗺️</span>
-              Sơ đồ tòa nhà & tầng
+              {t('floorMap.title')}
             </h1>
             <p className="fmp__subtitle">
-              Trạng thái phòng họp theo thời gian thực
+              {t('floorMap.subtitle')}
             </p>
           </div>
         </div>
@@ -279,11 +278,11 @@ const FloorMapPage = () => {
               onClick={() => setIsEditMode(!isEditMode)}
               id="floor-map-edit-layout-btn"
             >
-              {isEditMode ? '💾 Hoàn tất xếp' : '🔧 Sắp xếp vị trí'}
+              {isEditMode ? t('floorMap.editModeActive') : t('floorMap.editModeInactive')}
             </button>
           )}
           <Link to="/bookings/new" className="fmp__book-btn" id="floor-map-book-btn">
-            ⚡ Đặt phòng
+            {t('floorMap.bookBtn')}
           </Link>
         </div>
       </div>
@@ -311,12 +310,12 @@ const FloorMapPage = () => {
               aria-hidden="true"
             />
             <span className="fmp__refresh-text">
-              {refreshing ? 'Đang cập nhật...' : `Cập nhật sau ${countdown}s`}
+              {refreshing ? t('floorMap.updating') : t('floorMap.updateIn', { seconds: countdown })}
             </span>
             <button
               className="fmp__refresh-btn"
               onClick={handleManualRefresh}
-              aria-label="Cập nhật ngay"
+              aria-label={t('floorMap.updating')}
               id="floor-map-refresh-btn"
               disabled={refreshing}
             >
@@ -330,19 +329,19 @@ const FloorMapPage = () => {
       <div className="fmp__stats">
         <div className="fmp__stat fmp__stat--total">
           <span className="fmp__stat-value">{stats.total}</span>
-          <span className="fmp__stat-label">Tổng phòng</span>
+          <span className="fmp__stat-label">{t('floorMap.totalRooms')}</span>
         </div>
         <div className="fmp__stat fmp__stat--available">
           <span className="fmp__stat-value">{stats.available}</span>
-          <span className="fmp__stat-label">Trống</span>
+          <span className="fmp__stat-label">{t('floorMap.available')}</span>
         </div>
         <div className="fmp__stat fmp__stat--in-use">
           <span className="fmp__stat-value">{stats.inUse}</span>
-          <span className="fmp__stat-label">Đang họp</span>
+          <span className="fmp__stat-label">{t('floorMap.inUse')}</span>
         </div>
         <div className="fmp__stat fmp__stat--upcoming">
           <span className="fmp__stat-value">{stats.upcoming}</span>
-          <span className="fmp__stat-label">Sắp họp</span>
+          <span className="fmp__stat-label">{t('floorMap.upcoming')}</span>
         </div>
       </div>
 
@@ -350,23 +349,25 @@ const FloorMapPage = () => {
       {loading ? (
         <div className="fmp__loading" aria-live="polite">
           <div className="fmp__loading-spinner" />
-          <span>Đang tải sơ đồ tầng...</span>
+          <span>{t('floorMap.loading')}</span>
         </div>
       ) : error ? (
         <div className="fmp__error" role="alert">
           <span className="fmp__error-icon">⚠️</span>
           <span>{error}</span>
           <button className="fmp__error-retry" onClick={handleManualRefresh}>
-            Thử lại
+            {t('floorMap.retry')}
           </button>
         </div>
       ) : rooms.length === 0 ? (
         <div className="fmp__empty">
           <div className="fmp__empty-icon">🏢</div>
-          <p>Không có phòng nào trên tầng này.</p>
+          <p>{t('floorMap.empty')}</p>
           {isAdmin && (
             <p className="fmp__empty-hint">
-              Vào trang <Link to="/rooms">Quản lý phòng</Link> để thêm phòng và cấu hình tọa độ bản đồ.
+              {t('floorMap.emptyHint').split('{{link}}')[0]}
+              <Link to="/rooms">{t('sidebar.rooms')}</Link>
+              {t('floorMap.emptyHint').split('{{link}}')[1]}
             </p>
           )}
         </div>
@@ -403,8 +404,8 @@ const FloorMapPage = () => {
                       <button
                         className="fmp__edit-pos-btn"
                         onClick={(e) => handleEditPosition(e, room)}
-                        aria-label={`Chỉnh sửa thông tin ${room.name}`}
-                        title="Chỉnh sửa chi tiết"
+                        aria-label={t('floorMap.editPosition', { name: room.name })}
+                        title={t('floorMap.editDetails')}
                         id={`edit-pos-${room.id}`}
                       >
                         ✏️

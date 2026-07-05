@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './PeakHoursHeatmap.css';
 
-const DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-const DAY_FULL = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 const HOURS = Array.from({ length: 16 }, (_, i) => `${String(i + 7).padStart(2, '0')}:00`);
+
+const DEFAULT_DAYS_SHORT = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+const DEFAULT_DAYS_FULL = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 
 /**
  * Get cell background based on count relative to max value.
@@ -48,7 +50,14 @@ function getCellStyle(count, maxCount) {
  *   loading {boolean}
  */
 const PeakHoursHeatmap = ({ matrix = [], loading = false }) => {
+  const { t } = useTranslation();
   const [tooltip, setTooltip] = useState(null);
+
+  const rawDaysShort = t('dashboard.daysShort', { returnObjects: true });
+  const daysShort = Array.isArray(rawDaysShort) ? rawDaysShort : DEFAULT_DAYS_SHORT;
+
+  const rawDaysFull = t('dashboard.daysFull', { returnObjects: true });
+  const daysFull = Array.isArray(rawDaysFull) ? rawDaysFull : DEFAULT_DAYS_FULL;
 
   if (loading) {
     return (
@@ -65,17 +74,17 @@ const PeakHoursHeatmap = ({ matrix = [], loading = false }) => {
   }
 
   if (!matrix.length) {
-    return <div className="chart-empty">Chưa có dữ liệu trong khoảng thời gian này</div>;
+    return <div className="chart-empty">{t('dashboard.noData')}</div>;
   }
 
   const maxCount = Math.max(...matrix.flat());
 
   return (
-    <div className="heatmap" role="grid" aria-label="Heatmap giờ cao điểm">
+    <div className="heatmap" role="grid" aria-label={t('dashboard.peakHours')}>
       {/* Header: day labels */}
       <div className="heatmap__row heatmap__header">
         <div className="heatmap__hour-label" />
-        {DAYS.map((d) => (
+        {daysShort.map((d) => (
           <div key={d} className="heatmap__day-label">{d}</div>
         ))}
       </div>
@@ -84,7 +93,7 @@ const PeakHoursHeatmap = ({ matrix = [], loading = false }) => {
       {HOURS.map((hour, hIdx) => (
         <div key={hour} className="heatmap__row" role="row">
           <div className="heatmap__hour-label">{hour}</div>
-          {DAYS.map((_, dIdx) => {
+          {daysShort.map((_, dIdx) => {
             const count = matrix[dIdx]?.[hIdx] ?? 0;
             const cellStyle = getCellStyle(count, maxCount);
             return (
@@ -93,11 +102,11 @@ const PeakHoursHeatmap = ({ matrix = [], loading = false }) => {
                 className={`heatmap__cell${count > 0 ? ' heatmap__cell--active' : ''}`}
                 style={cellStyle}
                 role="gridcell"
-                aria-label={`${DAY_FULL[dIdx]}, ${hour}: ${count} lượt`}
+                aria-label={`${daysFull[dIdx]}, ${hour}: ${t('dashboard.countUnit', { count })}`}
                 onMouseEnter={(e) => {
                   if (count > 0) {
                     setTooltip({
-                      day: DAY_FULL[dIdx],
+                      day: daysFull[dIdx],
                       hour,
                       count,
                       x: e.clientX,
@@ -120,15 +129,15 @@ const PeakHoursHeatmap = ({ matrix = [], loading = false }) => {
         >
           <strong>{tooltip.day}, {tooltip.hour}</strong>
           <br />
-          {tooltip.count} lượt đặt
+          {t('dashboard.countTimes', { count: tooltip.count })}
         </div>
       )}
 
       {/* Legend */}
       <div className="heatmap__legend">
-        <span className="heatmap__legend-label">Ít</span>
+        <span className="heatmap__legend-label">{t('dashboard.low')}</span>
         <div className="heatmap__legend-scale" />
-        <span className="heatmap__legend-label">Nhiều</span>
+        <span className="heatmap__legend-label">{t('dashboard.high')}</span>
       </div>
     </div>
   );

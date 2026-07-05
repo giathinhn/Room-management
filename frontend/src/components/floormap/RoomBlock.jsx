@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import './RoomBlock.css';
 
 const STATUS_CONFIG = {
@@ -21,22 +22,29 @@ const STATUS_CONFIG = {
   },
 };
 
-const formatTime = (isoString) => {
+const formatTime = (isoString, locale) => {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleTimeString('vi-VN', {
+  return new Date(isoString).toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
   });
 };
 
 const RoomBlock = ({ room, onClick, draggable, onDragStart, onDragOver, onDrop }) => {
+  const { t, i18n } = useTranslation();
   const config = STATUS_CONFIG[room.status] || STATUS_CONFIG.available;
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+
+  const statusLabel = {
+    available: t('floorMap.available'),
+    in_use: t('floorMap.inUse'),
+    upcoming: t('floorMap.upcoming'),
+  };
 
   const style = {
     gridColumnStart: room.mapX != null ? room.mapX + 1 : 'auto',
     gridRowStart: room.mapY != null ? room.mapY + 1 : 'auto',
   };
-
 
   return (
     <div
@@ -46,7 +54,7 @@ const RoomBlock = ({ room, onClick, draggable, onDragStart, onDragOver, onDrop }
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick(room)}
       role="button"
       tabIndex={0}
-      aria-label={`${room.name} — ${config.label}`}
+      aria-label={`${room.name} — ${statusLabel[room.status] || config.label}`}
       id={`room-block-${room.id}`}
       draggable={draggable}
       onDragStart={onDragStart}
@@ -67,7 +75,7 @@ const RoomBlock = ({ room, onClick, draggable, onDragStart, onDragOver, onDrop }
       {/* Status badge */}
       <div className={`room-block__badge ${config.badgeClass}`}>
         <span className="room-block__badge-dot" aria-hidden="true" />
-        {config.label}
+        {statusLabel[room.status] || config.label}
       </div>
 
       {/* Current booking info */}
@@ -75,7 +83,7 @@ const RoomBlock = ({ room, onClick, draggable, onDragStart, onDragOver, onDrop }
         <div className="room-block__booking-info">
           <div className="room-block__booking-title">{room.currentBooking.title}</div>
           <div className="room-block__booking-time">
-            {formatTime(room.currentBooking.startTime)} – {formatTime(room.currentBooking.endTime)}
+            {formatTime(room.currentBooking.startTime, locale)} – {formatTime(room.currentBooking.endTime, locale)}
           </div>
         </div>
       )}
@@ -84,7 +92,7 @@ const RoomBlock = ({ room, onClick, draggable, onDragStart, onDragOver, onDrop }
       {room.status === 'upcoming' && room.nextBooking && (
         <div className="room-block__booking-info">
           <div className="room-block__booking-time">
-            ⏳ {formatTime(room.nextBooking.startTime)}
+            ⏳ {formatTime(room.nextBooking.startTime, locale)}
           </div>
         </div>
       )}

@@ -1,41 +1,43 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import userService from '../../services/user.service';
 import './ChangeRoleModal.css';
-
-const ROLES = [
-  {
-    value: 'admin',
-    label: 'Admin',
-    emoji: '🔴',
-    desc: 'Toàn quyền quản trị hệ thống, quản lý user và phòng họp',
-    gradient: 'linear-gradient(135deg, #6366f1, #ec4899)',
-  },
-  {
-    value: 'approver',
-    label: 'Người duyệt',
-    emoji: '🔵',
-    desc: 'Duyệt / từ chối lịch đặt phòng, xem báo cáo',
-    gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-  },
-  {
-    value: 'user',
-    label: 'Nhân viên',
-    emoji: '⚫',
-    desc: 'Đặt phòng cơ bản, hủy lịch của bản thân',
-    gradient: 'linear-gradient(135deg, #10b981, #06b6d4)',
-  },
-];
 
 /**
  * ChangeRoleModal — allows admin to change a user's role via card selector.
  * @param {{ isOpen: boolean, onClose: Function, onSaved: Function, user: object|null }} props
  */
 function ChangeRoleModal({ isOpen, onClose, onSaved, user }) {
+  const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState('user');
   const [loading, setLoading]           = useState(false);
+
+  const rolesConfig = [
+    {
+      value: 'admin',
+      label: t('roles.admin'),
+      emoji: '🔴',
+      desc: t('users.adminDesc'),
+      gradient: 'linear-gradient(135deg, #6366f1, #ec4899)',
+    },
+    {
+      value: 'approver',
+      label: t('roles.approver'),
+      emoji: '🔵',
+      desc: t('users.approverDesc'),
+      gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+    },
+    {
+      value: 'user',
+      label: t('roles.user'),
+      emoji: '⚫',
+      desc: t('users.userDesc'),
+      gradient: 'linear-gradient(135deg, #10b981, #06b6d4)',
+    },
+  ];
 
   useEffect(() => {
     if (user) setSelectedRole(user.role || 'user');
@@ -50,11 +52,11 @@ function ChangeRoleModal({ isOpen, onClose, onSaved, user }) {
     setLoading(true);
     try {
       const updated = await userService.updateUserRole(user.id, selectedRole);
-      toast.success(`Đã đổi vai trò thành công!`);
+      toast.success(t('users.changeRoleSuccess'));
       onSaved(updated.data);
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể đổi vai trò');
+      toast.error(err.response?.data?.message || t('users.changeRoleFailed'));
     } finally {
       setLoading(false);
     }
@@ -63,13 +65,13 @@ function ChangeRoleModal({ isOpen, onClose, onSaved, user }) {
   if (!user) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="🔄 Thay đổi vai trò">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('users.changeRoleTitle')}>
       <div className="change-role-modal">
         {/* User info */}
         <div className="change-role-modal__user-info">
           <div
             className="change-role-modal__avatar"
-            style={{ background: ROLES.find((r) => r.value === user.role)?.gradient }}
+            style={{ background: rolesConfig.find((r) => r.value === user.role)?.gradient }}
           >
             {user.fullName?.charAt(0)?.toUpperCase() || '?'}
           </div>
@@ -81,7 +83,7 @@ function ChangeRoleModal({ isOpen, onClose, onSaved, user }) {
 
         {/* Role cards */}
         <div className="change-role-modal__roles">
-          {ROLES.map((role) => (
+          {rolesConfig.map((role) => (
             <button
               key={role.value}
               type="button"
@@ -106,14 +108,14 @@ function ChangeRoleModal({ isOpen, onClose, onSaved, user }) {
         {/* Downgrade warning */}
         {isDowngrade && (
           <div className="change-role-modal__warning">
-            ⚠️ Bạn đang hạ quyền của một Admin. Hành động này sẽ thu hồi toàn bộ quyền quản trị.
+            {t('users.downgradeWarning')}
           </div>
         )}
 
         {/* Actions */}
         <div className="change-role-modal__actions">
           <Button variant="ghost" onClick={onClose} disabled={loading}>
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button
             variant={isDowngrade ? 'danger' : 'primary'}
@@ -121,7 +123,7 @@ function ChangeRoleModal({ isOpen, onClose, onSaved, user }) {
             loading={loading}
             disabled={unchanged}
           >
-            {unchanged ? 'Không thay đổi' : 'Xác nhận'}
+            {unchanged ? t('users.noChange') : t('common.confirm')}
           </Button>
         </div>
       </div>

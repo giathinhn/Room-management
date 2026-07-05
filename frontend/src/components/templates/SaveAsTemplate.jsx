@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import templateService from '../../services/template.service';
 
 /**
@@ -9,6 +10,7 @@ import templateService from '../../services/template.service';
  *   booking  — the booking object (must have id, title, startTime, endTime, roomId)
  */
 function SaveAsTemplate({ booking }) {
+  const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,16 +28,16 @@ function SaveAsTemplate({ booking }) {
 
   const handleSave = async () => {
     if (!templateName.trim()) {
-      toast.error('Vui lòng nhập tên mẫu');
+      toast.error(t('templates.validation.nameRequired'));
       return;
     }
     setIsLoading(true);
     try {
       await templateService.createFromBooking(booking.id, templateName.trim());
-      toast.success('Đã lưu làm mẫu đặt phòng!');
+      toast.success(t('templates.saveSuccess'));
       handleClose();
     } catch (err) {
-      const msg = err.response?.data?.message || 'Lưu mẫu thất bại';
+      const msg = err.response?.data?.message || t('templates.saveFailed');
       toast.error(msg);
     } finally {
       setIsLoading(false);
@@ -52,9 +54,9 @@ function SaveAsTemplate({ booking }) {
         id="save-as-template-btn"
         className="save-tpl-btn"
         onClick={handleOpen}
-        title="Lưu booking này làm mẫu đặt phòng"
+        title={t('templates.saveAsTemplate')}
       >
-        💾 Lưu làm mẫu
+        {t('templates.saveAsTemplate')}
       </button>
 
       {showModal && (
@@ -65,20 +67,20 @@ function SaveAsTemplate({ booking }) {
           aria-modal="true"
         >
           <div className="save-tpl-modal">
-            <h3 className="save-tpl-modal__title">💾 Lưu làm mẫu đặt phòng</h3>
+            <h3 className="save-tpl-modal__title">{t('templates.saveAsTitle')}</h3>
             <p className="save-tpl-modal__desc">
-              Nhập tên để nhận diện mẫu này trong tương lai.
+              {t('templates.saveAsDesc')}
             </p>
 
             <div className="save-tpl-modal__field">
               <label htmlFor="save-tpl-name" className="save-tpl-modal__label">
-                Tên mẫu
+                {t('templates.templateName')}
               </label>
               <input
                 id="save-tpl-name"
                 type="text"
                 className="save-tpl-modal__input"
-                placeholder="vd: Họp sprint hàng tuần"
+                placeholder={t('templates.namePlaceholder')}
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 maxLength={100}
@@ -94,7 +96,7 @@ function SaveAsTemplate({ booking }) {
                 onClick={handleClose}
                 disabled={isLoading}
               >
-                Hủy
+                {t('common.cancel')}
               </button>
               <button
                 id="save-tpl-confirm"
@@ -102,7 +104,7 @@ function SaveAsTemplate({ booking }) {
                 onClick={handleSave}
                 disabled={isLoading}
               >
-                {isLoading ? 'Đang lưu...' : '💾 Lưu'}
+                {isLoading ? t('common.saving') : `💾 ${t('common.save')}`}
               </button>
             </div>
           </div>

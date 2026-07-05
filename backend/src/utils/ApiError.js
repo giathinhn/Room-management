@@ -9,7 +9,13 @@ class ApiError extends Error {
    * @param {boolean} [isOperational=true] - Whether error is operational (trusted)
    */
   constructor(statusCode, message, isOperational = true) {
-    super(message);
+    if (typeof message === 'object' && message !== null) {
+      super(message.message || message.code);
+      this.code = message.code;
+    } else {
+      super(message);
+      this.code = message;
+    }
     this.statusCode = statusCode;
     this.isOperational = isOperational;
     this.name = 'ApiError';

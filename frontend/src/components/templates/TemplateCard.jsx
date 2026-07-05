@@ -1,14 +1,16 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './TemplateCard.css';
 
 /**
  * Format a Prisma Time field (1970-01-01T...) to "HH:mm".
  * @param {string} timeStr
+ * @param {string} locale
  */
-function formatTime(timeStr) {
+function formatTime(timeStr, locale) {
   if (!timeStr) return '--:--';
   const d = new Date(timeStr);
-  return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 /**
@@ -21,7 +23,10 @@ function formatTime(timeStr) {
  *   onDelete  — called when user clicks "Xóa"
  */
 function TemplateCard({ template, onUse, onEdit, onDelete }) {
-  const timeRange = `${formatTime(template.startTime)} – ${formatTime(template.endTime)}`;
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+
+  const timeRange = `${formatTime(template.startTime, locale)} – ${formatTime(template.endTime, locale)}`;
 
   return (
     <div className="tpl-card" tabIndex={0} role="article" aria-label={`Template: ${template.name}`}>
@@ -36,7 +41,7 @@ function TemplateCard({ template, onUse, onEdit, onDelete }) {
         {template.room ? (
           <span className="tpl-card__room">📍 {template.room.name}</span>
         ) : (
-          <span className="tpl-card__room tpl-card__room--none">📍 Chưa chọn phòng</span>
+          <span className="tpl-card__room tpl-card__room--none">📍 {t('templates.noRoomSelected')}</span>
         )}
         <span className="tpl-card__time">🕐 {timeRange}</span>
         <span className="tpl-card__title" title={template.title}>
@@ -50,23 +55,23 @@ function TemplateCard({ template, onUse, onEdit, onDelete }) {
           id={`tpl-use-${template.id}`}
           className="tpl-card__btn tpl-card__btn--use"
           onClick={() => onUse(template)}
-          title="Đặt phòng từ mẫu này"
+          title={t('templates.bookNow')}
         >
-          ⚡ Đặt ngay
+          {t('templates.bookNow')}
         </button>
         <button
           id={`tpl-edit-${template.id}`}
           className="tpl-card__btn tpl-card__btn--edit"
           onClick={() => onEdit(template)}
-          title="Chỉnh sửa mẫu"
+          title={t('templates.editTitle')}
         >
-          ✏️ Sửa
+          {t('templates.editBtn')}
         </button>
         <button
           id={`tpl-delete-${template.id}`}
           className="tpl-card__btn tpl-card__btn--delete"
           onClick={() => onDelete(template)}
-          title="Xóa mẫu"
+          title={t('templates.deleteConfirm', { name: '' }).split('?')[0]}
         >
           🗑️
         </button>

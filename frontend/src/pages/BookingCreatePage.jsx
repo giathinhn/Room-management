@@ -7,6 +7,7 @@ import SlotPreview from '../components/bookings/SlotPreview';
 import SmartSuggestions from '../components/bookings/SmartSuggestions';
 import bookingService from '../services/booking.service';
 import templateService from '../services/template.service';
+import { useTranslation } from 'react-i18next';
 import './BookingCreatePage.css';
 
 /**
@@ -14,8 +15,11 @@ import './BookingCreatePage.css';
  * Toggle between "Đặt 1 lần" and "Đặt định kỳ" modes.
  */
 function BookingCreatePage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
 
   // Read pre-filled values from URL query params (set by RoomSearchPage or TemplatesPage)
   const initialValues = useMemo(() => {
@@ -88,15 +92,15 @@ function BookingCreatePage() {
     setConflicts([]);
     try {
       await bookingService.createBooking(data);
-      toast.success('Đặt phòng thành công! Đang chờ duyệt.');
+      toast.success(t('bookings.createSuccessPending'));
       navigate('/bookings');
     } catch (err) {
       if (err.response?.status === 409) {
         setConflicts(err.response.data.conflicts || []);
-        toast.error('Thời gian bị trùng! Vui lòng chọn thời gian khác.');
+        toast.error(t('bookings.timeConflict'));
       } else {
-        const msg = err.response?.data?.message || 'Đặt phòng thất bại. Vui lòng thử lại.';
-        toast.error(msg);
+        const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+        toast.error(t(`errors.${errorCode}`));
       }
     } finally {
       setIsLoading(false);
@@ -114,7 +118,7 @@ function BookingCreatePage() {
     // Validate required fields
     const { roomId, title, startDate, endDate, startTime, endTime, frequency } = recurringForm;
     if (!roomId || !title || !startDate || !endDate || !startTime || !endTime || !frequency) {
-      toast.error('Vui lòng điền đầy đủ thông tin trước khi xem trước.');
+      toast.error(t('bookings.fillAllRequired'));
       return;
     }
 
@@ -124,11 +128,11 @@ function BookingCreatePage() {
       const result = await bookingService.previewRecurring(recurringForm);
       setPreviewResult(result.data);
       if (result.data.totalGenerated === 0) {
-        toast.error('Không có slots nào được tạo. Kiểm tra lại ngày và giờ.');
+        toast.error(t('bookings.noSlotsCreated'));
       }
     } catch (err) {
-      const msg = err.response?.data?.message || 'Không thể xem trước slots.';
-      toast.error(msg);
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setIsPreviewing(false);
     }
@@ -143,13 +147,11 @@ function BookingCreatePage() {
         ...recurringForm,
         confirmedSlots: previewResult.okSlots,
       });
-      toast.success(
-        `Đặt định kỳ thành công! ${result.data.bookings.length} booking đã được tạo.`
-      );
+      toast.success(t('bookings.recurringSuccess', { count: result.data.bookings.length }));
       navigate('/bookings');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Đặt định kỳ thất bại. Vui lòng thử lại.';
-      toast.error(msg);
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setIsConfirming(false);
     }
@@ -164,18 +166,18 @@ function BookingCreatePage() {
           className="create-page__back"
           onClick={() => navigate('/bookings')}
         >
-          ← Quay lại
+          ← {t('bookings.back')}
         </button>
         <div className="create-page__title-area">
-          <h1 className="create-page__title">➕ Đặt phòng họp</h1>
+          <h1 className="create-page__title">➕ {t('bookings.createTitle')}</h1>
           <p className="create-page__subtitle">
-            Chọn thời gian, phòng trống và điền thông tin để đặt phòng
+            {t('bookings.createSubtitle')}
           </p>
         </div>
       </div>
 
       {/* ── Mode Toggle ─────────────────────────────────────────────────────── */}
-      <div className="create-page__mode-toggle" role="group" aria-label="Chọn loại đặt phòng">
+      <div className="create-page__mode-toggle" role="group" aria-label={t('bookings.createTitle')}>
         <button
           id="mode-single-btn"
           type="button"
@@ -184,7 +186,7 @@ function BookingCreatePage() {
           className={`create-page__mode-btn ${mode === 'single' ? 'create-page__mode-btn--active' : ''}`}
           onClick={() => setMode('single')}
         >
-          📌 Đặt 1 lần
+          📌 {t('bookings.singleBooking')}
         </button>
         <button
           id="mode-recurring-btn"
@@ -194,7 +196,7 @@ function BookingCreatePage() {
           className={`create-page__mode-btn ${mode === 'recurring' ? 'create-page__mode-btn--active' : ''}`}
           onClick={() => setMode('recurring')}
         >
-          🔄 Đặt định kỳ
+          🔄 {t('bookings.recurringBooking')}
         </button>
       </div>
 
@@ -208,22 +210,22 @@ function BookingCreatePage() {
               <div className="create-page__templates">
                 <div className="create-page__templates-header">
                   <span className="create-page__templates-icon">📋</span>
-                  <span className="create-page__templates-label">Đặt từ mẫu</span>
+                  <span className="create-page__templates-label">{t('bookings.bookFromTemplate')}</span>
                   <button
                     id="go-to-templates-btn"
                     className="create-page__templates-link"
                     onClick={() => navigate('/templates')}
                   >
-                    Quản lý →
+                    {t('bookings.manage')}
                   </button>
                 </div>
                 <div className="create-page__templates-scroll">
                   {templates.map((tpl) => {
                     const startStr = tpl.startTime
-                      ? new Date(tpl.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+                      ? new Date(tpl.startTime).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
                       : '';
                     const endStr = tpl.endTime
-                      ? new Date(tpl.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+                      ? new Date(tpl.endTime).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
                       : '';
                     return (
                       <button
@@ -274,13 +276,13 @@ function BookingCreatePage() {
             <div className="create-page__recurring-meta">
               <div className="create-page__recurring-field">
                 <label htmlFor="recurring-title" className="create-page__recurring-label">
-                  Tiêu đề cuộc họp
+                  {t('bookings.meetingTitle')}
                 </label>
                 <input
                   id="recurring-title"
                   type="text"
                   className="create-page__recurring-input"
-                  placeholder="Họp nhóm tuần..."
+                  placeholder={t('bookings.meetingTitle') + '...'}
                   value={recurringForm.title}
                   onChange={(e) => handleRecurringChange('title', e.target.value)}
                   maxLength={200}
@@ -288,13 +290,13 @@ function BookingCreatePage() {
               </div>
               <div className="create-page__recurring-field">
                 <label htmlFor="recurring-room-id" className="create-page__recurring-label">
-                  ID Phòng họp
+                  {t('rooms.name')} / ID
                 </label>
                 <input
                   id="recurring-room-id"
                   type="text"
                   className="create-page__recurring-input"
-                  placeholder="UUID phòng họp..."
+                  placeholder={t('bookings.uuidPlaceholder')}
                   value={recurringForm.roomId}
                   onChange={(e) => handleRecurringChange('roomId', e.target.value)}
                 />

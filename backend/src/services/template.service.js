@@ -1,5 +1,6 @@
 const templateRepository = require('../repositories/template.repository');
 const roomRepository = require('../repositories/room.repository');
+const ApiError = require('../utils/ApiError');
 
 /** Maximum templates per user */
 const MAX_TEMPLATES = 10;
@@ -39,9 +40,7 @@ const templateService = {
     // 1. Check limit
     const count = await templateRepository.countByUserId(userId);
     if (count >= MAX_TEMPLATES) {
-      const err = new Error(`Bạn đã đạt giới hạn ${MAX_TEMPLATES} mẫu đặt phòng`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('TEMPLATE_LIMIT_REACHED');
     }
 
     // 2. Validate roomId if provided
@@ -49,9 +48,7 @@ const templateService = {
     if (roomId) {
       const room = await roomRepository.findById(roomId);
       if (!room || !room.isActive) {
-        const err = new Error('Phòng không tồn tại hoặc đã bị vô hiệu hóa');
-        err.statusCode = 404;
-        throw err;
+        throw ApiError.notFound('ROOM_NOT_FOUND');
       }
     }
 
@@ -61,9 +58,7 @@ const templateService = {
 
     // 4. Validate time range
     if (startTimeParsed >= endTimeParsed) {
-      const err = new Error('Giờ bắt đầu phải trước giờ kết thúc');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
     return templateRepository.create({
@@ -88,14 +83,10 @@ const templateService = {
     // 1. Check ownership
     const template = await templateRepository.findById(id);
     if (!template) {
-      const err = new Error('Mẫu đặt phòng không tồn tại');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('TEMPLATE_NOT_FOUND');
     }
     if (template.userId !== userId) {
-      const err = new Error('Bạn không có quyền chỉnh sửa mẫu này');
-      err.statusCode = 403;
-      throw err;
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     const updateData = {};
@@ -109,9 +100,7 @@ const templateService = {
       if (roomId) {
         const room = await roomRepository.findById(roomId);
         if (!room || !room.isActive) {
-          const err = new Error('Phòng không tồn tại hoặc đã bị vô hiệu hóa');
-          err.statusCode = 404;
-          throw err;
+          throw ApiError.notFound('ROOM_NOT_FOUND');
         }
       }
       updateData.roomId = roomId;
@@ -124,9 +113,7 @@ const templateService = {
     const newStart = updateData.startTime || template.startTime;
     const newEnd = updateData.endTime || template.endTime;
     if (newStart >= newEnd) {
-      const err = new Error('Giờ bắt đầu phải trước giờ kết thúc');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
     return templateRepository.update(id, updateData);
@@ -142,14 +129,10 @@ const templateService = {
   async delete(id, userId) {
     const template = await templateRepository.findById(id);
     if (!template) {
-      const err = new Error('Mẫu đặt phòng không tồn tại');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('TEMPLATE_NOT_FOUND');
     }
     if (template.userId !== userId) {
-      const err = new Error('Bạn không có quyền xóa mẫu này');
-      err.statusCode = 403;
-      throw err;
+      throw ApiError.forbidden('FORBIDDEN');
     }
     return templateRepository.delete(id);
   },
@@ -163,9 +146,7 @@ const templateService = {
   async createFromBooking(userId, booking, name) {
     const count = await templateRepository.countByUserId(userId);
     if (count >= MAX_TEMPLATES) {
-      const err = new Error(`Bạn đã đạt giới hạn ${MAX_TEMPLATES} mẫu đặt phòng`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('TEMPLATE_LIMIT_REACHED');
     }
 
     // Extract HH:mm from booking DateTime

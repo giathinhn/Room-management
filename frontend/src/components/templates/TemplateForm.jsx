@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
 import './TemplateForm.css';
 
@@ -13,6 +14,7 @@ import './TemplateForm.css';
  *   isLoading   — submit in progress
  */
 function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoading }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: initial.name || '',
     roomId: initial.roomId || '',
@@ -51,17 +53,17 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
 
   const validate = () => {
     const newErrors = {};
-    if (!form.name.trim()) newErrors.name = 'Tên mẫu là bắt buộc';
-    else if (form.name.trim().length > 100) newErrors.name = 'Tên mẫu không quá 100 ký tự';
+    if (!form.name.trim()) newErrors.name = t('templates.validation.nameRequired');
+    else if (form.name.trim().length > 100) newErrors.name = t('templates.validation.nameMaxLength');
 
-    if (!form.title.trim()) newErrors.title = 'Tiêu đề cuộc họp là bắt buộc';
-    else if (form.title.trim().length > 200) newErrors.title = 'Tiêu đề không quá 200 ký tự';
+    if (!form.title.trim()) newErrors.title = t('templates.validation.titleRequired');
+    else if (form.title.trim().length > 200) newErrors.title = t('templates.validation.titleMaxLength');
 
-    if (!form.startTime) newErrors.startTime = 'Giờ bắt đầu là bắt buộc';
-    if (!form.endTime) newErrors.endTime = 'Giờ kết thúc là bắt buộc';
+    if (!form.startTime) newErrors.startTime = t('templates.validation.startTimeRequired');
+    if (!form.endTime) newErrors.endTime = t('templates.validation.endTimeRequired');
 
     if (form.startTime && form.endTime && form.startTime >= form.endTime) {
-      newErrors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
+      newErrors.endTime = t('templates.validation.endTimeAfterStart');
     }
 
     setErrors(newErrors);
@@ -91,13 +93,13 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
         {/* Header */}
         <div className="tpl-modal__header">
           <h2 className="tpl-modal__title">
-            {mode === 'create' ? '➕ Tạo mẫu mới' : '✏️ Chỉnh sửa mẫu'}
+            {mode === 'create' ? t('templates.createTitle') : t('templates.editTitle')}
           </h2>
           <button
             id="tpl-modal-close-btn"
             className="tpl-modal__close"
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={t('floorMap.close')}
           >
             ✕
           </button>
@@ -108,13 +110,13 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
           {/* Template name */}
           <div className={`tpl-modal__field ${errors.name ? 'tpl-modal__field--error' : ''}`}>
             <label htmlFor="tpl-name" className="tpl-modal__label">
-              Tên mẫu <span className="tpl-modal__required">*</span>
+              {t('templates.templateName')} <span className="tpl-modal__required">*</span>
             </label>
             <input
               id="tpl-name"
               type="text"
               className="tpl-modal__input"
-              placeholder="vd: Họp sprint hàng tuần"
+              placeholder={t('templates.namePlaceholder')}
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
               maxLength={100}
@@ -126,13 +128,13 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
           {/* Meeting title */}
           <div className={`tpl-modal__field ${errors.title ? 'tpl-modal__field--error' : ''}`}>
             <label htmlFor="tpl-title" className="tpl-modal__label">
-              Tiêu đề cuộc họp <span className="tpl-modal__required">*</span>
+              {t('templates.meetingTitleLabel')} <span className="tpl-modal__required">*</span>
             </label>
             <input
               id="tpl-title"
               type="text"
               className="tpl-modal__input"
-              placeholder="vd: Sprint Planning Q3"
+              placeholder={t('bookings.form.titlePlaceholder')}
               value={form.title}
               onChange={(e) => handleChange('title', e.target.value)}
               maxLength={200}
@@ -143,7 +145,7 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
           {/* Room dropdown */}
           <div className="tpl-modal__field">
             <label htmlFor="tpl-room" className="tpl-modal__label">
-              Phòng họp <span className="tpl-modal__optional">(tuỳ chọn)</span>
+              {t('templates.roomLabel')}
             </label>
             <select
               id="tpl-room"
@@ -152,7 +154,7 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
               onChange={(e) => handleChange('roomId', e.target.value)}
               disabled={roomsLoading}
             >
-              <option value="">-- Không chọn phòng --</option>
+              <option value="">{t('templates.noRoomSelectedOption')}</option>
               {(() => {
                 const sorted = [...rooms].sort((a, b) => {
                   if (a.isFavorite && !b.isFavorite) return -1;
@@ -172,7 +174,7 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
           <div className="tpl-modal__time-row">
             <div className={`tpl-modal__field ${errors.startTime ? 'tpl-modal__field--error' : ''}`}>
               <label htmlFor="tpl-start" className="tpl-modal__label">
-                Giờ bắt đầu <span className="tpl-modal__required">*</span>
+                {t('templates.startTimeLabel')} <span className="tpl-modal__required">*</span>
               </label>
               <input
                 id="tpl-start"
@@ -186,7 +188,7 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
 
             <div className={`tpl-modal__field ${errors.endTime ? 'tpl-modal__field--error' : ''}`}>
               <label htmlFor="tpl-end" className="tpl-modal__label">
-                Giờ kết thúc <span className="tpl-modal__required">*</span>
+                {t('templates.endTimeLabel')} <span className="tpl-modal__required">*</span>
               </label>
               <input
                 id="tpl-end"
@@ -208,7 +210,7 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
               onClick={onClose}
               disabled={isLoading}
             >
-              Hủy
+              {t('common.cancel')}
             </button>
             <button
               id="tpl-modal-save-btn"
@@ -216,7 +218,7 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
               className="tpl-modal__btn tpl-modal__btn--save"
               disabled={isLoading}
             >
-              {isLoading ? 'Đang lưu...' : mode === 'create' ? '💾 Tạo mẫu' : '💾 Cập nhật'}
+              {isLoading ? t('common.saving') : mode === 'create' ? `💾 ${t('templates.create')}` : `💾 ${t('common.save')}`}
             </button>
           </div>
         </form>

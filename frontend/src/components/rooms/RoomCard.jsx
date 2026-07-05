@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiStar } from 'react-icons/fi';
 import { BsQrCode } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import roomService from '../../services/room.service';
 import RoomQRModal from './RoomQRModal';
@@ -29,6 +30,7 @@ export { EQUIPMENT_ICONS };
  *   onFavoriteToggle {Function} Called when favorite status changes (optional)
  */
 function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle }) {
+  const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(room.isFavorite || false);
   const [qrOpen, setQrOpen] = useState(false);
 
@@ -43,25 +45,35 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
     try {
       if (newStatus) {
         await roomService.favoriteRoom(room.id);
-        toast.success(`Đã thêm "${room.name}" vào danh sách yêu thích`);
+        toast.success(t('rooms.favoriteAdded', { name: room.name }));
       } else {
         await roomService.unfavoriteRoom(room.id);
-        toast.success(`Đã xóa "${room.name}" khỏi danh sách yêu thích`);
+        toast.success(t('rooms.favoriteRemoved', { name: room.name }));
       }
       if (onFavoriteToggle) {
         onFavoriteToggle(room.id, newStatus);
       }
     } catch (err) {
       setIsFavorite(!newStatus);
-      toast.error('Không thể cập nhật trạng thái yêu thích');
+      toast.error(t('rooms.favoriteError'));
     }
+  };
+
+  const equipmentLabel = {
+    'Máy chiếu': t('rooms.equipmentOptions.projector'),
+    'Micro': t('rooms.equipmentOptions.microphone'),
+    'Bảng trắng': t('rooms.equipmentOptions.whiteboard'),
+    'TV': t('rooms.equipmentOptions.tv'),
+    'Webcam': t('rooms.equipmentOptions.webcam'),
+    'Loa': t('rooms.equipmentOptions.speaker'),
+    'Điều hòa': t('rooms.equipmentOptions.airConditioner'),
   };
 
   return (
     <article className="room-card" id={`room-card-${room.id}`}>
       {/* Status badge */}
       {!room.isActive && (
-        <span className="room-card__inactive-badge">Không hoạt động</span>
+        <span className="room-card__inactive-badge">{t('rooms.inactive')}</span>
       )}
 
       <div className="room-card__header">
@@ -70,7 +82,7 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
             type="button"
             className={`room-card__favorite-btn ${isFavorite ? 'room-card__favorite-btn--active' : ''}`}
             onClick={handleFavoriteClick}
-            title={isFavorite ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+            title={isFavorite ? t('rooms.removeFavorite') : t('rooms.addFavorite')}
           >
             <FiStar fill={isFavorite ? '#fbbf24' : 'none'} />
           </button>
@@ -78,7 +90,7 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
         </div>
         <div className="room-card__capacity-badge">
           <span className="room-card__capacity-icon">👥</span>
-          <span>{room.capacity} người</span>
+          <span>{room.capacity} {t('rooms.capacityUnit')}</span>
         </div>
       </div>
 
@@ -91,11 +103,11 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
       {room.equipment && room.equipment.length > 0 && (
         <div className="room-card__equipment">
           {room.equipment.map((item) => (
-            <span key={item} className="room-card__equipment-badge" title={item}>
+            <span key={item} className="room-card__equipment-badge" title={equipmentLabel[item] || item}>
               <span className="room-card__equipment-icon">
                 {EQUIPMENT_ICONS[item] || '🔧'}
               </span>
-              <span className="room-card__equipment-label">{item}</span>
+              <span className="room-card__equipment-label">{equipmentLabel[item] || item}</span>
             </span>
           ))}
         </div>
@@ -108,7 +120,7 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
           className="btn btn--sm btn--ghost"
           onClick={() => onView(room.id)}
         >
-          Xem chi tiết
+          {t('common.viewDetails')}
         </button>
 
         <button
@@ -118,7 +130,7 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
             e.stopPropagation();
             setQrOpen(true);
           }}
-          title="Xem mã QR của phòng này"
+          title={t('rooms.viewQR')}
           style={{ padding: '0.4rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}
         >
           <BsQrCode />
@@ -131,14 +143,14 @@ function RoomCard({ room, onEdit, onDelete, onView, isAdmin, onFavoriteToggle })
               className="btn btn--sm btn--primary"
               onClick={() => onEdit(room)}
             >
-              Sửa
+              {t('common.edit')}
             </button>
             <button
               id={`delete-room-${room.id}`}
               className="btn btn--sm btn--danger"
               onClick={() => onDelete(room)}
             >
-              Xóa
+              {t('common.delete')}
             </button>
           </>
         )}

@@ -18,7 +18,7 @@ const commentService = {
   async getByBooking(bookingId) {
     const booking = await bookingRepository.findById(bookingId);
     if (!booking) {
-      throw ApiError.notFound('Booking not found');
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
     return commentRepository.findByBookingId(bookingId);
   },
@@ -33,15 +33,15 @@ const commentService = {
    */
   async create(bookingId, user, content) {
     if (!content || content.trim().length === 0) {
-      throw ApiError.badRequest('Nội dung bình luận không được để trống');
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
     if (content.length > 1000) {
-      throw ApiError.badRequest('Nội dung bình luận tối đa 1000 ký tự');
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
     const booking = await bookingRepository.findById(bookingId);
     if (!booking) {
-      throw ApiError.notFound('Booking not found');
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
 
     // Only owner, approver (approvedBy), or admin can comment
@@ -51,7 +51,7 @@ const commentService = {
     const isApproverRole = user.role === 'approver';
 
     if (!isOwner && !isApprover && !isAdmin && !isApproverRole) {
-      throw ApiError.forbidden('Bạn không có quyền bình luận trên booking này');
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     return commentRepository.create({
@@ -70,26 +70,26 @@ const commentService = {
    */
   async update(commentId, user, content) {
     if (!content || content.trim().length === 0) {
-      throw ApiError.badRequest('Nội dung bình luận không được để trống');
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
     if (content.length > 1000) {
-      throw ApiError.badRequest('Nội dung bình luận tối đa 1000 ký tự');
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
     const comment = await commentRepository.findById(commentId);
     if (!comment) {
-      throw ApiError.notFound('Comment not found');
+      throw ApiError.notFound('COMMENT_NOT_FOUND');
     }
 
     // Only the comment owner can edit
     if (comment.userId !== user.id) {
-      throw ApiError.forbidden('Bạn không có quyền sửa bình luận này');
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     // Only within 5 minutes
     const ageMs = Date.now() - new Date(comment.createdAt).getTime();
     if (ageMs > EDIT_WINDOW_MS) {
-      throw ApiError.forbidden('Chỉ được sửa bình luận trong vòng 5 phút đầu');
+      throw ApiError.forbidden('COMMENT_EDIT_TIMEOUT');
     }
 
     return commentRepository.update(commentId, content.trim());
@@ -104,7 +104,7 @@ const commentService = {
   async delete(commentId, user) {
     const comment = await commentRepository.findById(commentId);
     if (!comment) {
-      throw ApiError.notFound('Comment not found');
+      throw ApiError.notFound('COMMENT_NOT_FOUND');
     }
 
     // Only the comment owner (or admin) can delete
@@ -112,14 +112,14 @@ const commentService = {
     const isAdmin = user.role === 'admin';
 
     if (!isOwner && !isAdmin) {
-      throw ApiError.forbidden('Bạn không có quyền xóa bình luận này');
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     // Only within 5 minutes (admins bypass this)
     if (!isAdmin) {
       const ageMs = Date.now() - new Date(comment.createdAt).getTime();
       if (ageMs > EDIT_WINDOW_MS) {
-        throw ApiError.forbidden('Chỉ được xóa bình luận trong vòng 5 phút đầu');
+        throw ApiError.forbidden('COMMENT_EDIT_TIMEOUT');
       }
     }
 

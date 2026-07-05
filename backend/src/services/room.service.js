@@ -7,44 +7,7 @@ const {
   availableRoomSchema,
 } = require('../validators/room.validator');
 
-/**
- * Helper to remove Vietnamese diacritics/accents.
- */
-function removeAccents(str) {
-  if (!str) return '';
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D');
-}
 
-/**
- * Parse floor and building from a location string.
- * Supports common Vietnamese formats, e.g.:
- *   "Tang 2, Toa A"  →  { floor: '2', building: 'A' }
- *   "Tầng 3, Tòa B"  →  { floor: '3', building: 'B' }
- *   "Floor 2 - Building C" → { floor: '2', building: 'C' }
- */
-function parseLocationInfo(location) {
-  if (!location) return { floor: null, building: null };
-
-  // Normalize string to ASCII to avoid diacritic regex issues
-  const normalized = removeAccents(location);
-
-  // Match floor number
-  const floorMatch = normalized.match(/(?:tang|floor|lau)[.\s-]*([0-9]+)/i);
-
-  // Match building/toa
-  const buildingMatch = normalized.match(
-    /(?:toa|building|block|bl?dg)[.\s-]*([A-Za-z0-9]+)/i
-  );
-
-  return {
-    floor: floorMatch ? floorMatch[1] : null,
-    building: buildingMatch ? buildingMatch[1].toUpperCase() : null,
-  };
-}
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
@@ -86,7 +49,7 @@ const roomService = {
   async getById(id, user) {
     const room = await roomRepository.findById(id, user?.id);
     if (!room) {
-      throw ApiError.notFound('Room not found');
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
     return room;
   },
@@ -108,7 +71,7 @@ const roomService = {
     // Check for duplicate room name
     const existing = await roomRepository.findByName(name);
     if (existing) {
-      throw ApiError.conflict('A room with this name already exists');
+      throw ApiError.conflict('ROOM_NAME_EXISTS');
     }
 
     const finalBuilding = building.toUpperCase();
@@ -148,19 +111,19 @@ const roomService = {
 
     const room = await roomRepository.findById(id);
     if (!room) {
-      throw ApiError.notFound('Room not found');
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
 
     // If name is changing, check for duplicates
     if (parsed.data.name && parsed.data.name !== room.name) {
       const existingName = await roomRepository.findByName(parsed.data.name, id);
       if (existingName) {
-        throw ApiError.conflict('A room with this name already exists');
+        throw ApiError.conflict('ROOM_NAME_EXISTS');
       }
     }
 
     // Resolve final floor/building
-    let finalFloor = parsed.data.floor !== undefined ? parsed.data.floor : room.floor;
+    const finalFloor = parsed.data.floor !== undefined ? parsed.data.floor : room.floor;
     let finalBuilding = parsed.data.building !== undefined ? parsed.data.building : room.building;
     if (finalBuilding) finalBuilding = finalBuilding.toUpperCase();
 
@@ -177,7 +140,7 @@ const roomService = {
       }
     }
 
-    let extraFields = {
+    const extraFields = {
       location: finalLocation,
     };
 
@@ -203,7 +166,7 @@ const roomService = {
   async delete(id) {
     const room = await roomRepository.findById(id);
     if (!room) {
-      throw ApiError.notFound('Room not found');
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
 
     await roomRepository.softDelete(id);
@@ -264,7 +227,7 @@ const roomService = {
   async updateMapPosition(roomId, mapData) {
     const room = await roomRepository.findById(roomId);
     if (!room) {
-      throw ApiError.notFound('Room not found');
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
     return roomRepository.updateMapPosition(roomId, mapData);
   },
@@ -277,7 +240,7 @@ const roomService = {
   async favoriteRoom(userId, roomId) {
     const room = await roomRepository.findById(roomId);
     if (!room) {
-      throw ApiError.notFound('Room not found');
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
     return roomRepository.favoriteRoom(userId, roomId);
   },
@@ -290,7 +253,7 @@ const roomService = {
   async unfavoriteRoom(userId, roomId) {
     const room = await roomRepository.findById(roomId);
     if (!room) {
-      throw ApiError.notFound('Room not found');
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
     return roomRepository.unfavoriteRoom(userId, roomId);
   },

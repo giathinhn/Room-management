@@ -1,13 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './BookingFilter.css';
-
-const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả trạng thái' },
-  { value: 'pending', label: '🟡 Chờ duyệt' },
-  { value: 'approved', label: '🟢 Đã duyệt' },
-  { value: 'rejected', label: '🔴 Từ chối' },
-  { value: 'cancelled', label: '⚪ Đã hủy' },
-];
 
 /**
  * BookingFilter — filter bar for the bookings list page.
@@ -20,8 +13,17 @@ const STATUS_OPTIONS = [
  * }} props
  */
 function BookingFilter({ rooms = [], filters, onChange, onReset }) {
+  const { t } = useTranslation();
   const hasFilters =
     filters.roomId || filters.status || filters.startDate || filters.endDate;
+
+  const statusOptions = [
+    { value: '', label: t('bookings.allStatus') },
+    { value: 'pending', label: `🟡 ${t('bookings.status.pending')}` },
+    { value: 'approved', label: `🟢 ${t('bookings.status.approved')}` },
+    { value: 'rejected', label: `🔴 ${t('bookings.status.rejected')}` },
+    { value: 'cancelled', label: `⚪ ${t('bookings.status.cancelled')}` },
+  ];
 
   return (
     <div className="booking-filter">
@@ -32,7 +34,7 @@ function BookingFilter({ rooms = [], filters, onChange, onReset }) {
         value={filters.roomId || ''}
         onChange={(e) => onChange({ ...filters, roomId: e.target.value, page: 1 })}
       >
-        <option value="">📍 Tất cả phòng</option>
+        <option value="">📍 {t('calendar.allRooms')}</option>
         {(() => {
           const sorted = [...rooms].sort((a, b) => {
             if (a.isFavorite && !b.isFavorite) return -1;
@@ -54,7 +56,7 @@ function BookingFilter({ rooms = [], filters, onChange, onReset }) {
         value={filters.status || ''}
         onChange={(e) => onChange({ ...filters, status: e.target.value, page: 1 })}
       >
-        {STATUS_OPTIONS.map((o) => (
+        {statusOptions.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>
@@ -69,7 +71,8 @@ function BookingFilter({ rooms = [], filters, onChange, onReset }) {
           className="booking-filter__date"
           value={filters.startDate || ''}
           onChange={(e) => onChange({ ...filters, startDate: e.target.value, page: 1 })}
-          placeholder="Từ ngày"
+          placeholder={t('bookings.fromDate')}
+          aria-label={t('bookings.fromDate')}
         />
         <span className="booking-filter__date-sep">→</span>
         <input
@@ -79,7 +82,8 @@ function BookingFilter({ rooms = [], filters, onChange, onReset }) {
           value={filters.endDate || ''}
           min={filters.startDate || undefined}
           onChange={(e) => onChange({ ...filters, endDate: e.target.value, page: 1 })}
-          placeholder="Đến ngày"
+          placeholder={t('bookings.toDate')}
+          aria-label={t('bookings.toDate')}
         />
       </div>
 
@@ -90,7 +94,7 @@ function BookingFilter({ rooms = [], filters, onChange, onReset }) {
           className="booking-filter__reset"
           onClick={onReset}
         >
-          ↺ Xóa bộ lọc
+          ↺ {t('bookings.clearFilters')}
         </button>
       )}
     </div>

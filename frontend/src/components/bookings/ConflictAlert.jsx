@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import suggestionService from '../../services/suggestion.service';
 import './ConflictAlert.css';
 
 /**
- * Format a datetime string to readable Vietnamese format.
+ * Format a datetime string to readable localized format.
  */
-function formatDateTime(dateStr) {
+function formatDateTime(dateStr, locale) {
   const d = new Date(dateStr);
-  return d.toLocaleString('vi-VN', {
+  return d.toLocaleString(locale, {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
@@ -54,10 +55,13 @@ function ConflictAlert({ conflicts, roomId, startTime, endTime, onDismiss, onSel
 }
 
 function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, onSelectRoom, onSelectSlot }) {
+  const { t, i18n } = useTranslation();
   const [altRooms, setAltRooms]   = useState([]);
   const [altSlots, setAltSlots]   = useState([]);
   const [loadingRooms, setLoadingRooms] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
 
   useEffect(() => {
     if (!roomId || !startTime || !endTime) return;
@@ -90,22 +94,32 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
     'Camera': '📷',
   };
 
+  const equipmentLabel = {
+    'Máy chiếu': t('rooms.equipmentOptions.projector'),
+    'Micro': t('rooms.equipmentOptions.microphone'),
+    'Bảng trắng': t('rooms.equipmentOptions.whiteboard'),
+    'TV': t('rooms.equipmentOptions.tv'),
+    'Webcam': t('rooms.equipmentOptions.webcam'),
+    'Loa': t('rooms.equipmentOptions.speaker'),
+    'Điều hòa': t('rooms.equipmentOptions.airConditioner'),
+  };
+
   return (
     <div className="conflict-alert" role="alert">
       {/* Header */}
       <div className="conflict-alert__header">
         <div className="conflict-alert__icon">⚠️</div>
         <div className="conflict-alert__heading">
-          <h4 className="conflict-alert__title">Trùng lịch đặt phòng!</h4>
+          <h4 className="conflict-alert__title">{t('bookings.conflict')}</h4>
           <p className="conflict-alert__subtitle">
-            Thời gian bạn chọn đang bị chiếm bởi {conflicts.length} lịch sau:
+            {t('bookings.conflictDescription')}
           </p>
         </div>
         <button
           id="conflict-alert-dismiss"
           className="conflict-alert__dismiss"
           onClick={onDismiss}
-          aria-label="Đóng"
+          aria-label={t('floorMap.close')}
         >
           ×
         </button>
@@ -117,7 +131,7 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
           <li key={c.id} className="conflict-alert__item">
             <div className="conflict-alert__item-title">{c.title}</div>
             <div className="conflict-alert__item-time">
-              🕐 {formatDateTime(c.startTime)} – {formatDateTime(c.endTime)}
+              🕐 {formatDateTime(c.startTime, locale)} – {formatDateTime(c.endTime, locale)}
             </div>
             {c.user && (
               <div className="conflict-alert__item-user">
@@ -131,9 +145,9 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
       {/* Alternative rooms */}
       {(loadingRooms || altRooms.length > 0) && (
         <div className="conflict-alert__section">
-          <div className="conflict-alert__section-title">📍 Phòng thay thế cùng giờ:</div>
+          <div className="conflict-alert__section-title">{t('bookings.altRoomsSameTime')}</div>
           {loadingRooms ? (
-            <div className="conflict-alert__loading">Đang tải...</div>
+            <div className="conflict-alert__loading">{t('comments.loading')}</div>
           ) : (
             <div className="conflict-alert__alt-rooms">
               {altRooms.map((room) => (
@@ -146,13 +160,13 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
                       {room.score >= 10 ? '✨ ' : ''}{room.name}
                     </div>
                     <div className="conflict-alert__room-meta">
-                      {room.location} · {room.capacity} người
+                      {room.location} · {room.capacity} {t('rooms.capacityUnit')}
                     </div>
                     {room.equipment && room.equipment.length > 0 && (
                       <div className="conflict-alert__room-equipment">
                         {room.equipment.map((eq) => (
                           <span key={eq} className="conflict-alert__equip-tag">
-                            {equipmentIcons[eq] || '🔧'} {eq}
+                            {equipmentIcons[eq] || '🔧'} {equipmentLabel[eq] || eq}
                           </span>
                         ))}
                       </div>
@@ -164,7 +178,7 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
                       className="conflict-alert__select-btn"
                       onClick={() => onSelectRoom(room)}
                     >
-                      Chọn →
+                      {t('bookings.selectBtn')} →
                     </button>
                   )}
                 </div>
@@ -177,16 +191,16 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
       {/* Alternative time slots */}
       {(loadingSlots || altSlots.length > 0) && (
         <div className="conflict-alert__section">
-          <div className="conflict-alert__section-title">🕐 Giờ thay thế cùng phòng:</div>
+          <div className="conflict-alert__section-title">{t('bookings.altSlotsSameRoom')}</div>
           {loadingSlots ? (
-            <div className="conflict-alert__loading">Đang tải...</div>
+            <div className="conflict-alert__loading">{t('comments.loading')}</div>
           ) : (
             <div className="conflict-alert__alt-slots">
               {altSlots.map((slot, i) => (
                 <div key={i} className="conflict-alert__slot-row">
                   <span className="conflict-alert__slot-time">
                     {slot.startLabel} – {slot.endLabel}
-                    <span className="conflict-alert__slot-badge">trống</span>
+                    <span className="conflict-alert__slot-badge">{t('rooms.available')}</span>
                   </span>
                   {onSelectSlot && (
                     <button
@@ -194,7 +208,7 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
                       className="conflict-alert__slot-btn"
                       onClick={() => onSelectSlot(slot)}
                     >
-                      Chọn
+                      {t('bookings.selectBtn')}
                     </button>
                   )}
                 </div>
@@ -207,7 +221,7 @@ function ConflictAlertInner({ conflicts, roomId, startTime, endTime, onDismiss, 
       {/* No suggestions fallback */}
       {!roomId && (
         <div className="conflict-alert__suggestion">
-          💡 Hãy chọn thời gian khác hoặc phòng khác để đặt phòng.
+          {t('bookings.noSuggestions')}
         </div>
       )}
     </div>

@@ -7,38 +7,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Dot,
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
-import { vi } from 'date-fns/locale';
-
-const LINES = [
-  { key: 'total',    color: '#6366f1', label: 'Tổng' },
-  { key: 'approved', color: '#10b981', label: 'Đã duyệt' },
-  { key: 'rejected', color: '#ef4444', label: 'Từ chối' },
-  { key: 'pending',  color: '#f59e0b', label: 'Chờ duyệt' },
-];
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{
-      background: '#1e1e35',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: 10,
-      padding: '10px 14px',
-      fontSize: 13,
-      minWidth: 140,
-    }}>
-      <div style={{ fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>{label}</div>
-      {payload.map((p) => (
-        <div key={p.dataKey} style={{ color: p.color, marginBottom: 3 }}>
-          {LINES.find((l) => l.key === p.dataKey)?.label}: {p.value}
-        </div>
-      ))}
-    </div>
-  );
-};
+import { vi, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 const CustomDot = ({ cx, cy, fill }) => (
   <circle cx={cx} cy={cy} r={4} fill={fill} stroke="rgba(255,255,255,0.2)" strokeWidth={2} />
@@ -52,6 +24,36 @@ const CustomDot = ({ cx, cy, fill }) => (
  *   loading     {boolean}
  */
 const TrendChart = ({ data = [], granularity = 'week', loading = false }) => {
+  const { t, i18n } = useTranslation();
+
+  const lines = [
+    { key: 'total',    color: '#6366f1', label: t('dashboard.trends.total') },
+    { key: 'approved', color: '#10b981', label: t('dashboard.trends.approved') },
+    { key: 'rejected', color: '#ef4444', label: t('dashboard.trends.rejected') },
+    { key: 'pending',  color: '#f59e0b', label: t('dashboard.trends.pending') },
+  ];
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div style={{
+        background: '#1e1e35',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: 10,
+        padding: '10px 14px',
+        fontSize: 13,
+        minWidth: 140,
+      }}>
+        <div style={{ fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>{label}</div>
+        {payload.map((p) => (
+          <div key={p.dataKey} style={{ color: p.color, marginBottom: 3 }}>
+            {lines.find((l) => l.key === p.dataKey)?.label}: {p.value}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -65,16 +67,17 @@ const TrendChart = ({ data = [], granularity = 'week', loading = false }) => {
   }
 
   if (!data.length) {
-    return <div className="chart-empty">Chưa có dữ liệu trong khoảng thời gian này</div>;
+    return <div className="chart-empty">{t('dashboard.noData')}</div>;
   }
 
   // Format X-axis label
   const formatPeriod = (period) => {
     try {
       const date = parseISO(period);
+      const currentLocale = i18n.language === 'en' ? enUS : vi;
       return granularity === 'month'
-        ? format(date, 'MM/yyyy', { locale: vi })
-        : format(date, 'dd/MM', { locale: vi });
+        ? format(date, 'MM/yyyy', { locale: currentLocale })
+        : format(date, 'dd/MM', { locale: currentLocale });
     } catch {
       return period;
     }
@@ -104,11 +107,11 @@ const TrendChart = ({ data = [], granularity = 'week', loading = false }) => {
         <Tooltip content={<CustomTooltip />} />
         <Legend
           formatter={(value) => {
-            const found = LINES.find((l) => l.key === value);
+            const found = lines.find((l) => l.key === value);
             return <span style={{ color: '#94a3b8', fontSize: 12 }}>{found?.label || value}</span>;
           }}
         />
-        {LINES.map((line) => (
+        {lines.map((line) => (
           <Line
             key={line.key}
             type="monotone"

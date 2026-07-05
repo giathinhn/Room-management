@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { useTranslation } from 'react-i18next';
 
 import bookingService from '../services/booking.service';
 import RoomFilter from '../components/calendar/RoomFilter';
@@ -55,13 +56,9 @@ function renderEventContent(eventInfo) {
 
 /**
  * CalendarPage — displays all bookings on a FullCalendar (day/week/month).
- * Features:
- *  - Room filter
- *  - Click empty slot → QuickBookingModal
- *  - Click event → EventPopover with detail + actions
- *  - Auto re-fetch on date range change
  */
 function CalendarPage() {
+  const { t, i18n } = useTranslation();
   const calendarRef = useRef(null);
 
   const [selectedRoomId, setSelectedRoomId] = useState('');
@@ -179,9 +176,9 @@ function CalendarPage() {
       {/* ── Page Header ────────────────────────────────────────────────────── */}
       <div className="cal-page__header">
         <div className="cal-page__title-area">
-          <h1 className="cal-page__title">📅 Lịch đặt phòng</h1>
+          <h1 className="cal-page__title">📅 {t('calendar.title')}</h1>
           <p className="cal-page__subtitle">
-            Xem và quản lý lịch đặt phòng theo ngày, tuần hoặc tháng
+            {t('calendar.subtitle')}
           </p>
         </div>
 
@@ -190,11 +187,11 @@ function CalendarPage() {
           <div className="cal-page__legend">
             <div className="cal-page__legend-item">
               <span className="cal-page__legend-dot cal-page__legend-dot--approved" />
-              Đã duyệt
+              {t('calendar.approved')}
             </div>
             <div className="cal-page__legend-item">
               <span className="cal-page__legend-dot cal-page__legend-dot--pending" />
-              Chờ duyệt
+              {t('calendar.pending')}
             </div>
           </div>
 
@@ -215,12 +212,12 @@ function CalendarPage() {
             right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
           buttonText={{
-            today: 'Hôm nay',
-            month: 'Tháng',
-            week: 'Tuần',
-            day: 'Ngày',
+            today: t('calendar.today'),
+            month: t('calendar.month'),
+            week: t('calendar.week'),
+            day: t('calendar.day'),
           }}
-          locale="vi"
+          locale={i18n.language || 'vi'}
           firstDay={1}
           slotMinTime="07:00:00"
           slotMaxTime="22:00:00"

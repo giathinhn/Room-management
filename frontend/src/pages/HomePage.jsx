@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useTranslation } from 'react-i18next';
 import './HomePage.css';
 
 // ─── Stat Card Component ─────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ function TechBadge({ name, color }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 function HomePage() {
+  const { t } = useTranslation();
   const [healthStatus, setHealthStatus] = useState(null);
   const [healthLoading, setHealthLoading] = useState(true);
 
@@ -59,41 +61,41 @@ function HomePage() {
   const features = [
     {
       icon: '🏢',
-      title: 'Quản lý phòng họp',
-      description: 'Xem danh sách phòng, thiết bị, sức chứa và trạng thái hoạt động theo thời gian thực.',
+      title: t('home.features.rooms.title'),
+      description: t('home.features.rooms.desc'),
     },
     {
       icon: '📅',
-      title: 'Đặt phòng thông minh',
-      description: 'Kiểm tra xung đột lịch tự động, đặt phòng định kỳ, hủy và duyệt booking.',
+      title: t('home.features.bookings.title'),
+      description: t('home.features.bookings.desc'),
     },
     {
       icon: '🔐',
-      title: 'Phân quyền 3 cấp',
-      description: 'Admin, Approver và User với quyền hạn rõ ràng. JWT authentication bảo mật.',
+      title: t('home.features.roles.title'),
+      description: t('home.features.roles.desc'),
     },
     {
       icon: '🔔',
-      title: 'Thông báo real-time',
-      description: 'Nhận thông báo khi booking được duyệt, từ chối hoặc sắp đến giờ họp.',
+      title: t('home.features.notifications.title'),
+      description: t('home.features.notifications.desc'),
     },
     {
       icon: '📊',
-      title: 'Dashboard thống kê',
-      description: 'Biểu đồ sử dụng phòng, heatmap, báo cáo và xuất Excel.',
+      title: t('home.features.dashboard.title'),
+      description: t('home.features.dashboard.desc'),
     },
     {
       icon: '🗓️',
-      title: 'Calendar view',
-      description: 'Xem lịch đặt phòng theo ngày, tuần, tháng với giao diện trực quan.',
+      title: t('home.features.calendar.title'),
+      description: t('home.features.calendar.desc'),
     },
   ];
 
   const stats = [
-    { icon: '🏢', value: '5', label: 'Phòng họp', color: 'rgba(99, 102, 241, 0.2)', delay: '0ms' },
-    { icon: '👥', value: '4', label: 'Tài khoản mẫu', color: 'rgba(6, 182, 212, 0.2)', delay: '100ms' },
-    { icon: '📋', value: '8', label: 'Booking mẫu', color: 'rgba(16, 185, 129, 0.2)', delay: '200ms' },
-    { icon: '🗄️', value: '8', label: 'Database tables', color: 'rgba(245, 158, 11, 0.2)', delay: '300ms' },
+    { icon: '🏢', value: '5', label: t('home.stats.rooms'), color: 'rgba(99, 102, 241, 0.2)', delay: '0ms' },
+    { icon: '👥', value: '4', label: t('home.stats.accounts'), color: 'rgba(6, 182, 212, 0.2)', delay: '100ms' },
+    { icon: '📋', value: '8', label: t('home.stats.bookings'), color: 'rgba(16, 185, 129, 0.2)', delay: '200ms' },
+    { icon: '🗄️', value: '8', label: t('home.stats.tables'), color: 'rgba(245, 158, 11, 0.2)', delay: '300ms' },
   ];
 
   const techStack = [
@@ -140,7 +142,7 @@ function HomePage() {
               )}
             </div>
             <a href="/login" className="btn btn-primary" id="btn-get-started">
-              Bắt đầu →
+              {t('home.start')}
             </a>
           </div>
         </div>
@@ -151,24 +153,23 @@ function HomePage() {
         <div className="container">
           <div className="hero-content">
             <div className="hero-badge animate-fade-in">
-              ✨ Meeting Room Management System
+              ✨ {t('home.systemName')}
             </div>
             <h1 className="hero-title animate-fade-in-up">
-              Quản lý phòng họp{' '}
-              <span className="gradient-text">thông minh</span>
+              {t('home.smartManagement')}{' '}
+              <span className="gradient-text">{t('home.gradientText')}</span>
               <br />
-              hiệu quả hơn bao giờ hết
+              {t('home.moreEfficient')}
             </h1>
             <p className="hero-description animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-              Hệ thống đặt phòng họp toàn diện với phân quyền 3 cấp, thông báo real-time,
-              calendar view và dashboard thống kê chi tiết.
+              {t('home.subtitle')}
             </p>
             <div className="hero-actions animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               <a href="/login" className="btn btn-primary btn-lg" id="btn-hero-login">
-                🚀 Đăng nhập ngay
+                {t('home.loginButton')}
               </a>
               <a href="/rooms" className="btn btn-secondary btn-lg" id="btn-hero-rooms">
-                🏢 Xem phòng họp
+                {t('home.viewRooms')}
               </a>
             </div>
             {/* Tech stack */}
@@ -249,7 +250,7 @@ function HomePage() {
               <div className="health-icon">{healthStatus?.ok ? '✅' : '⚠️'}</div>
               <div className="health-info">
                 <div className="health-title">
-                  {healthStatus?.ok ? 'Backend API đang hoạt động' : 'Backend API chưa kết nối'}
+                  {healthStatus?.ok ? t('home.health.online') : t('home.health.offline')}
                 </div>
                 {healthStatus?.ok ? (
                   <div className="health-detail">
@@ -259,8 +260,7 @@ function HomePage() {
                   </div>
                 ) : (
                   <div className="health-detail">
-                    Hãy chạy <code>npm run dev</code> trong thư mục{' '}
-                    <code>backend/</code> để khởi động server.
+                    {t('home.health.offlineInstructions')}
                   </div>
                 )}
               </div>
@@ -274,10 +274,11 @@ function HomePage() {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">
-              Tính năng <span className="gradient-text">nổi bật</span>
+              {t('home.featuresTitle')}{' '}
+              <span className="gradient-text">{t('home.featuresTitleGradient')}</span>
             </h2>
             <p className="section-description">
-              Đầy đủ tính năng quản lý phòng họp cho doanh nghiệp hiện đại
+              {t('home.featuresSubtitle')}
             </p>
           </div>
           <div className="features-grid">
@@ -297,18 +298,19 @@ function HomePage() {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">
-              Tài khoản <span className="gradient-text">demo</span>
+              {t('home.demo.title')}{' '}
+              <span className="gradient-text">{t('home.demo.titleGradient')}</span>
             </h2>
             <p className="section-description">
-              Seed data đã tạo sẵn — password: <code className="inline-code">Password123!</code>
+              {t('home.demo.subtitle')}
             </p>
           </div>
           <div className="accounts-grid">
             {[
-              { email: 'admin@company.com', role: 'Admin', icon: '👑', color: '#f59e0b', desc: 'Toàn quyền hệ thống' },
-              { email: 'approver@company.com', role: 'Approver', icon: '✅', color: '#10b981', desc: 'Duyệt / từ chối booking' },
-              { email: 'user1@company.com', role: 'User', icon: '👤', color: '#6366f1', desc: 'Nguyễn Văn A' },
-              { email: 'user2@company.com', role: 'User', icon: '👤', color: '#06b6d4', desc: 'Trần Thị B' },
+              { email: 'admin@company.com', role: t('roles.admin'), icon: '👑', color: '#f59e0b', desc: 'Toàn quyền hệ thống' },
+              { email: 'approver@company.com', role: t('roles.approver'), icon: '✅', color: '#10b981', desc: 'Duyệt / từ chối booking' },
+              { email: 'user1@company.com', role: t('roles.user'), icon: '👤', color: '#6366f1', desc: 'Nguyễn Văn A' },
+              { email: 'user2@company.com', role: t('roles.user'), icon: '👤', color: '#06b6d4', desc: 'Trần Thị B' },
             ].map(({ email, role, icon, color, desc }) => (
               <div key={email} className="account-card glass-card" id={`account-${role.toLowerCase()}`}>
                 <div className="account-icon" style={{ background: `${color}20`, color }}>

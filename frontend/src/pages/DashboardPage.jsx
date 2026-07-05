@@ -11,22 +11,23 @@ import RoomUsageChart from '../components/dashboard/RoomUsageChart';
 import PeakHoursHeatmap from '../components/dashboard/PeakHoursHeatmap';
 import TopUsersTable from '../components/dashboard/TopUsersTable';
 import TrendChart from '../components/dashboard/TrendChart';
+import { useTranslation } from 'react-i18next';
 import '../components/dashboard/chart.utils.css';
 import './DashboardPage.css';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 const roleConfig = {
-  admin: { label: 'Quản trị viên', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
-  approver: { label: 'Người duyệt', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-  user: { label: 'Nhân viên', color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+  admin: { color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+  approver: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  user: { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
 };
 
-function greeting() {
+function greeting(t) {
   const h = new Date().getHours();
-  if (h < 12) return 'Chào buổi sáng';
-  if (h < 18) return 'Chào buổi chiều';
-  return 'Chào buổi tối';
+  if (h < 12) return t('dashboard.greeting.morning');
+  if (h < 18) return t('dashboard.greeting.afternoon');
+  return t('dashboard.greeting.evening');
 }
 
 function defaultRange() {
@@ -41,10 +42,17 @@ function defaultRange() {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const DashboardPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const role = roleConfig[user?.role] || roleConfig.user;
+  const roleInfo = roleConfig[user?.role] || roleConfig.user;
   const isAdmin = user?.role === 'admin';
+
+  const roleLabel = {
+    admin: t('roles.admin'),
+    approver: t('roles.approver'),
+    user: t('roles.user'),
+  };
 
   const [dateRange, setDateRange] = useState(defaultRange());
   const [granularity, setGranularity] = useState('week');
@@ -63,10 +71,11 @@ const DashboardPage = () => {
     e.stopPropagation();
     try {
       await bookingService.checkInBooking(bookingId);
-      toast.success('Check-in phòng họp thành công!');
+      toast.success(t('dashboard.checkInSuccess'));
       fetchPersonalStats();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Check-in thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     }
   };
 
@@ -180,18 +189,18 @@ const DashboardPage = () => {
   const statCards = overview
     ? [
         {
-          icon: '📋', label: 'Tổng booking',
+          icon: '📋', label: t('dashboard.stats.totalBookings'),
           value: overview.totalBookings.toLocaleString(),
           color: '#6366f1',
         },
         {
-          icon: '✅', label: 'Đã duyệt',
+          icon: '✅', label: t('dashboard.stats.approved'),
           value: overview.approved.toLocaleString(),
           percentage: overview.approvalRate,
           color: '#10b981',
         },
         {
-          icon: '❌', label: 'Từ chối',
+          icon: '❌', label: t('dashboard.stats.rejected'),
           value: overview.rejected.toLocaleString(),
           percentage: overview.totalBookings
             ? ((overview.rejected / overview.totalBookings) * 100).toFixed(1)
@@ -199,7 +208,7 @@ const DashboardPage = () => {
           color: '#ef4444',
         },
         {
-          icon: '⏳', label: 'Chờ duyệt',
+          icon: '⏳', label: t('dashboard.stats.pending'),
           value: overview.pending.toLocaleString(),
           percentage: overview.totalBookings
             ? ((overview.pending / overview.totalBookings) * 100).toFixed(1)
@@ -208,10 +217,10 @@ const DashboardPage = () => {
         },
       ]
     : [
-        { icon: '📋', label: 'Tổng booking', color: '#6366f1' },
-        { icon: '✅', label: 'Đã duyệt', color: '#10b981' },
-        { icon: '❌', label: 'Từ chối', color: '#ef4444' },
-        { icon: '⏳', label: 'Chờ duyệt', color: '#f59e0b' },
+        { icon: '📋', label: t('dashboard.stats.totalBookings'), color: '#6366f1' },
+        { icon: '✅', label: t('dashboard.stats.approved'), color: '#10b981' },
+        { icon: '❌', label: t('dashboard.stats.rejected'), color: '#ef4444' },
+        { icon: '⏳', label: t('dashboard.stats.pending'), color: '#f59e0b' },
       ];
 
   const personalCards = personalStats
@@ -219,25 +228,25 @@ const DashboardPage = () => {
       ? [
           {
             icon: '📥',
-            label: 'Chờ duyệt hệ thống',
+            label: t('dashboard.stats.pendingSystem'),
             value: personalStats.approverMetrics?.pendingApprovalsCount?.toLocaleString() || '0',
             color: '#f59e0b',
           },
           {
             icon: '✅',
-            label: 'Tôi đã duyệt',
+            label: t('dashboard.stats.myApproved'),
             value: personalStats.approverMetrics?.myApprovedCount?.toLocaleString() || '0',
             color: '#10b981',
           },
           {
             icon: '❌',
-            label: 'Tôi đã từ chối',
+            label: t('dashboard.stats.myRejected'),
             value: personalStats.approverMetrics?.myRejectedCount?.toLocaleString() || '0',
             color: '#ef4444',
           },
           {
             icon: '📋',
-            label: 'Lượt đặt cá nhân',
+            label: t('dashboard.stats.myBookings'),
             value: personalStats.totalBookings?.toLocaleString() || '0',
             color: '#6366f1',
           },
@@ -245,13 +254,13 @@ const DashboardPage = () => {
       : [
           {
             icon: '📋',
-            label: 'Lượt đặt cá nhân',
+            label: t('dashboard.stats.myBookings'),
             value: personalStats.totalBookings?.toLocaleString() || '0',
             color: '#6366f1',
           },
           {
             icon: '✅',
-            label: 'Đã duyệt',
+            label: t('dashboard.stats.approved'),
             value: personalStats.approved?.toLocaleString() || '0',
             percentage: personalStats.totalBookings
               ? ((personalStats.approved / personalStats.totalBookings) * 100).toFixed(1)
@@ -260,7 +269,7 @@ const DashboardPage = () => {
           },
           {
             icon: '⏳',
-            label: 'Chờ duyệt',
+            label: t('dashboard.stats.pending'),
             value: personalStats.pending?.toLocaleString() || '0',
             percentage: personalStats.totalBookings
               ? ((personalStats.pending / personalStats.totalBookings) * 100).toFixed(1)
@@ -269,7 +278,7 @@ const DashboardPage = () => {
           },
           {
             icon: '⏱️',
-            label: 'Tổng giờ sử dụng',
+            label: t('dashboard.stats.totalHours'),
             value: `${personalStats.totalHours}h`,
             color: '#3b82f6',
           },
@@ -283,13 +292,13 @@ const DashboardPage = () => {
         {/* Welcome Section */}
         <section className="dashboard-hero animate-fade-in-up">
           <div className="dashboard-hero__text">
-            <p className="dashboard-greeting">{greeting()},</p>
+            <p className="dashboard-greeting">{greeting(t)},</p>
             <h1 className="dashboard-username">{user?.fullName || 'Người dùng'} 👋</h1>
-            <div className="dashboard-role-badge" style={{ color: role.color, background: role.bg }}>
-              {role.label}
+            <div className="dashboard-role-badge" style={{ color: roleInfo.color, background: roleInfo.bg }}>
+              {roleLabel[user?.role] || roleLabel.user}
             </div>
             <p className="dashboard-desc">
-              Chào mừng bạn đến với hệ thống đặt phòng họp. Dưới đây là thống kê hoạt động cá nhân của bạn.
+              {t('dashboard.welcomeMessage')}
             </p>
           </div>
           <div className="dashboard-hero__illustration" aria-hidden="true">
@@ -325,7 +334,7 @@ const DashboardPage = () => {
                 <StatCard
                   key={i}
                   icon="📋"
-                  label="Đang tải..."
+                  label={t('common.loading')}
                   loading={true}
                   style={{ animationDelay: `${i * 0.07}s` }}
                 />
@@ -338,13 +347,13 @@ const DashboardPage = () => {
           <div className="dashboard-chart-card glass-card personal-upcoming">
             <div className="dashboard-chart-card__header">
               <div>
-                <h2 className="dashboard-chart-card__title">📅 Lịch đặt sắp diễn ra</h2>
-                <p className="dashboard-chart-card__sub">Danh sách 5 cuộc họp sắp tới của bạn</p>
+                <h2 className="dashboard-chart-card__title">📅 {t('dashboard.upcomingBookings')}</h2>
+                <p className="dashboard-chart-card__sub">{t('dashboard.upcomingSubtitle')}</p>
               </div>
             </div>
             <div className="dashboard-chart-card__body">
               {loadingPersonal ? (
-                <div className="loading-spinner">Đang tải lịch đặt...</div>
+                <div className="loading-spinner">{t('dashboard.loadingUpcoming')}</div>
               ) : personalStats?.upcomingBookings?.length > 0 ? (
                 <div className="upcoming-list">
                   {personalStats.upcomingBookings.map((b) => {
@@ -368,7 +377,7 @@ const DashboardPage = () => {
                       >
                         <div className="upcoming-item__left">
                           <span className={`upcoming-status-badge upcoming-status-badge--${b.status}`}>
-                            {b.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
+                            {b.status === 'approved' ? t('bookings.status.approved') : t('bookings.status.pending')}
                           </span>
                         </div>
                         <div className="upcoming-item__body">
@@ -381,7 +390,7 @@ const DashboardPage = () => {
                           </p>
                           {b.checkedIn && (
                             <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
-                              ✅ Đã check-in lúc {format(new Date(b.checkInTime), 'HH:mm')}
+                              ✅ {t('bookingDetail.checkedInAt', { time: format(new Date(b.checkInTime), 'HH:mm') })}
                             </p>
                           )}
                           {showCheckIn && (
@@ -402,9 +411,9 @@ const DashboardPage = () => {
                 </div>
               ) : (
                 <div className="empty-state-container">
-                  <p className="empty-state-text">Bạn không có lịch đặt phòng nào sắp diễn ra.</p>
+                  <p className="empty-state-text">{t('dashboard.noUpcoming')}</p>
                   <Link to="/bookings/new" className="btn btn--primary btn--sm" style={{ marginTop: '1rem' }}>
-                    Đặt phòng ngay
+                    {t('dashboard.bookNow')}
                   </Link>
                 </div>
               )}
@@ -417,13 +426,13 @@ const DashboardPage = () => {
             <div className="dashboard-chart-card glass-card personal-recent-approvals">
               <div className="dashboard-chart-card__header">
                 <div>
-                  <h2 className="dashboard-chart-card__title">📥 Yêu cầu duyệt gần đây</h2>
-                  <p className="dashboard-chart-card__sub">Lịch sử phê duyệt/từ chối của bạn</p>
+                  <h2 className="dashboard-chart-card__title">📥 {t('dashboard.recentRequests')}</h2>
+                  <p className="dashboard-chart-card__sub">{t('dashboard.requestsSubtitle')}</p>
                 </div>
               </div>
               <div className="dashboard-chart-card__body">
                 {loadingPersonal ? (
-                  <div className="loading-spinner">Đang tải lịch sử...</div>
+                  <div className="loading-spinner">{t('dashboard.loadingHistory')}</div>
                 ) : personalStats?.approverMetrics?.approvalsHistory?.length > 0 ? (
                   <div className="approvals-history-list">
                     {personalStats.approverMetrics.approvalsHistory.map((a) => {
@@ -433,7 +442,7 @@ const DashboardPage = () => {
                           <div className="history-item__header">
                             <span className="history-item__user">{a.bookerName}</span>
                             <span className={`status-tag status-tag--${a.status}`}>
-                              {a.status === 'approved' ? 'Đã duyệt' : 'Từ chối'}
+                              {a.status === 'approved' ? t('bookings.status.approved') : t('bookings.status.rejected')}
                             </span>
                           </div>
                           <p className="history-item__title">{a.title}</p>
@@ -446,7 +455,7 @@ const DashboardPage = () => {
                   </div>
                 ) : (
                   <div className="empty-state-container">
-                    <p className="empty-state-text">Bạn chưa thực hiện duyệt yêu cầu nào gần đây.</p>
+                    <p className="empty-state-text">{t('dashboard.noRecentRequests')}</p>
                   </div>
                 )}
               </div>
@@ -456,27 +465,27 @@ const DashboardPage = () => {
             <div className="dashboard-chart-card glass-card personal-quick-actions">
               <div className="dashboard-chart-card__header">
                 <div>
-                  <h2 className="dashboard-chart-card__title">⚡ Phím tắt nhanh</h2>
-                  <p className="dashboard-chart-card__sub">Thao tác nhanh trên hệ thống</p>
+                  <h2 className="dashboard-chart-card__title">⚡ {t('dashboard.quickActions')}</h2>
+                  <p className="dashboard-chart-card__sub">{t('dashboard.quickActionsSubtitle')}</p>
                 </div>
               </div>
               <div className="dashboard-chart-card__body">
                 <div className="quick-actions-grid">
                   <Link to="/bookings/new" className="quick-action-btn">
                     <span className="quick-action-icon">➕</span>
-                    <span className="quick-action-label">Đặt phòng mới</span>
+                    <span className="quick-action-label">{t('sidebar.newBooking')}</span>
                   </Link>
                   <Link to="/rooms/search" className="quick-action-btn">
                     <span className="quick-action-icon">🔍</span>
-                    <span className="quick-action-label">Tìm phòng trống</span>
+                    <span className="quick-action-label">{t('sidebar.search')}</span>
                   </Link>
                   <Link to="/bookings" className="quick-action-btn">
                     <span className="quick-action-icon">📅</span>
-                    <span className="quick-action-label">Xem lịch đặt của tôi</span>
+                    <span className="quick-action-label">{t('sidebar.myBookings')}</span>
                   </Link>
                   <Link to="/templates" className="quick-action-btn">
                     <span className="quick-action-icon">🔖</span>
-                    <span className="quick-action-label">Mẫu đặt phòng</span>
+                    <span className="quick-action-label">{t('sidebar.templates')}</span>
                   </Link>
                 </div>
               </div>
@@ -494,9 +503,9 @@ const DashboardPage = () => {
       <div className="dashboard-topbar animate-fade-in-up">
         <div className="dashboard-topbar__left">
           <h1 className="dashboard-topbar__title">
-            <span className="gradient-text">📊 Dashboard</span>
+            <span className="gradient-text">📊 {t('dashboard.title')}</span>
           </h1>
-          <p className="dashboard-topbar__sub">Thống kê &amp; phân tích hệ thống đặt phòng</p>
+          <p className="dashboard-topbar__sub">{t('dashboard.subtitle')}</p>
         </div>
         <DateRangeFilter onChange={setDateRange} />
       </div>
@@ -505,21 +514,21 @@ const DashboardPage = () => {
       {overview && (
         <div className="dashboard-extra-stats animate-fade-in">
           <div className="dashboard-extra-stat">
-            <span className="dashboard-extra-stat__label">Hôm nay</span>
+            <span className="dashboard-extra-stat__label">{t('dashboard.today')}</span>
             <span className="dashboard-extra-stat__value">{overview.bookingsToday}</span>
           </div>
           <div className="dashboard-extra-stat">
-            <span className="dashboard-extra-stat__label">Tuần này</span>
+            <span className="dashboard-extra-stat__label">{t('dashboard.thisWeek')}</span>
             <span className="dashboard-extra-stat__value">{overview.bookingsThisWeek}</span>
           </div>
           <div className="dashboard-extra-stat">
-            <span className="dashboard-extra-stat__label">Tỉ lệ duyệt</span>
+            <span className="dashboard-extra-stat__label">{t('dashboard.stats.approved')}</span>
             <span className="dashboard-extra-stat__value dashboard-extra-stat__value--green">
               {overview.approvalRate}%
             </span>
           </div>
           <div className="dashboard-extra-stat">
-            <span className="dashboard-extra-stat__label">Đã huỷ</span>
+            <span className="dashboard-extra-stat__label">{t('dashboard.cancelled')}</span>
             <span className="dashboard-extra-stat__value dashboard-extra-stat__value--muted">
               {overview.cancelled}
             </span>
@@ -548,8 +557,8 @@ const DashboardPage = () => {
         <div className="dashboard-chart-card glass-card">
           <div className="dashboard-chart-card__header">
             <div>
-              <h2 className="dashboard-chart-card__title">📊 Tần suất phòng</h2>
-              <p className="dashboard-chart-card__sub">Số lượt đặt theo phòng</p>
+              <h2 className="dashboard-chart-card__title">📊 {t('dashboard.roomFrequency')}</h2>
+              <p className="dashboard-chart-card__sub">{t('dashboard.roomFrequencySubtitle')}</p>
             </div>
           </div>
           <div className="dashboard-chart-card__body">
@@ -560,8 +569,8 @@ const DashboardPage = () => {
         <div className="dashboard-chart-card glass-card">
           <div className="dashboard-chart-card__header">
             <div>
-              <h2 className="dashboard-chart-card__title">🔥 Giờ cao điểm</h2>
-              <p className="dashboard-chart-card__sub">Mật độ đặt phòng theo giờ &amp; ngày</p>
+              <h2 className="dashboard-chart-card__title">🔥 {t('dashboard.peakHours')}</h2>
+              <p className="dashboard-chart-card__sub">{t('dashboard.peakHoursSubtitle')}</p>
             </div>
           </div>
           <div className="dashboard-chart-card__body">
@@ -578,8 +587,8 @@ const DashboardPage = () => {
         <div className="dashboard-chart-card glass-card">
           <div className="dashboard-chart-card__header">
             <div>
-              <h2 className="dashboard-chart-card__title">👤 Top người đặt</h2>
-              <p className="dashboard-chart-card__sub">Top 10 người đặt nhiều nhất</p>
+              <h2 className="dashboard-chart-card__title">👤 {t('dashboard.topBookers')}</h2>
+              <p className="dashboard-chart-card__sub">{t('dashboard.topBookersSubtitle')}</p>
             </div>
           </div>
           <div className="dashboard-chart-card__body">
@@ -590,8 +599,8 @@ const DashboardPage = () => {
         <div className="dashboard-chart-card glass-card">
           <div className="dashboard-chart-card__header">
             <div>
-              <h2 className="dashboard-chart-card__title">📈 Xu hướng booking</h2>
-              <p className="dashboard-chart-card__sub">Theo thời gian</p>
+              <h2 className="dashboard-chart-card__title">📈 {t('dashboard.bookingTrends')}</h2>
+              <p className="dashboard-chart-card__sub">{t('dashboard.trendsSubtitle')}</p>
             </div>
             {/* Granularity toggle */}
             <div className="dashboard-granularity">
@@ -600,14 +609,14 @@ const DashboardPage = () => {
                 className={`dashboard-granularity__btn${granularity === 'week' ? ' active' : ''}`}
                 onClick={() => setGranularity('week')}
               >
-                Tuần
+                {t('dashboard.week')}
               </button>
               <button
                 id="granularity-month"
                 className={`dashboard-granularity__btn${granularity === 'month' ? ' active' : ''}`}
                 onClick={() => setGranularity('month')}
               >
-                Tháng
+                {t('dashboard.month')}
               </button>
             </div>
           </div>

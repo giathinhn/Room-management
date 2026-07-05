@@ -1,11 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './RecurringForm.css';
-
-const FREQUENCY_OPTIONS = [
-  { value: 'daily', label: 'Hàng ngày', icon: '📅' },
-  { value: 'weekly', label: 'Hàng tuần', icon: '📆' },
-  { value: 'monthly', label: 'Hàng tháng', icon: '🗓️' },
-];
 
 /**
  * RecurringForm — form section for configuring recurring booking parameters.
@@ -18,7 +13,14 @@ const FREQUENCY_OPTIONS = [
  * }} props
  */
 function RecurringForm({ values, onChange, onPreview, isLoading }) {
+  const { t } = useTranslation();
   const { startDate, endDate, startTime, endTime, frequency } = values;
+
+  const frequencyOptions = [
+    { value: 'daily', label: t('bookings.recurring.daily'), icon: '📅' },
+    { value: 'weekly', label: t('bookings.recurring.weekly'), icon: '📆' },
+    { value: 'monthly', label: t('bookings.recurring.monthly'), icon: '🗓️' },
+  ];
 
   // Calculate max endDate (6 months from startDate)
   const maxEndDate = startDate
@@ -37,7 +39,7 @@ function RecurringForm({ values, onChange, onPreview, isLoading }) {
       <div className="recurring-form__row">
         <div className="recurring-form__field">
           <label htmlFor="recurring-start-date" className="recurring-form__label">
-            Ngày bắt đầu
+            {t('bookings.recurring.startDate')}
           </label>
           <input
             id="recurring-start-date"
@@ -51,7 +53,7 @@ function RecurringForm({ values, onChange, onPreview, isLoading }) {
         </div>
         <div className="recurring-form__field">
           <label htmlFor="recurring-end-date" className="recurring-form__label">
-            Ngày kết thúc
+            {t('bookings.recurring.endDate')}
           </label>
           <input
             id="recurring-end-date"
@@ -70,7 +72,7 @@ function RecurringForm({ values, onChange, onPreview, isLoading }) {
       <div className="recurring-form__row">
         <div className="recurring-form__field">
           <label htmlFor="recurring-start-time" className="recurring-form__label">
-            Giờ bắt đầu
+            {t('bookings.startTime')}
           </label>
           <input
             id="recurring-start-time"
@@ -85,7 +87,7 @@ function RecurringForm({ values, onChange, onPreview, isLoading }) {
         </div>
         <div className="recurring-form__field">
           <label htmlFor="recurring-end-time" className="recurring-form__label">
-            Giờ kết thúc
+            {t('bookings.endTime')}
           </label>
           <input
             id="recurring-end-time"
@@ -102,9 +104,9 @@ function RecurringForm({ values, onChange, onPreview, isLoading }) {
 
       {/* Frequency Selector */}
       <div className="recurring-form__field">
-        <label className="recurring-form__label">Tần suất lặp lại</label>
-        <div className="recurring-form__frequency" role="radiogroup" aria-label="Tần suất lặp lại">
-          {FREQUENCY_OPTIONS.map((opt) => (
+        <label className="recurring-form__label">{t('bookings.recurring.frequency')}</label>
+        <div className="recurring-form__frequency" role="radiogroup" aria-label={t('bookings.recurring.frequency')}>
+          {frequencyOptions.map((opt) => (
             <button
               key={opt.value}
               type="button"
@@ -132,12 +134,10 @@ function RecurringForm({ values, onChange, onPreview, isLoading }) {
         {isLoading ? (
           <>
             <span className="recurring-form__spinner" />
-            Đang kiểm tra...
+            {t('bookings.recurring.checking')}
           </>
         ) : (
-          <>
-            🔍 Xem trước slots
-          </>
+          t('bookings.recurring.previewSlots')
         )}
       </button>
     </div>

@@ -1,5 +1,6 @@
 const bookingRepository = require('../repositories/booking.repository');
 const roomRepository = require('../repositories/room.repository');
+const ApiError = require('../utils/ApiError');
 const userRepository = require('../repositories/user.repository');
 const emailService = require('./email.service');
 const notificationService = require('./notification.service');
@@ -8,11 +9,6 @@ const logger = require('../utils/logger');
 const prisma = require('../config/database');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const BUSINESS_HOUR_START = 7;   // 07:00
-const BUSINESS_HOUR_END = 22;    // 22:00
-const MIN_DURATION_MS = 15 * 60 * 1000;       // 15 minutes
-const MAX_DURATION_MS = 8 * 60 * 60 * 1000;   // 8 hours
-const MAX_ADVANCE_DAYS = 30;
 const PAST_TOLERANCE_MS = 5 * 60 * 1000;       // 5 minutes grace period
 
 /**
@@ -35,16 +31,12 @@ const bookingService = {
 
     // 1. startTime < endTime
     if (startTime >= endTime) {
-      const err = new Error('Start time must be before end time');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
     // 2. startTime not in the past (allow 5-min grace)
     if (startTime < new Date(now - PAST_TOLERANCE_MS)) {
-      const err = new Error('Cannot book in the past');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_PAST_TIME');
     }
 
     // Load dynamic system settings
@@ -60,55 +52,42 @@ const bookingService = {
     const startHour = startTime.getHours() + startTime.getMinutes() / 60;
     const endHour = endTime.getHours() + endTime.getMinutes() / 60;
     if (startHour < workHourStartVal || endHour > workHourEndVal) {
-      const err = new Error(`Booking must be between ${sysSettings.workHourStart} and ${sysSettings.workHourEnd}`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_OUTSIDE_HOURS');
     }
 
     // 4. Minimum duration
     const durationMs = endTime - startTime;
     const minDurationMs = sysSettings.minBookingDurationMin * 60 * 1000;
     if (durationMs < minDurationMs) {
-      const err = new Error(`Minimum duration is ${sysSettings.minBookingDurationMin} minutes`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_TOO_SHORT');
     }
 
     // 5. Maximum duration
     const maxDurationMs = sysSettings.maxBookingDurationMin * 60 * 1000;
     if (durationMs > maxDurationMs) {
-      const err = new Error(`Maximum duration is ${sysSettings.maxBookingDurationMin} minutes`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_TOO_LONG');
     }
 
     // 6. Cannot book too far in advance
     const maxAdvanceDate = new Date(now);
     maxAdvanceDate.setDate(maxAdvanceDate.getDate() + sysSettings.maxBookingDaysAhead);
     if (startTime > maxAdvanceDate) {
-      const err = new Error(`Cannot book more than ${sysSettings.maxBookingDaysAhead} days in advance`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_TOO_FAR_AHEAD');
     }
 
     // 7. Check room exists and is active
     const room = await roomRepository.findById(roomId);
     if (!room) {
-      const err = new Error('Room not found');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('ROOM_NOT_FOUND');
     }
     if (!room.isActive) {
-      const err = new Error('Room is not available');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('ROOM_INACTIVE');
     }
 
     // 8. Check for overlapping bookings (CRITICAL)
     const conflicts = await bookingRepository.findOverlapping(roomId, startTime, endTime);
     if (conflicts.length > 0) {
-      const err = new Error('Time slot conflicts with existing bookings');
-      err.statusCode = 409;
+      const err = ApiError.conflict('BOOKING_CONFLICT');
       err.conflicts = conflicts;
       throw err;
     }
@@ -194,9 +173,7 @@ const bookingService = {
   async getById(id, requestingUser) {
     const booking = await bookingRepository.findById(id);
     if (!booking) {
-      const err = new Error('Booking not found');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
 
     const { role, id: userId } = requestingUser;
@@ -204,9 +181,7 @@ const bookingService = {
     const canView = isOwner || role === 'approver' || role === 'admin';
 
     if (!canView) {
-      const err = new Error('Insufficient permissions');
-      err.statusCode = 403;
-      throw err;
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     return booking;
@@ -221,15 +196,11 @@ const bookingService = {
   async approve(id, approverId) {
     const booking = await bookingRepository.findById(id);
     if (!booking) {
-      const err = new Error('Booking not found');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
 
     if (booking.status !== 'pending') {
-      const err = new Error('Can only approve pending bookings');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_INVALID_STATUS');
     }
 
     const updatedBooking = await bookingRepository.updateStatus(id, 'approved', {
@@ -273,15 +244,11 @@ const bookingService = {
   async reject(id, approverId, rejectionReason) {
     const booking = await bookingRepository.findById(id);
     if (!booking) {
-      const err = new Error('Booking not found');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
 
     if (booking.status !== 'pending') {
-      const err = new Error('Can only reject pending bookings');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_INVALID_STATUS');
     }
 
     const updatedBooking = await bookingRepository.updateStatus(id, 'rejected', {
@@ -326,9 +293,7 @@ const bookingService = {
   async cancel(id, requestingUser) {
     const booking = await bookingRepository.findById(id);
     if (!booking) {
-      const err = new Error('Booking not found');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
 
     const { role, id: userId } = requestingUser;
@@ -336,23 +301,17 @@ const bookingService = {
     const isAdmin = role === 'admin';
 
     if (!isOwner && !isAdmin) {
-      const err = new Error('You can only cancel your own bookings');
-      err.statusCode = 403;
-      throw err;
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     if (!['pending', 'approved'].includes(booking.status)) {
-      const err = new Error('Can only cancel pending or approved bookings');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_INVALID_STATUS');
     }
 
     if (booking.status === 'approved' && !isAdmin) {
       const sysSettings = await settingsService.getSystemSettings();
       if (sysSettings && !sysSettings.allowCancelApproved) {
-        const err = new Error('Cannot cancel bookings that have already been approved');
-        err.statusCode = 400;
-        throw err;
+        throw ApiError.badRequest('BOOKING_INVALID_STATUS');
       }
     }
 
@@ -397,21 +356,15 @@ const bookingService = {
   async checkIn(bookingId, userId, userRole) {
     const booking = await bookingRepository.findById(bookingId);
     if (!booking) {
-      const err = new Error('Không tìm thấy lịch đặt phòng');
-      err.statusCode = 404;
-      throw err;
+      throw ApiError.notFound('BOOKING_NOT_FOUND');
     }
     if (booking.status !== 'approved') {
-      const err = new Error('Chỉ có thể check-in các lịch đặt đã được duyệt');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('BOOKING_INVALID_STATUS');
     }
   
     // Check permission: owner or admin/approver
     if (booking.userId !== userId && userRole === 'user') {
-      const err = new Error('Bạn không có quyền check-in lịch đặt này');
-      err.statusCode = 403;
-      throw err;
+      throw ApiError.forbidden('FORBIDDEN');
     }
 
     const now = new Date();
@@ -424,14 +377,10 @@ const bookingService = {
     const checkInEnd = new Date(startTime.getTime() + releaseTimeMin * 60 * 1000);  // dynamic minutes after
 
     if (now < checkInStart) {
-      const err = new Error('Chưa đến giờ check-in (Có thể check-in trước giờ họp 10 phút)');
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
     if (now > checkInEnd) {
-      const err = new Error(`Đã quá thời hạn check-in (Hạn check-in tối đa là ${releaseTimeMin} phút sau khi cuộc họp bắt đầu)`);
-      err.statusCode = 400;
-      throw err;
+      throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
     return bookingRepository.update(bookingId, {

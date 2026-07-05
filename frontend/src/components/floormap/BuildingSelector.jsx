@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import './BuildingSelector.css';
 
 const BuildingSelector = ({ buildings, selectedBuilding, onChange }) => {
+  const { t } = useTranslation();
   if (!buildings || buildings.length === 0) return null;
 
   return (
-    <div className="building-selector" role="tablist" aria-label="Chọn tòa nhà">
+    <div className="building-selector" role="tablist" aria-label={t('floorMap.selectBuilding')}>
       {buildings.map((building) => (
         <button
           key={building}
@@ -15,7 +17,7 @@ const BuildingSelector = ({ buildings, selectedBuilding, onChange }) => {
           aria-selected={selectedBuilding === building}
         >
           <span className="building-selector__icon">🏢</span>
-          <span>Tòa {building}</span>
+          <span>{t('floorMap.buildingLabel', { name: building })}</span>
         </button>
       ))}
     </div>

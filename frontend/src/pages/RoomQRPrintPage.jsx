@@ -4,9 +4,11 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { FiPrinter, FiArrowLeft } from 'react-icons/fi';
 import roomService from '../services/room.service';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import './RoomQRPrintPage.css';
 
 function RoomQRPrintPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
@@ -18,20 +20,20 @@ function RoomQRPrintPage() {
         const result = await roomService.getRoom(id);
         setRoom(result.data);
       } catch (err) {
-        toast.error('Không thể tải thông tin phòng họp');
+        toast.error(t('qrPrint.loadFailed'));
         navigate('/rooms');
       } finally {
         setLoading(false);
       }
     }
     fetchRoom();
-  }, [id, navigate]);
+  }, [id, navigate, t]);
 
   if (loading) {
     return (
       <div className="qr-print-page__loading">
         <div className="spinner" />
-        <p>Đang tải thông tin phòng...</p>
+        <p>{t('qrPrint.loading')}</p>
       </div>
     );
   }
@@ -39,9 +41,9 @@ function RoomQRPrintPage() {
   if (!room) {
     return (
       <div className="qr-print-page__error">
-        <p>Không tìm thấy phòng họp.</p>
+        <p>{t('qrPrint.notFound')}</p>
         <button type="button" className="btn btn--primary" onClick={() => navigate('/rooms')}>
-          Quay lại danh sách
+          {t('qrPrint.back')}
         </button>
       </div>
     );
@@ -54,10 +56,10 @@ function RoomQRPrintPage() {
       {/* Action buttons - hidden during print */}
       <div className="qr-print-page__toolbar">
         <button type="button" className="btn btn--outline btn--sm" onClick={() => window.close()}>
-          <FiArrowLeft style={{ marginRight: '6px' }} /> Đóng tab
+          <FiArrowLeft style={{ marginRight: '6px' }} /> {t('qrPrint.closeTab')}
         </button>
         <button type="button" className="btn btn--primary btn--sm" onClick={() => window.print()}>
-          <FiPrinter style={{ marginRight: '6px' }} /> In trang này
+          <FiPrinter style={{ marginRight: '6px' }} /> {t('qrPrint.printPage')}
         </button>
       </div>
 
@@ -92,18 +94,18 @@ function RoomQRPrintPage() {
           </div>
 
           <div className="qr-print-page__instructions">
-            <h2>HƯỚNG DẪN QUÉT MÃ ĐẶT PHÒNG</h2>
+            <h2>{t('qrPrint.instructionsTitle')}</h2>
             <ol>
-              <li>Mở camera điện thoại hoặc ứng dụng quét mã QR.</li>
-              <li>Quét mã QR ở trên để xem trạng thái phòng hiện tại.</li>
-              <li>Đăng nhập và chọn thời gian để **Đặt phòng nhanh**.</li>
+              <li>{t('qrPrint.step1')}</li>
+              <li>{t('qrPrint.step2')}</li>
+              <li>{t('qrPrint.step3')}</li>
             </ol>
           </div>
         </div>
 
         <div className="qr-print-page__footer">
           <p className="qr-print-page__url">{quickBookUrl}</p>
-          <p className="qr-print-page__copyright">Hệ thống Quản lý và Đặt phòng họp RoomBook</p>
+          <p className="qr-print-page__copyright">{t('qrPrint.copyright')}</p>
         </div>
       </div>
     </div>

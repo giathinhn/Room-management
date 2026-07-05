@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import TemplateCard from './TemplateCard';
 
 /**
@@ -14,6 +15,7 @@ import TemplateCard from './TemplateCard';
  *   onDelete      — callback(template) — delete with confirm
  */
 function TemplateList({ templates, total, maxTemplates = 10, onCreateNew, onUse, onEdit, onDelete }) {
+  const { t } = useTranslation();
   const atLimit = total >= maxTemplates;
 
   return (
@@ -22,7 +24,7 @@ function TemplateList({ templates, total, maxTemplates = 10, onCreateNew, onUse,
       <div className="tpl-list__header">
         <div className="tpl-list__title-area">
           <span className="tpl-list__icon">📋</span>
-          <h2 className="tpl-list__title">Mẫu đặt phòng</h2>
+          <h2 className="tpl-list__title">{t('templates.title')}</h2>
           <span className="tpl-list__counter">
             {total}/{maxTemplates}
           </span>
@@ -32,9 +34,9 @@ function TemplateList({ templates, total, maxTemplates = 10, onCreateNew, onUse,
           className={`tpl-list__create-btn ${atLimit ? 'tpl-list__create-btn--disabled' : ''}`}
           onClick={onCreateNew}
           disabled={atLimit}
-          title={atLimit ? `Đã đạt giới hạn ${maxTemplates} mẫu` : 'Tạo mẫu mới'}
+          title={atLimit ? t('templates.limitTitle', { max: maxTemplates }) : t('templates.createTitle')}
         >
-          + Tạo mới
+          {t('templates.createNewBtn')}
         </button>
       </div>
 
@@ -42,7 +44,7 @@ function TemplateList({ templates, total, maxTemplates = 10, onCreateNew, onUse,
       {templates.length === 0 ? (
         <div className="tpl-list__empty">
           <span className="tpl-list__empty-icon">📋</span>
-          <p className="tpl-list__empty-text">Chưa có mẫu nào. Tạo mẫu đầu tiên!</p>
+          <p className="tpl-list__empty-text">{t('templates.emptyList')}</p>
         </div>
       ) : (
         <div className="tpl-list__grid">

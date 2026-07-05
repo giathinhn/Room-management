@@ -6,18 +6,19 @@ import Pagination from '../components/common/Pagination';
 import EditUserModal from '../components/users/EditUserModal';
 import ChangeRoleModal from '../components/users/ChangeRoleModal';
 import CreateUserModal from '../components/users/CreateUserModal';
+import { useTranslation } from 'react-i18next';
 import './UsersPage.css';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 const ROLE_CONFIG = {
-  admin:    { label: 'Admin',        gradient: 'linear-gradient(135deg,#6366f1,#ec4899)', badgeClass: 'badge--admin' },
-  approver: { label: 'Người duyệt', gradient: 'linear-gradient(135deg,#06b6d4,#3b82f6)', badgeClass: 'badge--approver' },
-  user:     { label: 'Nhân viên',   gradient: 'linear-gradient(135deg,#10b981,#06b6d4)', badgeClass: 'badge--user' },
+  admin:    { gradient: 'linear-gradient(135deg,#6366f1,#ec4899)', badgeClass: 'badge--admin' },
+  approver: { gradient: 'linear-gradient(135deg,#06b6d4,#3b82f6)', badgeClass: 'badge--approver' },
+  user:     { gradient: 'linear-gradient(135deg,#10b981,#06b6d4)', badgeClass: 'badge--user' },
 };
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('vi-VN', {
+  return new Date(iso).toLocaleDateString(navigator.language, {
     day: '2-digit', month: '2-digit', year: 'numeric',
   });
 }
@@ -51,11 +52,18 @@ function SkeletonRow() {
 const DEFAULT_FILTERS = { page: 1, limit: 15, search: '', role: '', isActive: '' };
 
 function UsersPage() {
+  const { t } = useTranslation();
   const [users,       setUsers]       = useState([]);
   const [pagination,  setPagination]  = useState({ total: 0, page: 1, totalPages: 1 });
   const [filters,     setFilters]     = useState(DEFAULT_FILTERS);
   const [loading,     setLoading]     = useState(true);
   const [togglingId,  setTogglingId]  = useState(null);
+
+  const roleLabel = {
+    admin: t('roles.admin'),
+    approver: t('roles.approver'),
+    user: t('roles.user')
+  };
 
   // Modal states
   const [editUser,         setEditUser]         = useState(null);
@@ -80,11 +88,11 @@ function UsersPage() {
       setUsers(result.data.users);
       setPagination(result.data.pagination);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể tải danh sách người dùng');
+      toast.error(err.response?.data?.message || t('users.loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchUsers(filters);
@@ -93,9 +101,7 @@ function UsersPage() {
   // ── Filter handlers ──────────────────────────────────────────────────────────
   function handleSearchChange(e) {
     const val = e.target.value;
-    // Immediately update input display
     setFilters((prev) => ({ ...prev, search: val }));
-    // Debounce the actual fetch reset
     clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
       setFilters((prev) => ({ ...prev, search: val, page: 1 }));
@@ -123,10 +129,10 @@ function UsersPage() {
         prev.map((u) => (u.id === user.id ? { ...u, isActive: !u.isActive } : u))
       );
       toast.success(
-        user.isActive ? `Đã vô hiệu hóa "${user.fullName}"` : `Đã kích hoạt "${user.fullName}"`
+        user.isActive ? t('users.deactivateSuccess', { name: user.fullName }) : t('users.activateSuccess', { name: user.fullName })
       );
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Không thể cập nhật trạng thái');
+      toast.error(err.response?.data?.message || t('users.updateStatusFailed'));
     } finally {
       setTogglingId(null);
     }
@@ -139,8 +145,23 @@ function UsersPage() {
     );
   }
 
+  // Custom JSX for Title Count using i18n
+  const renderTitleCount = () => {
+    if (loading) return t('users.loading');
+    const parts = t('users.totalUsers', { count: pagination.total }).split(/<span[^>]*>|<\/span>/);
+    if (parts.length === 3) {
+      return (
+        <>
+          {parts[0]}
+          <span className="users-page__count">{pagination.total}</span>
+          {parts[2]}
+        </>
+      );
+    }
+    return t('users.totalUsers', { count: pagination.total });
+  };
+
   function handleUserCreated() {
-    // Refresh list from first page
     setFilters((prev) => ({ ...prev, page: 1 }));
   }
 
@@ -150,15 +171,9 @@ function UsersPage() {
       {/* ── Header ── */}
       <div className="users-page__header">
         <div>
-          <h1 className="users-page__title">👥 Quản lý Người dùng</h1>
+          <h1 className="users-page__title">👥 {t('users.title')}</h1>
           <p className="users-page__subtitle">
-            {loading ? 'Đang tải...' : (
-              <>
-                Tổng cộng{' '}
-                <span className="users-page__count">{pagination.total}</span>{' '}
-                tài khoản trong hệ thống
-              </>
-            )}
+            {renderTitleCount()}
           </p>
         </div>
         <button
@@ -167,7 +182,7 @@ function UsersPage() {
           onClick={() => setCreateModalOpen(true)}
         >
           <FiUserPlus />
-          <span>Thêm người dùng</span>
+          <span>{t('users.addUser')}</span>
         </button>
       </div>
 
@@ -180,7 +195,7 @@ function UsersPage() {
             id="users-search-input"
             type="text"
             className="users-page__search"
-            placeholder="Tìm theo tên hoặc email..."
+            placeholder={t('users.searchPlaceholder')}
             value={filters.search}
             onChange={handleSearchChange}
           />
@@ -193,10 +208,10 @@ function UsersPage() {
           value={filters.role}
           onChange={handleRoleFilter}
         >
-          <option value="">Tất cả vai trò</option>
-          <option value="admin">Admin</option>
-          <option value="approver">Người duyệt</option>
-          <option value="user">Nhân viên</option>
+          <option value="">{t('users.allRoles')}</option>
+          <option value="admin">{roleLabel.admin}</option>
+          <option value="approver">{roleLabel.approver}</option>
+          <option value="user">{roleLabel.user}</option>
         </select>
 
         {/* Status filter */}
@@ -206,9 +221,9 @@ function UsersPage() {
           value={filters.isActive}
           onChange={handleStatusFilter}
         >
-          <option value="">Tất cả trạng thái</option>
-          <option value="true">Hoạt động</option>
-          <option value="false">Vô hiệu hóa</option>
+          <option value="">{t('users.allStatuses')}</option>
+          <option value="true">{t('users.active')}</option>
+          <option value="false">{t('users.inactive')}</option>
         </select>
       </div>
 
@@ -217,12 +232,12 @@ function UsersPage() {
         <table className="users-table">
           <thead>
             <tr>
-              <th>Người dùng</th>
-              <th>Tên &amp; Email</th>
-              <th>Vai trò</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th className="users-table__actions-col">Hành động</th>
+              <th>{t('users.userCol')}</th>
+              <th>{t('users.nameEmailCol')}</th>
+              <th>{t('users.roleCol')}</th>
+              <th>{t('users.statusCol')}</th>
+              <th>{t('users.createdCol')}</th>
+              <th className="users-table__actions-col">{t('users.actionsCol')}</th>
             </tr>
           </thead>
           <tbody>
@@ -233,13 +248,13 @@ function UsersPage() {
                 <td colSpan={6} className="users-table__empty">
                   <div className="users-table__empty-inner">
                     <span className="users-table__empty-icon">🔍</span>
-                    <p>Không tìm thấy người dùng nào.</p>
+                    <p>{t('users.noUsers')}</p>
                     {(filters.search || filters.role || filters.isActive !== '') && (
                       <button
                         className="btn btn--ghost btn--sm"
                         onClick={() => setFilters(DEFAULT_FILTERS)}
                       >
-                        Xóa bộ lọc
+                        {t('users.clearFilters')}
                       </button>
                     )}
                   </div>
@@ -270,14 +285,14 @@ function UsersPage() {
                     {/* Role badge */}
                     <td>
                       <span className={`role-badge ${rc.badgeClass}`}>
-                        {rc.label}
+                        {roleLabel[user.role] || user.role}
                       </span>
                     </td>
 
                     {/* Status badge */}
                     <td>
                       <span className={`status-badge ${user.isActive ? 'status-badge--active' : 'status-badge--inactive'}`}>
-                        {user.isActive ? '● Hoạt động' : '● Vô hiệu hóa'}
+                        {user.isActive ? t('users.active') : t('users.inactive')}
                       </span>
                     </td>
 
@@ -290,7 +305,7 @@ function UsersPage() {
                         {/* Edit */}
                         <button
                           className="action-btn action-btn--edit"
-                          title="Chỉnh sửa thông tin"
+                          title={t('users.editTooltip')}
                           onClick={() => setEditUser(user)}
                         >
                           <FiEdit2 />
@@ -299,7 +314,7 @@ function UsersPage() {
                         {/* Change role */}
                         <button
                           className="action-btn action-btn--role"
-                          title="Thay đổi vai trò"
+                          title={t('users.roleTooltip')}
                           onClick={() => setRoleUser(user)}
                         >
                           <FiShield />
@@ -308,7 +323,7 @@ function UsersPage() {
                         {/* Toggle active */}
                         <button
                           className={`action-btn ${user.isActive ? 'action-btn--deactivate' : 'action-btn--activate'}`}
-                          title={user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                          title={user.isActive ? t('users.deactivateTooltip') : t('users.activateTooltip')}
                           onClick={() => handleToggleActive(user)}
                           disabled={togglingId === user.id}
                         >
@@ -333,7 +348,7 @@ function UsersPage() {
             onPageChange={handlePageChange}
           />
           <p className="users-page__page-info">
-            Trang {pagination.page} / {pagination.totalPages} &nbsp;·&nbsp; {pagination.total} người dùng
+            {t('users.pageInfo', { page: pagination.page, totalPages: pagination.totalPages, total: pagination.total })}
           </p>
         </div>
       )}

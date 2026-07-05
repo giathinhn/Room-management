@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FiMessageSquare, FiX, FiSend, FiTrash2, FiUser, FiClock, FiUsers, FiMapPin, FiCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -8,39 +9,46 @@ import './ChatWidget.css';
 
 // --- Sub-components ----------------------------------------------------------
 
-const RoomCard = ({ room, onBook }) => (
-  <div className="chat-room-card">
-    <div className="chat-room-card__header">
-      <span className="chat-room-card__name">{room.name}</span>
-      <span className="chat-room-card__capacity"><FiUsers size={12} /> {room.capacity} người</span>
-    </div>
-    <div className="chat-room-card__info">
-      <span><FiMapPin size={11} /> {room.location}</span>
-    </div>
-    {room.equipment && room.equipment.length > 0 && (
-      <div className="chat-room-card__equipment">
-        {room.equipment.slice(0, 3).map((eq) => (
-          <span key={eq} className="chat-room-card__tag">{eq}</span>
-        ))}
-        {room.equipment.length > 3 && (
-          <span className="chat-room-card__tag">+{room.equipment.length - 3}</span>
-        )}
+const RoomCard = ({ room, onBook }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="chat-room-card">
+      <div className="chat-room-card__header">
+        <span className="chat-room-card__name">{room.name}</span>
+        <span className="chat-room-card__capacity"><FiUsers size={12} /> {room.capacity} {t('rooms.capacityUnit')}</span>
       </div>
-    )}
-    <button className="chat-room-card__btn" onClick={() => onBook(room)}>
-      Đặt phòng này &rarr;
-    </button>
-  </div>
-);
+      <div className="chat-room-card__info">
+        <span><FiMapPin size={11} /> {room.location}</span>
+      </div>
+      {room.equipment && room.equipment.length > 0 && (
+        <div className="chat-room-card__equipment">
+          {room.equipment.slice(0, 3).map((eq) => (
+            <span key={eq} className="chat-room-card__tag">{eq}</span>
+          ))}
+          {room.equipment.length > 3 && (
+            <span className="chat-room-card__tag">+{room.equipment.length - 3}</span>
+          )}
+        </div>
+      )}
+      <button className="chat-room-card__btn" onClick={() => onBook(room)}>
+        {t('chat.bookThisRoom')}
+      </button>
+    </div>
+  );
+};
 
 const BookingProposalCard = ({ proposal, onConfirm, onDecline, confirming }) => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+
   const fmt = (iso) => {
     const d = new Date(iso);
-    return d.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+    return d.toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' });
   };
+
   return (
     <div className="chat-proposal-card">
-      <div className="chat-proposal-card__title">📋 Xác nhận đặt phòng</div>
+      <div className="chat-proposal-card__title">{t('chat.confirmBookingTitle')}</div>
       <div className="chat-proposal-card__detail">
         <span>🏢</span> <strong>{proposal.roomName || proposal.room?.name}</strong>
       </div>
@@ -49,14 +57,14 @@ const BookingProposalCard = ({ proposal, onConfirm, onDecline, confirming }) => 
       </div>
       <div className="chat-proposal-card__detail">
         <span><FiClock size={12} /></span>
-        {fmt(proposal.startTime)} – {new Date(proposal.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+        {fmt(proposal.startTime)} – {new Date(proposal.endTime).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
       </div>
       <div className="chat-proposal-card__actions">
         <button className="chat-proposal-card__btn-confirm" onClick={() => onConfirm(proposal)} disabled={confirming}>
-          {confirming ? '⏳ Đang đặt...' : '✅ Xác nhận đặt'}
+          {confirming ? t('chat.bookingInProgress') : t('chat.confirmBookBtn')}
         </button>
         <button className="chat-proposal-card__btn-decline" onClick={() => onDecline(proposal)} disabled={confirming}>
-          Hủy bỏ
+          {t('common.cancel')}
         </button>
       </div>
     </div>
@@ -64,8 +72,17 @@ const BookingProposalCard = ({ proposal, onConfirm, onDecline, confirming }) => 
 };
 
 const BookingItem = ({ booking }) => {
-  const statusLabel = { pending: '⏳ Chờ duyệt', approved: '✅ Đã duyệt', rejected: '❌ Từ chối', cancelled: '🚫 Đã hủy' };
-  const fmt = (iso) => new Date(iso).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+  const { t, i18n } = useTranslation();
+  const statusLabel = {
+    pending: t('chat.status.pending'),
+    approved: t('chat.status.approved'),
+    rejected: t('chat.status.rejected'),
+    cancelled: t('chat.status.cancelled')
+  };
+
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+  const fmt = (iso) => new Date(iso).toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' });
+
   return (
     <div className="chat-booking-item">
       <div className="chat-booking-item__title">{booking.title}</div>
@@ -94,18 +111,20 @@ const TypingIndicator = () => (
 
 // --- Main ChatWidget ---------------------------------------------------------
 
-const WELCOME_MESSAGE = {
-  id: 'welcome',
-  role: 'assistant',
-  content: 'Xin chào! Tôi là **RoomSync AI** 🤖\n\nTôi có thể giúp bạn:\n• Đặt phòng họp bằng ngôn ngữ tự nhiên\n• Kiểm tra phòng trống\n• Xem lịch cuộc họp của bạn\n• Hủy booking\n\nBạn cần gì?',
-  metadata: null,
-  createdAt: new Date().toISOString(),
-};
-
 const ChatWidget = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  
+  const welcomeMessage = {
+    id: 'welcome',
+    role: 'assistant',
+    content: t('chat.welcome'),
+    metadata: null,
+    createdAt: new Date().toISOString(),
+  };
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
@@ -113,6 +132,19 @@ const ChatWidget = () => {
   const [confirmingProposal, setConfirmingProposal] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Sync welcome message on language change
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 0) return [welcomeMessage];
+      return prev.map((msg) =>
+        msg.id === 'welcome'
+          ? { ...msg, content: t('chat.welcome') }
+          : msg
+      );
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -137,7 +169,7 @@ const ChatWidget = () => {
       const res = await chatService.getHistory(50);
       const history = res.data || [];
       if (history.length > 0) {
-        setMessages([WELCOME_MESSAGE, ...history]);
+        setMessages([welcomeMessage, ...history]);
       }
       setHistoryLoaded(true);
     } catch {
@@ -188,7 +220,7 @@ const ChatWidget = () => {
       const errMsg = {
         id: `err-${Date.now()}`,
         role: 'assistant',
-        content: err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại!',
+        content: err.response?.data?.message || t('chat.errorOccurred'),
         metadata: null,
         createdAt: new Date().toISOString(),
       };
@@ -199,7 +231,8 @@ const ChatWidget = () => {
   };
 
   const handleBookRoom = (room) => {
-    handleSend(`Đặt phòng ${room.name}`);
+    const bookPrompt = i18n.language === 'en' ? `Book room ${room.name}` : `Đặt phòng ${room.name}`;
+    handleSend(bookPrompt);
   };
 
   const handleConfirmProposal = async (proposalArg) => {
@@ -217,7 +250,7 @@ const ChatWidget = () => {
       const successMsg = {
         id: `success-${Date.now()}`,
         role: 'assistant',
-        content: `✅ **Đặt phòng thành công!**\n\nCuộc họp **${proposal.title}** tại **${proposal.roomName}** đã được tạo và đang chờ duyệt. Bạn có thể xem trong trang [Đặt phòng của tôi](/bookings).`,
+        content: t('chat.bookingSuccessMsg', { title: proposal.title, room: proposal.roomName || proposal.room?.name }),
         metadata: null,
         createdAt: new Date().toISOString(),
       };
@@ -239,9 +272,9 @@ const ChatWidget = () => {
           })
           .concat([successMsg]);
       });
-      toast.success('Đặt phòng thành công!');
+      toast.success(t('chat.bookingSuccessToast'));
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || err.response?.data?.message || 'Không thể đặt phòng. Vui lòng thử lại.');
+      toast.error(err.response?.data?.error?.message || err.response?.data?.message || t('chat.bookingFailedToast'));
     } finally {
       setConfirmingProposal(false);
     }
@@ -253,7 +286,7 @@ const ChatWidget = () => {
     const declineMsg = {
       id: `decline-${Date.now()}`,
       role: 'assistant',
-      content: 'Đã hủy đề xuất. Bạn muốn tìm phòng khác hoặc thay đổi thời gian không?',
+      content: t('chat.proposalCancelled'),
       metadata: null,
       createdAt: new Date().toISOString(),
     };
@@ -277,14 +310,15 @@ const ChatWidget = () => {
   };
 
   const handleClearHistory = async () => {
+    if (!window.confirm(t('chat.clearHistoryConfirm'))) return;
     try {
       await chatService.clearHistory();
-      setMessages([WELCOME_MESSAGE]);
+      setMessages([welcomeMessage]);
       setPendingProposal(null);
       setHistoryLoaded(true);
-      toast.success('Đã xóa lịch sử chat');
+      toast.success(t('chat.clearHistorySuccess'));
     } catch {
-      toast.error('Không thể xóa lịch sử');
+      toast.error(t('chat.clearHistoryFailed'));
     }
   };
 
@@ -305,6 +339,7 @@ const ChatWidget = () => {
   const renderMessage = (msg) => {
     const isUser = msg.role === 'user';
     const meta = msg.metadata;
+    const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
 
     return (
       <div key={msg.id} className={`chat-message chat-message--${isUser ? 'user' : 'ai'}`}>
@@ -353,7 +388,7 @@ const ChatWidget = () => {
           )}
 
           <span className="chat-time">
-            {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(msg.createdAt).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
         {isUser && (
@@ -374,7 +409,7 @@ const ChatWidget = () => {
         id="ai-chat-bubble-btn"
         className={`chat-bubble-btn ${isOpen ? 'chat-bubble-btn--active' : ''}`}
         onClick={() => setIsOpen((v) => !v)}
-        aria-label="Mo AI Chatbot"
+        aria-label="AI Chatbot"
         title="RoomSync AI Assistant"
       >
         {isOpen ? <FiX size={24} /> : <FiMessageSquare size={24} />}
@@ -392,14 +427,14 @@ const ChatWidget = () => {
               <div className="chat-panel__avatar">🤖</div>
               <div>
                 <div className="chat-panel__title">RoomSync AI</div>
-                <div className="chat-panel__subtitle">Tro ly dat phong thong minh</div>
+                <div className="chat-panel__subtitle">{t('chat.subtitle')}</div>
               </div>
             </div>
             <div className="chat-panel__header-actions">
               <button
                 className="chat-icon-btn"
                 onClick={handleClearHistory}
-                title="Xóa lịch sử chat"
+                title={t('chat.clearHistoryTooltip')}
                 id="chat-clear-history-btn"
               >
                 <FiTrash2 size={16} />
@@ -407,7 +442,7 @@ const ChatWidget = () => {
               <button
                 className="chat-icon-btn"
                 onClick={() => setIsOpen(false)}
-                title="Đóng"
+                title={t('floorMap.close')}
                 id="chat-close-btn"
               >
                 <FiX size={18} />
@@ -426,9 +461,9 @@ const ChatWidget = () => {
           {messages.length <= 1 && !isLoading && (
             <div className="chat-suggestions">
               {[
-                'Phòng nào trống hôm nay lúc 2h?',
-                'Đặt phòng cho 5 người ngày mai lúc 9h',
-                'Tôi có lịch họp gì hôm nay?',
+                t('chat.prompts.roomAvailableToday'),
+                t('chat.prompts.bookRoomTomorrow'),
+                t('chat.prompts.myBookingsToday'),
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -450,7 +485,7 @@ const ChatWidget = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Nhập tin nhắn... (Enter để gửi)"
+              placeholder={t('chat.inputPlaceholder')}
               rows={1}
               disabled={isLoading}
             />
@@ -459,7 +494,7 @@ const ChatWidget = () => {
               className="chat-send-btn"
               onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
-              aria-label="Gửi tin nhắn"
+              aria-label={t('comments.send')}
             >
               <FiSend size={18} />
             </button>

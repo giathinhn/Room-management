@@ -5,27 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import './LoginPage.css';
 import './RegisterPage.css';
 
-// ── Password strength helper ──────────────────────────────────────────────────
-const getPasswordStrength = (password) => {
-  if (!password) return { score: 0, label: '', checks: getChecks('') };
-  const checks = getChecks(password);
-  const score = Object.values(checks).filter(Boolean).length;
-  const labels = ['', 'Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
-  return { score, label: labels[score] || '', checks };
-};
-
-const getChecks = (pw) => ({
-  length: pw.length >= 8,
-  uppercase: /[A-Z]/.test(pw),
-  lowercase: /[a-z]/.test(pw),
-  number: /\d/.test(pw),
-  special: /[^A-Za-z0-9]/.test(pw),
-});
-
 const RegisterPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -39,22 +24,46 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});
 
+  // ── Password strength helper ──────────────────────────────────────────────────
+  const getPasswordStrength = (password) => {
+    if (!password) return { score: 0, label: '', checks: getChecks('') };
+    const checks = getChecks(password);
+    const score = Object.values(checks).filter(Boolean).length;
+    const labels = [
+      '',
+      t('auth.strength.veryWeak'),
+      t('auth.strength.weak'),
+      t('auth.strength.medium'),
+      t('auth.strength.strong'),
+      t('auth.strength.veryStrong'),
+    ];
+    return { score, label: labels[score] || '', checks };
+  };
+
+  const getChecks = (pw) => ({
+    length: pw.length >= 8,
+    uppercase: /[A-Z]/.test(pw),
+    lowercase: /[a-z]/.test(pw),
+    number: /\d/.test(pw),
+    special: /[^A-Za-z0-9]/.test(pw),
+  });
+
   const strength = getPasswordStrength(form.password);
 
   // ── Validation ─────────────────────────────────────────────────────────────
   const validate = () => {
     const errs = {};
-    if (!form.fullName.trim()) errs.fullName = 'Vui lòng nhập họ tên';
-    else if (form.fullName.trim().length < 2) errs.fullName = 'Họ tên phải ít nhất 2 ký tự';
+    if (!form.fullName.trim()) errs.fullName = t('validation.fullNameRequired');
+    else if (form.fullName.trim().length < 2) errs.fullName = t('validation.fullNameRequired');
 
-    if (!form.email) errs.email = 'Vui lòng nhập email';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Email không hợp lệ';
+    if (!form.email) errs.email = t('validation.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t('validation.emailInvalid');
 
-    if (!form.password) errs.password = 'Vui lòng nhập mật khẩu';
-    else if (form.password.length < 6) errs.password = 'Mật khẩu phải ít nhất 6 ký tự';
+    if (!form.password) errs.password = t('validation.passwordRequired');
+    else if (form.password.length < 6) errs.password = t('validation.passwordTooShort');
 
-    if (!form.confirmPassword) errs.confirmPassword = 'Vui lòng xác nhận mật khẩu';
-    else if (form.password !== form.confirmPassword) errs.confirmPassword = 'Mật khẩu không khớp';
+    if (!form.confirmPassword) errs.confirmPassword = t('validation.confirmPasswordRequired');
+    else if (form.password !== form.confirmPassword) errs.confirmPassword = t('validation.passwordMismatch');
 
     return errs;
   };
@@ -77,13 +86,14 @@ const RegisterPage = () => {
     setLoading(true);
     try {
       await register(form.email, form.password, form.fullName.trim());
-      toast.success('Đăng ký thành công! Chào mừng bạn đến với RoomBook 🎉');
+      toast.success(t('auth.registerSuccess'));
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      const msg = t(`errors.${errorCode}`);
       toast.error(msg);
-      if (err?.response?.data?.message?.includes('email')) {
-        setErrors({ email: 'Email này đã được sử dụng' });
+      if (err?.response?.data?.error?.code === 'EMAIL_ALREADY_EXISTS') {
+        setErrors({ email: t('errors.EMAIL_ALREADY_EXISTS') });
       }
     } finally {
       setLoading(false);
@@ -119,15 +129,15 @@ const RegisterPage = () => {
           <span className="auth-logo-text">RoomBook</span>
         </div>
 
-        <h1 className="auth-title">Tạo tài khoản mới</h1>
-        <p className="auth-subtitle">Đăng ký để bắt đầu đặt phòng họp ngay hôm nay</p>
+        <h1 className="auth-title">{t('auth.registerTitle')}</h1>
+        <p className="auth-subtitle">{t('auth.registerSubtitle')}</p>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <Input
             id="reg-fullname"
             type="text"
             name="fullName"
-            label="Họ và tên"
+            label={t('auth.fullName')}
             placeholder="Nguyễn Văn An"
             value={form.fullName}
             onChange={handleChange}
@@ -140,7 +150,7 @@ const RegisterPage = () => {
             id="reg-email"
             type="email"
             name="email"
-            label="Email"
+            label={t('auth.email')}
             placeholder="you@company.com"
             value={form.email}
             onChange={handleChange}
@@ -154,7 +164,7 @@ const RegisterPage = () => {
               id="reg-password"
               type="password"
               name="password"
-              label="Mật khẩu"
+              label={t('auth.password')}
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
@@ -185,11 +195,11 @@ const RegisterPage = () => {
                 {/* Checklist */}
                 <ul className="pw-checklist">
                   {[
-                    { key: 'length', label: 'Ít nhất 8 ký tự' },
-                    { key: 'uppercase', label: 'Chữ hoa (A-Z)' },
-                    { key: 'lowercase', label: 'Chữ thường (a-z)' },
-                    { key: 'number', label: 'Số (0-9)' },
-                    { key: 'special', label: 'Ký tự đặc biệt (!@#...)' },
+                    { key: 'length', label: t('auth.strength.lenCheck') },
+                    { key: 'uppercase', label: t('auth.strength.upperCheck') },
+                    { key: 'lowercase', label: t('auth.strength.lowerCheck') },
+                    { key: 'number', label: t('auth.strength.numberCheck') },
+                    { key: 'special', label: t('auth.strength.specialCheck') },
                   ].map(({ key, label }) => (
                     <li
                       key={key}
@@ -207,7 +217,7 @@ const RegisterPage = () => {
             id="reg-confirm"
             type="password"
             name="confirmPassword"
-            label="Xác nhận mật khẩu"
+            label={t('auth.confirmPassword')}
             placeholder="••••••••"
             value={form.confirmPassword}
             onChange={handleChange}
@@ -224,14 +234,14 @@ const RegisterPage = () => {
             className="auth-submit-btn"
             leftIcon={!loading && <FiUserPlus />}
           >
-            {loading ? 'Đang đăng ký...' : 'Tạo tài khoản'}
+            {loading ? `${t('common.loading')}` : t('auth.createAccount')}
           </Button>
         </form>
 
         <p className="auth-footer">
-          Đã có tài khoản?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link to="/login" className="auth-link">
-            Đăng nhập
+            {t('auth.login')}
           </Link>
         </p>
       </div>

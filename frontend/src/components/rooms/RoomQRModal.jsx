@@ -1,9 +1,11 @@
 import Modal from '../common/Modal';
 import { QRCodeCanvas } from 'qrcode.react';
 import { FiDownload, FiPrinter } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './RoomQRModal.css';
 
 function RoomQRModal({ isOpen, onClose, room }) {
+  const { t } = useTranslation();
   if (!room) return null;
 
   const quickBookUrl = `${window.location.origin}/rooms/${room.id}/quick-book`;
@@ -26,10 +28,10 @@ function RoomQRModal({ isOpen, onClose, room }) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`📱 Mã QR - ${room.name}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('rooms.qrModal.qrTitle', { name: room.name })}>
       <div className="room-qr-modal">
         <p className="room-qr-modal__description">
-          Quét mã QR dưới đây bằng điện thoại để xem trạng thái thời gian thực và đặt phòng nhanh chóng.
+          {t('rooms.qrModal.qrDesc')}
         </p>
 
         <div className="room-qr-modal__canvas-wrapper">
@@ -55,19 +57,19 @@ function RoomQRModal({ isOpen, onClose, room }) {
             type="button"
             className="btn btn--primary"
             onClick={handleDownload}
-            title="Tải xuống QR Code dạng ảnh PNG"
+            title={t('rooms.qrModal.downloadPngTooltip')}
           >
             <FiDownload style={{ marginRight: '8px' }} />
-            Tải xuống PNG
+            {t('rooms.qrModal.downloadPng')}
           </button>
           <button
             type="button"
             className="btn btn--outline"
             onClick={handlePrint}
-            title="Mở trang xem bản in mã QR"
+            title={t('rooms.qrModal.printPreviewTooltip')}
           >
             <FiPrinter style={{ marginRight: '8px' }} />
-            Xem bản in
+            {t('rooms.qrModal.printPreview')}
           </button>
         </div>
       </div>

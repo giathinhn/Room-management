@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
+import { useTranslation } from 'react-i18next';
 import './RoomForm.css';
-
-const EQUIPMENT_OPTIONS = [
-  { value: 'Máy chiếu', icon: '📽️' },
-  { value: 'Micro',     icon: '🎤' },
-  { value: 'Bảng trắng', icon: '📋' },
-  { value: 'TV',        icon: '🖥️' },
-  { value: 'Webcam',    icon: '📷' },
-  { value: 'Loa',       icon: '🔊' },
-  { value: 'Điều hòa',  icon: '❄️' },
-];
 
 const EMPTY_FORM = {
   name: '',
@@ -31,8 +22,19 @@ const EMPTY_FORM = {
  *   isLoading {boolean}          Disable submit while request is in flight
  */
 function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false }) {
+  const { t } = useTranslation();
   const [form, setForm]   = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+
+  const equipmentOptions = [
+    { value: 'Máy chiếu', icon: '📽️', label: t('rooms.equipmentOptions.projector') },
+    { value: 'Micro',     icon: '🎤', label: t('rooms.equipmentOptions.microphone') },
+    { value: 'Bảng trắng', icon: '📋', label: t('rooms.equipmentOptions.whiteboard') },
+    { value: 'TV',        icon: '🖥️', label: t('rooms.equipmentOptions.tv') },
+    { value: 'Webcam',    icon: '📷', label: t('rooms.equipmentOptions.webcam') },
+    { value: 'Loa',       icon: '🔊', label: t('rooms.equipmentOptions.speaker') },
+    { value: 'Điều hòa',  icon: '❄️', label: t('rooms.equipmentOptions.airConditioner') },
+  ];
 
   // Pre-fill when editing
   useEffect(() => {
@@ -70,28 +72,28 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
   function validate() {
     const errs = {};
     if (!form.name.trim()) {
-      errs.name = 'Tên phòng là bắt buộc';
+      errs.name = t('rooms.form.validation.nameRequired');
     } else if (form.name.trim().length > 100) {
-      errs.name = 'Tên phòng tối đa 100 ký tự';
+      errs.name = t('rooms.form.validation.nameMaxLength');
     }
 
     const cap = Number(form.capacity);
     if (!form.capacity) {
-      errs.capacity = 'Sức chứa là bắt buộc';
+      errs.capacity = t('rooms.form.validation.capacityRequired');
     } else if (!Number.isInteger(cap) || cap < 1 || cap > 500) {
-      errs.capacity = 'Sức chứa phải là số nguyên từ 1 đến 500';
+      errs.capacity = t('rooms.form.validation.capacityRange');
     }
 
     if (!form.building.trim()) {
-      errs.building = 'Tòa nhà là bắt buộc';
+      errs.building = t('rooms.form.validation.buildingRequired');
     } else if (form.building.trim().length > 50) {
-      errs.building = 'Tòa nhà tối đa 50 ký tự';
+      errs.building = t('rooms.form.validation.buildingMaxLength');
     }
 
     if (!form.floor.trim()) {
-      errs.floor = 'Tầng là bắt buộc';
+      errs.floor = t('rooms.form.validation.floorRequired');
     } else if (form.floor.trim().length > 50) {
-      errs.floor = 'Tầng tối đa 50 ký tự';
+      errs.floor = t('rooms.form.validation.floorMaxLength');
     }
 
     return errs;
@@ -120,20 +122,20 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? 'Chỉnh sửa phòng họp' : 'Thêm phòng họp mới'}
+      title={isEdit ? t('rooms.form.editTitle') : t('rooms.form.addTitle')}
     >
       <form id="room-form" className="room-form" onSubmit={handleSubmit} noValidate>
         {/* Name */}
         <div className="form-group">
           <label htmlFor="room-name" className="form-label">
-            Tên phòng <span className="form-required">*</span>
+            {t('rooms.name')} <span className="form-required">*</span>
           </label>
           <input
             id="room-name"
             name="name"
             type="text"
             className={`form-input${errors.name ? ' form-input--error' : ''}`}
-            placeholder="Vd: Phòng họp A1"
+            placeholder={t('rooms.form.namePlaceholder')}
             value={form.name}
             onChange={handleChange}
             maxLength={100}
@@ -144,7 +146,7 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
         {/* Capacity */}
         <div className="form-group">
           <label htmlFor="room-capacity" className="form-label">
-            Sức chứa <span className="form-required">*</span>
+            {t('rooms.capacity')} <span className="form-required">*</span>
           </label>
           <input
             id="room-capacity"
@@ -153,27 +155,25 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
             min={1}
             max={500}
             className={`form-input${errors.capacity ? ' form-input--error' : ''}`}
-            placeholder="Vd: 10"
+            placeholder={t('rooms.form.capacityPlaceholder')}
             value={form.capacity}
             onChange={handleChange}
           />
           {errors.capacity && <p className="form-error">{errors.capacity}</p>}
         </div>
 
-
-
         {/* Building & Floor (Mandatory) */}
         <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label htmlFor="room-building" className="form-label">
-              Tòa nhà <span className="form-required">*</span>
+              {t('rooms.form.building')} <span className="form-required">*</span>
             </label>
             <input
               id="room-building"
               name="building"
               type="text"
               className={`form-input${errors.building ? ' form-input--error' : ''}`}
-              placeholder="Vd: A"
+              placeholder={t('rooms.form.buildingPlaceholder')}
               value={form.building}
               onChange={handleChange}
               maxLength={50}
@@ -183,14 +183,14 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label htmlFor="room-floor" className="form-label">
-              Tầng <span className="form-required">*</span>
+              {t('rooms.form.floor')} <span className="form-required">*</span>
             </label>
             <input
               id="room-floor"
               name="floor"
               type="text"
               className={`form-input${errors.floor ? ' form-input--error' : ''}`}
-              placeholder="Vd: 3"
+              placeholder={t('rooms.form.floorPlaceholder')}
               value={form.floor}
               onChange={handleChange}
               maxLength={50}
@@ -202,9 +202,9 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
 
         {/* Equipment */}
         <div className="form-group">
-          <label className="form-label">Thiết bị</label>
+          <label className="form-label">{t('rooms.equipment')}</label>
           <div className="room-form__equipment-grid">
-            {EQUIPMENT_OPTIONS.map(({ value, icon }) => {
+            {equipmentOptions.map(({ value, icon, label }) => {
               const checked = form.equipment.includes(value);
               return (
                 <label
@@ -220,7 +220,7 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
                     className="room-form__equipment-checkbox"
                   />
                   <span className="room-form__equipment-icon">{icon}</span>
-                  <span className="room-form__equipment-label">{value}</span>
+                  <span className="room-form__equipment-label">{label}</span>
                 </label>
               );
             })}
@@ -236,7 +236,7 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
             onClick={onClose}
             disabled={isLoading}
           >
-            Hủy
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -244,7 +244,7 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
             className="btn btn--primary"
             disabled={isLoading}
           >
-            {isLoading ? 'Đang lưu…' : isEdit ? 'Lưu thay đổi' : 'Thêm phòng'}
+            {isLoading ? t('rooms.form.saving') : isEdit ? t('rooms.form.saveChanges') : t('rooms.form.addRoomBtn')}
           </button>
         </div>
       </form>

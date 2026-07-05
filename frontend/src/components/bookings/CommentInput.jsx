@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * CommentInput — textarea with submit button for writing new comments.
@@ -9,6 +10,7 @@ import React, { useState, useRef, useEffect } from 'react';
  * }} props
  */
 function CommentInput({ onSubmit, disabled = false }) {
+  const { t } = useTranslation();
   const [content, setContent]   = useState('');
   const [loading, setLoading]   = useState(false);
   const textareaRef             = useRef(null);
@@ -30,6 +32,8 @@ function CommentInput({ onSubmit, disabled = false }) {
     try {
       await onSubmit(trimmed);
       setContent('');
+    } catch {
+      // Errors handled by parent component toast notification
     } finally {
       setLoading(false);
     }
@@ -52,7 +56,7 @@ function CommentInput({ onSubmit, disabled = false }) {
           id="comment-input-textarea"
           ref={textareaRef}
           className={`comment-input__textarea ${isOverLimit ? 'comment-input__textarea--error' : ''}`}
-          placeholder="Viết bình luận... (Ctrl+Enter để gửi)"
+          placeholder={t('comments.placeholder')}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -71,7 +75,7 @@ function CommentInput({ onSubmit, disabled = false }) {
             className="comment-input__submit"
             disabled={!content.trim() || loading || disabled || isOverLimit}
           >
-            {loading ? 'Đang gửi...' : 'Gửi 📤'}
+            {loading ? t('comments.sending') : t('comments.send')}
           </button>
         </div>
       </div>

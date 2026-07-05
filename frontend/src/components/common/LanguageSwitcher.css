@@ -1,0 +1,38 @@
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.language-switcher:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+.language-switcher__icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.language-switcher__select {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  padding-right: 4px;
+}
+
+.language-switcher__select option {
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+}

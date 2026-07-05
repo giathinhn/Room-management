@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import floorMapService from '../../services/floormap.service';
 import './RoomPositionEditor.css';
 
 const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
+  const { t } = useTranslation();
   const [position, setPosition] = useState({
     floor: room.floor || '1',
     building: room.building || 'A',
@@ -31,21 +33,21 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
     setSaving(true);
     try {
       await floorMapService.updateMapPosition(room.id, position);
-      toast.success('Đã cập nhật thông tin phòng họp');
+      toast.success(t('floorMap.configSuccess'));
       onSaved();
       onClose();
     } catch {
-      toast.error('Lỗi khi cập nhật thông tin phòng');
+      toast.error(t('floorMap.configError'));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="pos-editor" role="dialog" aria-label={`Chỉnh sửa phòng ${room.name}`}>
+    <div className="pos-editor" role="dialog" aria-label={t('floorMap.editPosition', { name: room.name })}>
       <div className="pos-editor__header">
-        <h3 className="pos-editor__title">🔧 Cấu hình sơ đồ phòng</h3>
-        <button className="pos-editor__close" onClick={onClose} aria-label="Đóng">✕</button>
+        <h3 className="pos-editor__title">{t('floorMap.configTitle')}</h3>
+        <button className="pos-editor__close" onClick={onClose} aria-label={t('floorMap.close')}>✕</button>
       </div>
 
       <p className="pos-editor__room-name">{room.name}</p>
@@ -54,26 +56,26 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
         {/* Building & Floor */}
         <div className="pos-editor__row">
           <div className="pos-editor__field">
-            <label className="pos-editor__label" htmlFor={`building-${room.id}`}>🏢 Tòa nhà</label>
+            <label className="pos-editor__label" htmlFor={`building-${room.id}`}>🏢 {t('floorMap.building')}</label>
             <input
               id={`building-${room.id}`}
               type="text"
               className="pos-editor__input"
               value={position.building}
               onChange={(e) => handleChange('building', e.target.value)}
-              placeholder="Ví dụ: A, B, C"
+              placeholder={t('floorMap.buildingPlaceholder')}
             />
           </div>
           
           <div className="pos-editor__field">
-            <label className="pos-editor__label" htmlFor={`floor-${room.id}`}>🏗️ Tầng</label>
+            <label className="pos-editor__label" htmlFor={`floor-${room.id}`}>🏗️ {t('floorMap.floor')}</label>
             <input
               id={`floor-${room.id}`}
               type="text"
               className="pos-editor__input"
               value={position.floor}
               onChange={(e) => handleChange('floor', e.target.value)}
-              placeholder="Ví dụ: 1, 2, 3"
+              placeholder={t('floorMap.floorPlaceholder')}
             />
           </div>
         </div>
@@ -81,21 +83,21 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
         {/* Grid placement */}
         <div className="pos-editor__row">
           <div className="pos-editor__field">
-            <label className="pos-editor__label" htmlFor={`mapX-${room.id}`}>Cột (0 - 3)</label>
+            <label className="pos-editor__label" htmlFor={`mapX-${room.id}`}>{t('floorMap.column')}</label>
             <select
               id={`mapX-${room.id}`}
               className="pos-editor__select"
               value={position.mapX}
               onChange={(e) => handleChange('mapX', e.target.value)}
             >
-              <option value={0}>Cột 1 (Trái)</option>
-              <option value={1}>Cột 2</option>
-              <option value={2}>Cột 3</option>
-              <option value={3}>Cột 4 (Phải)</option>
+              <option value={0}>{t('floorMap.col1')}</option>
+              <option value={1}>{t('floorMap.col2')}</option>
+              <option value={2}>{t('floorMap.col3')}</option>
+              <option value={3}>{t('floorMap.col4')}</option>
             </select>
           </div>
           <div className="pos-editor__field">
-            <label className="pos-editor__label" htmlFor={`mapY-${room.id}`}>Hàng (0+)</label>
+            <label className="pos-editor__label" htmlFor={`mapY-${room.id}`}>{t('floorMap.row')}</label>
             <input
               id={`mapY-${room.id}`}
               type="number"
@@ -111,7 +113,7 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
 
       <div className="pos-editor__actions">
         <button className="pos-editor__btn pos-editor__btn--cancel" onClick={onClose}>
-          Hủy
+          {t('common.cancel')}
         </button>
         <button
           className="pos-editor__btn pos-editor__btn--save"
@@ -119,7 +121,7 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
           disabled={saving}
           id={`save-pos-${room.id}`}
         >
-          {saving ? '⏳ Đang lưu...' : '💾 Lưu cấu hình'}
+          {saving ? t('floorMap.configSaving') : t('floorMap.configSave')}
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { FiUser, FiMail, FiLock } from 'react-icons/fi';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
@@ -7,12 +8,6 @@ import Button from '../common/Button';
 import { register } from '../../services/auth.service';
 import userService from '../../services/user.service';
 import './CreateUserModal.css';
-
-const ROLES = [
-  { value: 'user',     label: 'Nhân viên',    emoji: '⚫' },
-  { value: 'approver', label: 'Người duyệt',  emoji: '🔵' },
-  { value: 'admin',    label: 'Admin',         emoji: '🔴' },
-];
 
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
@@ -29,9 +24,16 @@ const INITIAL_FORM = {
  * Strategy: POST /api/auth/register → if role ≠ 'user', PATCH /api/users/:id/role
  */
 function CreateUserModal({ isOpen, onClose, onCreated }) {
+  const { t } = useTranslation();
   const [form, setForm]     = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const rolesConfig = [
+    { value: 'user',     label: t('roles.user'),    emoji: '⚫' },
+    { value: 'approver', label: t('roles.approver'),  emoji: '🔵' },
+    { value: 'admin',    label: t('roles.admin'),         emoji: '🔴' },
+  ];
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -44,27 +46,27 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
     const newErrors = {};
 
     if (!form.email.trim()) {
-      newErrors.email = 'Email không được để trống';
+      newErrors.email = t('validation.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('validation.emailInvalid');
     }
 
     if (!form.fullName.trim()) {
-      newErrors.fullName = 'Họ tên không được để trống';
+      newErrors.fullName = t('validation.fullNameRequired');
     } else if (form.fullName.trim().length < 2) {
-      newErrors.fullName = 'Họ tên phải có ít nhất 2 ký tự';
+      newErrors.fullName = t('validation.fullNameMinLength');
     }
 
     if (!form.password) {
-      newErrors.password = 'Mật khẩu không được để trống';
+      newErrors.password = t('validation.passwordRequired');
     } else if (!PASSWORD_REGEX.test(form.password)) {
-      newErrors.password = 'Mật khẩu cần ≥ 8 ký tự, chứa chữ hoa, số và ký tự đặc biệt';
+      newErrors.password = t('validation.passwordComplexity');
     }
 
     if (!form.confirmPassword) {
-      newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
+      newErrors.confirmPassword = t('validation.confirmPasswordRequired');
     } else if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+      newErrors.confirmPassword = t('validation.passwordMismatch');
     }
 
     setErrors(newErrors);
@@ -92,7 +94,7 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
         finalUser = roleResult.data || finalUser;
       }
 
-      toast.success(`Tạo tài khoản "${form.fullName.trim()}" thành công!`);
+      toast.success(t('users.createUserSuccess', { name: form.fullName.trim() }));
       onCreated(finalUser);
       setForm(INITIAL_FORM);
       setErrors({});
@@ -100,9 +102,9 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
     } catch (err) {
       const msg = err.response?.data?.message;
       if (msg?.toLowerCase().includes('email')) {
-        setErrors((prev) => ({ ...prev, email: 'Email này đã được sử dụng' }));
+        setErrors((prev) => ({ ...prev, email: t('users.emailUsed') }));
       } else {
-        toast.error(msg || 'Không thể tạo tài khoản. Vui lòng thử lại.');
+        toast.error(msg || t('users.createUserFailed'));
       }
     } finally {
       setLoading(false);
@@ -118,13 +120,13 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="➕ Tạo tài khoản mới">
+    <Modal isOpen={isOpen} onClose={handleClose} title={t('users.createUserTitle')}>
       <form className="create-user-form" onSubmit={handleSubmit} noValidate>
         <Input
           id="create-user-email"
           name="email"
           type="email"
-          label="Email *"
+          label={t('auth.email') + ' *'}
           placeholder="example@company.com"
           value={form.email}
           onChange={handleChange}
@@ -136,8 +138,8 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
           id="create-user-fullname"
           name="fullName"
           type="text"
-          label="Họ tên *"
-          placeholder="Nguyễn Văn A"
+          label={t('users.fullName') + ' *'}
+          placeholder={t('users.fullNamePlaceholder')}
           value={form.fullName}
           onChange={handleChange}
           error={errors.fullName}
@@ -148,12 +150,12 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
           id="create-user-password"
           name="password"
           type="password"
-          label="Mật khẩu *"
-          placeholder="Tối thiểu 8 ký tự..."
+          label={t('auth.password') + ' *'}
+          placeholder={t('users.passwordPlaceholder')}
           value={form.password}
           onChange={handleChange}
           error={errors.password}
-          hint="Cần ít nhất 1 chữ hoa, 1 số, 1 ký tự đặc biệt"
+          hint={t('users.passwordHint')}
           leftIcon={<FiLock />}
         />
 
@@ -161,8 +163,8 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
           id="create-user-confirm-password"
           name="confirmPassword"
           type="password"
-          label="Xác nhận mật khẩu *"
-          placeholder="Nhập lại mật khẩu..."
+          label={t('auth.confirmPassword') + ' *'}
+          placeholder={t('auth.confirmPassword') + '...'}
           value={form.confirmPassword}
           onChange={handleChange}
           error={errors.confirmPassword}
@@ -171,9 +173,9 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
 
         {/* Role selector */}
         <div className="create-user-form__field">
-          <label className="create-user-form__label">Vai trò</label>
-          <div className="create-user-form__role-group" role="group" aria-label="Chọn vai trò">
-            {ROLES.map((role) => (
+          <label className="create-user-form__label">{t('users.roleLabel')}</label>
+          <div className="create-user-form__role-group" role="group" aria-label={t('users.selectRoleLabel')}>
+            {rolesConfig.map((role) => (
               <button
                 key={role.value}
                 type="button"
@@ -191,10 +193,10 @@ function CreateUserModal({ isOpen, onClose, onCreated }) {
         {/* Actions */}
         <div className="create-user-form__actions">
           <Button variant="ghost" type="button" onClick={handleClose} disabled={loading}>
-            Hủy
+            {t('common.cancel')}
           </Button>
           <Button variant="primary" type="submit" loading={loading}>
-            Tạo tài khoản
+            {t('users.addUser')}
           </Button>
         </div>
       </form>

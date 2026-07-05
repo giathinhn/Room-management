@@ -1,51 +1,55 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './RoomQuickViewModal.css';
 
-const formatTime = (isoString) => {
+const formatTime = (isoString, locale) => {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleTimeString('vi-VN', {
+  return new Date(isoString).toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
   });
 };
 
-const formatDate = (isoString) => {
+const formatDate = (isoString, locale) => {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('vi-VN', {
+  return new Date(isoString).toLocaleDateString(locale, {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
   });
 };
 
-const STATUS_LABELS = {
-  available: { text: 'Trống', cls: 'status-chip--available', icon: '●' },
-  in_use:   { text: 'Đang họp', cls: 'status-chip--in-use', icon: '●' },
-  upcoming: { text: 'Sắp họp', cls: 'status-chip--upcoming', icon: '◐' },
-};
-
 const EQUIPMENT_ICONS = {
-  'May chieu': '📽️',
-  'Bang trang': '📋',
-  'TV': '📺',
-  'Dieu hoa': '❄️',
-  'Webcam': '📷',
-  'Video conference': '🎥',
+  'Máy chiếu': '📽️',
   'Micro': '🎤',
-  'He thong am thanh': '🔊',
-  'Mini bar': '🥤',
-};
-
-const getEquipmentIcon = (eq) => {
-  const key = Object.keys(EQUIPMENT_ICONS).find((k) =>
-    eq.toLowerCase().includes(k.toLowerCase())
-  );
-  return key ? EQUIPMENT_ICONS[key] : '🔧';
+  'Bảng trắng': '📋',
+  'TV': '🖥️',
+  'Webcam': '📷',
+  'Loa': '🔊',
+  'Điều hòa': '❄️',
 };
 
 const RoomQuickViewModal = ({ room, onClose }) => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const statusConfig = STATUS_LABELS[room.status] || STATUS_LABELS.available;
+  
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+
+  const statusConfig = {
+    available: { text: t('floorMap.available'), cls: 'status-chip--available', icon: '●' },
+    in_use: { text: t('floorMap.inUse'), cls: 'status-chip--in-use', icon: '●' },
+    upcoming: { text: t('floorMap.upcoming'), cls: 'status-chip--upcoming', icon: '◐' },
+  }[room.status] || { text: room.status, cls: 'status-chip--available', icon: '●' };
+
+  const equipmentLabel = {
+    'Máy chiếu': t('rooms.equipmentOptions.projector'),
+    'Micro': t('rooms.equipmentOptions.microphone'),
+    'Bảng trắng': t('rooms.equipmentOptions.whiteboard'),
+    'TV': t('rooms.equipmentOptions.tv'),
+    'Webcam': t('rooms.equipmentOptions.webcam'),
+    'Loa': t('rooms.equipmentOptions.speaker'),
+    'Điều hòa': t('rooms.equipmentOptions.airConditioner'),
+  };
 
   const handleQuickBook = () => {
     navigate(`/bookings/new?roomId=${room.id}`);
@@ -63,7 +67,7 @@ const RoomQuickViewModal = ({ room, onClose }) => {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={`Chi tiết phòng ${room.name}`}
+      aria-label={t('floorMap.editPosition', { name: room.name })}
     >
       <div
         className="quick-view-modal"
@@ -86,7 +90,7 @@ const RoomQuickViewModal = ({ room, onClose }) => {
             <button
               className="quick-view__close-btn"
               onClick={onClose}
-              aria-label="Đóng"
+              aria-label={t('floorMap.close')}
               id="quick-view-close-btn"
             >
               ✕
@@ -99,15 +103,15 @@ const RoomQuickViewModal = ({ room, onClose }) => {
           <div className="quick-view__info-card">
             <span className="quick-view__info-icon">👥</span>
             <div>
-              <div className="quick-view__info-label">Sức chứa</div>
-              <div className="quick-view__info-value">{room.capacity} người</div>
+              <div className="quick-view__info-label">{t('rooms.capacity')}</div>
+              <div className="quick-view__info-value">{room.capacity} {t('rooms.capacityUnit')}</div>
             </div>
           </div>
           <div className="quick-view__info-card">
             <span className="quick-view__info-icon">🏗️</span>
             <div>
-              <div className="quick-view__info-label">Tầng</div>
-              <div className="quick-view__info-value">Tầng {room.floor || 'N/A'}</div>
+              <div className="quick-view__info-label">{t('floorMap.floor')}</div>
+              <div className="quick-view__info-value">{t('floorMap.floorLabel', { name: room.floor || 'N/A' })}</div>
             </div>
           </div>
         </div>
@@ -115,11 +119,11 @@ const RoomQuickViewModal = ({ room, onClose }) => {
         {/* ── Equipment ── */}
         {room.equipment && room.equipment.length > 0 && (
           <div className="quick-view__section">
-            <h3 className="quick-view__section-title">Thiết bị</h3>
+            <h3 className="quick-view__section-title">{t('rooms.equipment')}</h3>
             <div className="quick-view__equipment-list">
               {room.equipment.map((eq) => (
                 <span key={eq} className="equipment-tag">
-                  {getEquipmentIcon(eq)} {eq}
+                  {EQUIPMENT_ICONS[eq] || '🔧'} {equipmentLabel[eq] || eq}
                 </span>
               ))}
             </div>
@@ -131,15 +135,15 @@ const RoomQuickViewModal = ({ room, onClose }) => {
           <div className="quick-view__booking-card quick-view__booking-card--current">
             <div className="quick-view__booking-header">
               <span className="quick-view__booking-status-dot quick-view__booking-status-dot--red" />
-              <span className="quick-view__booking-label">Đang diễn ra</span>
+              <span className="quick-view__booking-label">{t('floorMap.inProgress')}</span>
             </div>
             <div className="quick-view__booking-title">{room.currentBooking.title}</div>
             <div className="quick-view__booking-meta">
               <span>👤 {room.currentBooking.user?.fullName}</span>
               <span>
-                ⏰ {formatTime(room.currentBooking.startTime)} – {formatTime(room.currentBooking.endTime)}
+                ⏰ {formatTime(room.currentBooking.startTime, locale)} – {formatTime(room.currentBooking.endTime, locale)}
               </span>
-              <span>📅 {formatDate(room.currentBooking.startTime)}</span>
+              <span>📅 {formatDate(room.currentBooking.startTime, locale)}</span>
             </div>
           </div>
         )}
@@ -149,15 +153,15 @@ const RoomQuickViewModal = ({ room, onClose }) => {
           <div className="quick-view__booking-card quick-view__booking-card--next">
             <div className="quick-view__booking-header">
               <span className="quick-view__booking-status-dot quick-view__booking-status-dot--amber" />
-              <span className="quick-view__booking-label">Cuộc họp tiếp theo</span>
+              <span className="quick-view__booking-label">{t('floorMap.nextMeeting')}</span>
             </div>
             <div className="quick-view__booking-title">{room.nextBooking.title}</div>
             <div className="quick-view__booking-meta">
               <span>👤 {room.nextBooking.user?.fullName}</span>
               <span>
-                ⏰ {formatTime(room.nextBooking.startTime)} – {formatTime(room.nextBooking.endTime)}
+                ⏰ {formatTime(room.nextBooking.startTime, locale)} – {formatTime(room.nextBooking.endTime, locale)}
               </span>
-              <span>📅 {formatDate(room.nextBooking.startTime)}</span>
+              <span>📅 {formatDate(room.nextBooking.startTime, locale)}</span>
             </div>
           </div>
         )}
@@ -166,7 +170,7 @@ const RoomQuickViewModal = ({ room, onClose }) => {
         {room.status === 'available' && !room.nextBooking && (
           <div className="quick-view__available-msg">
             <span className="quick-view__available-icon">✅</span>
-            <span>Phòng trống — sẵn sàng đặt ngay!</span>
+            <span>{t('floorMap.availableReady')}</span>
           </div>
         )}
 
@@ -178,14 +182,14 @@ const RoomQuickViewModal = ({ room, onClose }) => {
             disabled={room.status === 'in_use'}
             id="quick-book-btn"
           >
-            ⚡ Đặt phòng nhanh
+            {t('floorMap.quickBook')}
           </button>
           <button
             className="quick-view__btn quick-view__btn--secondary"
             onClick={handleViewDetail}
             id="quick-view-detail-btn"
           >
-            📋 Xem chi tiết
+            {t('common.viewDetails')}
           </button>
         </div>
       </div>

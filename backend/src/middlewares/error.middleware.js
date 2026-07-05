@@ -9,32 +9,39 @@ const errorMiddleware = (err, req, res, _next) => {
   // Default values
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
+  let errorCode = err.code || 'INTERNAL_ERROR';
 
   // Handle Prisma known errors
   if (err.code === 'P2002') {
     statusCode = 409;
     const field = err.meta?.target?.[0] || 'field';
+    errorCode = field === 'email' ? 'EMAIL_ALREADY_EXISTS' : (field === 'name' ? 'ROOM_NAME_EXISTS' : 'VALIDATION_ERROR');
     message = `A record with this ${field} already exists.`;
   } else if (err.code === 'P2025') {
     statusCode = 404;
+    errorCode = 'RECORD_NOT_FOUND';
     message = 'Record not found.';
   } else if (err.code === 'P2003') {
     statusCode = 400;
+    errorCode = 'INVALID_REFERENCE';
     message = 'Invalid reference: related record not found.';
   }
 
   // Handle JWT errors
   if (err.name === 'JsonWebTokenError') {
     statusCode = 401;
+    errorCode = 'TOKEN_INVALID';
     message = 'Invalid token.';
   } else if (err.name === 'TokenExpiredError') {
     statusCode = 401;
+    errorCode = 'TOKEN_EXPIRED';
     message = 'Token has expired.';
   }
 
   // Handle validation errors
   if (err.name === 'ValidationError') {
     statusCode = 422;
+    errorCode = 'VALIDATION_ERROR';
     message = err.message;
   }
 
@@ -59,7 +66,7 @@ const errorMiddleware = (err, req, res, _next) => {
   res.status(statusCode).json({
     success: false,
     error: {
-      statusCode,
+      code: errorCode,
       message,
       ...(err.details && { details: err.details }),
       ...(isDev && !isOperational && { stack: err.stack }),

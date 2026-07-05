@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import templateService from '../services/template.service';
 import TemplateList from '../components/templates/TemplateList';
 import TemplateForm from '../components/templates/TemplateForm';
+import { useTranslation } from 'react-i18next';
 import './TemplatesPage.css';
 
 const MAX_TEMPLATES = 10;
@@ -12,6 +13,7 @@ const MAX_TEMPLATES = 10;
  * TemplatesPage — full page to manage booking templates (CRUD).
  */
 function TemplatesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [templates, setTemplates] = useState([]);
@@ -28,11 +30,11 @@ function TemplatesPage() {
       const res = await templateService.getTemplates();
       setTemplates(res.data || []);
     } catch (err) {
-      toast.error('Không thể tải danh sách mẫu');
+      toast.error(t('templates.loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchTemplates();
@@ -44,14 +46,14 @@ function TemplatesPage() {
   const handleEdit = (template) => setModal({ mode: 'edit', template });
 
   const handleDelete = async (template) => {
-    if (!window.confirm(`Xóa mẫu "${template.name}"? Hành động này không thể hoàn tác.`)) return;
+    if (!window.confirm(t('templates.deleteConfirm', { name: template.name }))) return;
     try {
       await templateService.deleteTemplate(template.id);
-      toast.success('Đã xóa mẫu đặt phòng');
+      toast.success(t('templates.deleteSuccess'));
       setTemplates((prev) => prev.filter((t) => t.id !== template.id));
     } catch (err) {
-      const msg = err.response?.data?.message || 'Xóa thất bại';
-      toast.error(msg);
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     }
   };
 
@@ -79,19 +81,19 @@ function TemplatesPage() {
     try {
       if (modal.mode === 'create') {
         const res = await templateService.createTemplate(formData);
-        toast.success('Tạo mẫu thành công!');
+        toast.success(t('templates.createSuccess'));
         setTemplates((prev) => [res.data, ...prev]);
       } else {
         const res = await templateService.updateTemplate(modal.template.id, formData);
-        toast.success('Cập nhật mẫu thành công!');
+        toast.success(t('templates.updateSuccess'));
         setTemplates((prev) =>
           prev.map((t) => (t.id === modal.template.id ? res.data : t))
         );
       }
       setModal(null);
     } catch (err) {
-      const msg = err.response?.data?.message || 'Lưu mẫu thất bại';
-      toast.error(msg);
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setModalLoading(false);
     }
@@ -102,9 +104,9 @@ function TemplatesPage() {
       {/* Page Header */}
       <div className="templates-page__header">
         <div>
-          <h1 className="templates-page__title">📋 Mẫu đặt phòng</h1>
+          <h1 className="templates-page__title">📋 {t('templates.title')}</h1>
           <p className="templates-page__subtitle">
-            Lưu các cấu hình đặt phòng thường xuyên — đặt phòng nhanh chỉ 1 click
+            {t('templates.subtitle')}
           </p>
         </div>
       </div>
@@ -113,7 +115,7 @@ function TemplatesPage() {
       {loading ? (
         <div className="templates-page__loading">
           <div className="spinner" />
-          <p>Đang tải...</p>
+          <p>{t('common.loading')}</p>
         </div>
       ) : (
         <TemplateList

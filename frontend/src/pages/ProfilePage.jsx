@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile, uploadAvatar, getPersonalStats, changePassword } from '../services/auth.service';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import {
   FiUser,
   FiLock,
@@ -21,6 +22,7 @@ import {
 import './ProfilePage.css';
 
 const ProfilePage = () => {
+  const { t, i18n } = useTranslation();
   const { user, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('info'); // 'info' | 'password' | 'stats'
   
@@ -68,7 +70,7 @@ const ProfilePage = () => {
         setStatsData(res.data);
       }
     } catch (err) {
-      toast.error('Không thể lấy thông tin thống kê');
+      toast.error(t('profile.statsLoadFailed'));
       console.error(err);
     } finally {
       setIsLoadingStats(false);
@@ -82,14 +84,14 @@ const ProfilePage = () => {
 
     // Validate size (2MB)
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('Kích thước ảnh không được vượt quá 2MB');
+      toast.error(t('profile.avatarSizeError'));
       return;
     }
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Định dạng file không hợp lệ. Chỉ chấp nhận ảnh JPEG, JPG, PNG, WEBP.');
+      toast.error(t('profile.avatarTypeError'));
       return;
     }
 
@@ -97,11 +99,11 @@ const ProfilePage = () => {
     try {
       const res = await uploadAvatar(file);
       if (res.success) {
-        toast.success('Cập nhật ảnh đại diện thành công');
+        toast.success(t('profile.avatarSuccess'));
         await refreshUser();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi tải ảnh lên');
+      toast.error(err.response?.data?.message || t('profile.avatarUploadError'));
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -111,7 +113,7 @@ const ProfilePage = () => {
   const handleSaveInfo = async (e) => {
     e.preventDefault();
     if (!fullName.trim()) {
-      toast.error('Họ tên không được để trống');
+      toast.error(t('profile.nameEmpty'));
       return;
     }
 
@@ -123,11 +125,11 @@ const ProfilePage = () => {
         department: department || null
       });
       if (res.success) {
-        toast.success('Cập nhật thông tin thành công');
+        toast.success(t('profile.infoSuccess'));
         await refreshUser();
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật thông tin');
+      toast.error(err.response?.data?.message || t('profile.infoError'));
     } finally {
       setIsSavingInfo(false);
     }
@@ -138,22 +140,22 @@ const ProfilePage = () => {
     e.preventDefault();
     
     if (!currentPassword) {
-      toast.error('Vui lòng nhập mật khẩu hiện tại');
+      toast.error(t('profile.enterCurrentPassword'));
       return;
     }
     if (newPassword.length < 8) {
-      toast.error('Mật khẩu mới phải có ít nhất 8 ký tự');
+      toast.error(t('profile.passwordMinLength'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp');
+      toast.error(t('profile.passwordMismatch'));
       return;
     }
 
     // Check strength
     const strength = getPasswordStrength(newPassword);
     if (strength.score < 2) {
-      toast.error('Mật khẩu quá yếu. Vui lòng làm theo hướng dẫn độ mạnh mật khẩu.');
+      toast.error(t('profile.passwordWeak'));
       return;
     }
 
@@ -161,13 +163,13 @@ const ProfilePage = () => {
     try {
       const res = await changePassword(currentPassword, newPassword);
       if (res.success) {
-        toast.success('Đổi mật khẩu thành công');
+        toast.success(t('profile.passwordSuccess'));
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra. Kiểm tra lại mật khẩu hiện tại.');
+      toast.error(err.response?.data?.message || t('profile.passwordError'));
     } finally {
       setIsChangingPass(false);
     }
@@ -175,27 +177,27 @@ const ProfilePage = () => {
 
   // Calculate Password Strength
   const getPasswordStrength = (pass) => {
-    if (!pass) return { label: 'Chưa nhập', color: '#6b7280', percent: 0, score: 0 };
+    if (!pass) return { label: t('profile.notEntered'), color: '#6b7280', percent: 0, score: 0 };
     let score = 0;
     if (pass.length >= 8) score += 1;
     if (/[A-Z]/.test(pass)) score += 1;
     if (/[0-9]/.test(pass)) score += 1;
     if (/[^A-Za-z0-9]/.test(pass)) score += 1;
 
-    let label = 'Yếu';
+    let label = t('profile.weak');
     let color = '#ef4444'; // Red
     let percent = 25;
 
     if (score === 2) {
-      label = 'Trung bình';
+      label = t('profile.medium');
       color = '#f59e0b'; // Amber
       percent = 50;
     } else if (score === 3) {
-      label = 'Khá mạnh';
+      label = t('profile.fairlyStrong');
       color = '#3b82f6'; // Blue
       percent = 75;
     } else if (score === 4) {
-      label = 'Mạnh';
+      label = t('profile.strong');
       color = '#10b981'; // Green
       percent = 100;
     }
@@ -216,21 +218,22 @@ const ProfilePage = () => {
   };
 
   const roleLabel = {
-    admin: 'Quản trị viên',
-    approver: 'Người duyệt',
-    user: 'Nhân viên'
+    admin: t('roles.admin'),
+    approver: t('roles.approver'),
+    user: t('roles.user')
   };
 
   const statusMap = {
-    pending: { label: 'Chờ duyệt', class: 'status-pending', icon: <FiClock /> },
-    approved: { label: 'Đã duyệt', class: 'status-approved', icon: <FiCheckCircle /> },
-    rejected: { label: 'Bị từ chối', class: 'status-rejected', icon: <FiXCircle /> },
-    cancelled: { label: 'Đã hủy', class: 'status-cancelled', icon: <FiAlertCircle /> }
+    pending: { label: t('bookings.status.pending'), class: 'status-pending', icon: <FiClock /> },
+    approved: { label: t('bookings.status.approved'), class: 'status-approved', icon: <FiCheckCircle /> },
+    rejected: { label: t('bookings.status.rejected'), class: 'status-rejected', icon: <FiXCircle /> },
+    cancelled: { label: t('bookings.status.cancelled'), class: 'status-cancelled', icon: <FiAlertCircle /> }
   };
 
   const formatDateTime = (dateStr) => {
     const d = new Date(dateStr);
-    return `${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} ${d.toLocaleDateString('vi-VN')}`;
+    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+    return `${d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })} ${d.toLocaleDateString(locale)}`;
   };
 
   return (
@@ -252,14 +255,14 @@ const ProfilePage = () => {
               className="avatar-edit-overlay"
               onClick={() => fileInputRef.current.click()}
               disabled={isUploadingAvatar}
-              title="Thay đổi ảnh đại diện"
+              title={t('profile.changeAvatarTooltip')}
             >
               {isUploadingAvatar ? (
                 <FiLoader className="spin-icon" />
               ) : (
                 <>
                   <FiCamera size={20} />
-                  <span>Thay ảnh</span>
+                  <span>{t('profile.changeAvatar')}</span>
                 </>
               )}
             </button>
@@ -296,19 +299,19 @@ const ProfilePage = () => {
             className={`profile-tab-btn ${activeTab === 'info' ? 'active' : ''}`}
             onClick={() => setActiveTab('info')}
           >
-            <FiUser /> Thông tin cá nhân
+            <FiUser /> {t('profile.personalInfo')}
           </button>
           <button
             className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`}
             onClick={() => setActiveTab('password')}
           >
-            <FiKey /> Đổi mật khẩu
+            <FiKey /> {t('profile.changePassword')}
           </button>
           <button
             className={`profile-tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
             onClick={() => setActiveTab('stats')}
           >
-            <FiBarChart2 /> Thống kê & Lịch sử
+            <FiBarChart2 /> {t('profile.statsHistory')}
           </button>
         </div>
 
@@ -317,7 +320,7 @@ const ProfilePage = () => {
           {activeTab === 'info' && (
             <form onSubmit={handleSaveInfo} className="profile-form-grid">
               <div className="form-group-item">
-                <label className="form-label">Email đăng nhập</label>
+                <label className="form-label">{t('profile.email')}</label>
                 <div className="input-with-icon lock-field">
                   <FiMail className="input-icon" />
                   <input
@@ -331,7 +334,7 @@ const ProfilePage = () => {
               </div>
 
               <div className="form-group-item">
-                <label className="form-label">Vai trò</label>
+                <label className="form-label">{t('profile.role')}</label>
                 <div className="input-with-icon lock-field">
                   <FiUser className="input-icon" />
                   <input
@@ -345,34 +348,34 @@ const ProfilePage = () => {
               </div>
 
               <div className="form-group-item">
-                <label className="form-label">Họ và tên <span className="text-danger">*</span></label>
+                <label className="form-label">{t('profile.fullName')} <span className="text-danger">*</span></label>
                 <div className="input-with-icon">
                   <FiUser className="input-icon" />
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Nhập họ và tên"
+                    placeholder={t('profile.fullName')}
                     required
                   />
                 </div>
               </div>
 
               <div className="form-group-item">
-                <label className="form-label">Số điện thoại</label>
+                <label className="form-label">{t('profile.phone')}</label>
                 <div className="input-with-icon">
                   <FiPhone className="input-icon" />
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Nhập số điện thoại"
+                    placeholder={t('profile.phone')}
                   />
                 </div>
               </div>
 
               <div className="form-group-item full-width-item">
-                <label className="form-label">Phòng ban / Lớp học</label>
+                <label className="form-label">{t('profile.department')}</label>
                 <div className="input-with-icon">
                   <FiBriefcase className="input-icon" />
                   <input
@@ -393,10 +396,10 @@ const ProfilePage = () => {
                   {isSavingInfo ? (
                     <>
                       <FiLoader className="spin-icon" />
-                      <span>Đang lưu...</span>
+                      <span>{t('profile.saving')}</span>
                     </>
                   ) : (
-                    <span>Lưu thay đổi</span>
+                    <span>{t('profile.saveChanges')}</span>
                   )}
                 </button>
               </div>
@@ -407,42 +410,42 @@ const ProfilePage = () => {
           {activeTab === 'password' && (
             <form onSubmit={handlePasswordChange} className="profile-form-grid">
               <div className="form-group-item full-width-item">
-                <label className="form-label">Mật khẩu hiện tại</label>
+                <label className="form-label">{t('profile.currentPassword')}</label>
                 <div className="input-with-icon">
                   <FiLock className="input-icon" />
                   <input
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu hiện tại"
+                    placeholder={t('profile.currentPassword')}
                     required
                   />
                 </div>
               </div>
 
               <div className="form-group-item">
-                <label className="form-label">Mật khẩu mới</label>
+                <label className="form-label">{t('profile.newPassword')}</label>
                 <div className="input-with-icon">
                   <FiLock className="input-icon" />
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Nhập mật khẩu mới"
+                    placeholder={t('profile.newPassword')}
                     required
                   />
                 </div>
               </div>
 
               <div className="form-group-item">
-                <label className="form-label">Xác nhận mật khẩu mới</label>
+                <label className="form-label">{t('profile.confirmNewPassword')}</label>
                 <div className="input-with-icon">
                   <FiLock className="input-icon" />
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Xác nhận mật khẩu mới"
+                    placeholder={t('profile.confirmNewPassword')}
                     required
                   />
                 </div>
@@ -451,7 +454,7 @@ const ProfilePage = () => {
               {/* Password strength details */}
               <div className="form-group-item full-width-item pass-strength-container">
                 <div className="pass-strength-header">
-                  <span>Độ mạnh mật khẩu: <strong style={{ color: passStrength.color }}>{passStrength.label}</strong></span>
+                  <span>{t('profile.strengthLabel')} <strong style={{ color: passStrength.color }}>{passStrength.label}</strong></span>
                 </div>
                 <div className="pass-strength-bar-bg">
                   <div
@@ -463,10 +466,10 @@ const ProfilePage = () => {
                   />
                 </div>
                 <ul className="pass-strength-rules">
-                  <li className={newPassword.length >= 8 ? 'rule-checked' : ''}>Ít nhất 8 ký tự</li>
-                  <li className={/[A-Z]/.test(newPassword) ? 'rule-checked' : ''}>Chứa ít nhất một chữ hoa</li>
-                  <li className={/[0-9]/.test(newPassword) ? 'rule-checked' : ''}>Chứa ít nhất một con số</li>
-                  <li className={/[^A-Za-z0-9]/.test(newPassword) ? 'rule-checked' : ''}>Chứa ít nhất một ký tự đặc biệt</li>
+                  <li className={newPassword.length >= 8 ? 'rule-checked' : ''}>{t('profile.ruleLength')}</li>
+                  <li className={/[A-Z]/.test(newPassword) ? 'rule-checked' : ''}>{t('profile.ruleUpper')}</li>
+                  <li className={/[0-9]/.test(newPassword) ? 'rule-checked' : ''}>{t('profile.ruleNumber')}</li>
+                  <li className={/[^A-Za-z0-9]/.test(newPassword) ? 'rule-checked' : ''}>{t('profile.ruleSpecial')}</li>
                 </ul>
               </div>
 
@@ -479,10 +482,10 @@ const ProfilePage = () => {
                   {isChangingPass ? (
                     <>
                       <FiLoader className="spin-icon" />
-                      <span>Đang cập nhật...</span>
+                      <span>{t('profile.updating')}</span>
                     </>
                   ) : (
-                    <span>Cập nhật mật khẩu</span>
+                    <span>{t('profile.updatePassword')}</span>
                   )}
                 </button>
               </div>
@@ -495,7 +498,7 @@ const ProfilePage = () => {
               {isLoadingStats ? (
                 <div className="loading-spinner-wrapper">
                   <FiLoader className="spin-icon" size={40} />
-                  <p>Đang tải dữ liệu thống kê...</p>
+                  <p>{t('profile.loadingStats')}</p>
                 </div>
               ) : statsData ? (
                 <>
@@ -507,7 +510,7 @@ const ProfilePage = () => {
                       </div>
                       <div className="card-data">
                         <h3>{statsData.stats.total || 0}</h3>
-                        <p>Tổng cuộc họp đã đặt</p>
+                        <p>{t('profile.totalBookings')}</p>
                       </div>
                     </div>
 
@@ -517,7 +520,7 @@ const ProfilePage = () => {
                       </div>
                       <div className="card-data">
                         <h3>{statsData.totalMeetingHours || 0}h</h3>
-                        <p>Tổng số giờ họp</p>
+                        <p>{t('profile.totalHours')}</p>
                       </div>
                     </div>
 
@@ -532,20 +535,20 @@ const ProfilePage = () => {
                             : 0}
                           %
                         </h3>
-                        <p>Tỉ lệ duyệt</p>
+                        <p>{t('profile.approvalRate')}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Status breakdowns */}
                   <div className="stats-breakdowns-box">
-                    <h3 className="section-title">Phân loại theo trạng thái</h3>
+                    <h3 className="section-title">{t('profile.statusDistribution')}</h3>
                     <div className="status-bars-list">
                       {[
-                        { key: 'approved', label: 'Đã duyệt', color: '#10b981' },
-                        { key: 'pending', label: 'Chờ duyệt', color: '#f59e0b' },
-                        { key: 'rejected', label: 'Bị từ chối', color: '#ef4444' },
-                        { key: 'cancelled', label: 'Đã hủy', color: '#6b7280' }
+                        { key: 'approved', label: t('bookings.status.approved'), color: '#10b981' },
+                        { key: 'pending', label: t('bookings.status.pending'), color: '#f59e0b' },
+                        { key: 'rejected', label: t('bookings.status.rejected'), color: '#ef4444' },
+                        { key: 'cancelled', label: t('bookings.status.cancelled'), color: '#6b7280' }
                       ].map((item) => {
                         const count = statsData.stats[item.key] || 0;
                         const percentage = statsData.stats.total > 0 ? (count / statsData.stats.total) * 100 : 0;
@@ -569,16 +572,16 @@ const ProfilePage = () => {
 
                   {/* Recent bookings list */}
                   <div className="stats-recent-bookings">
-                    <h3 className="section-title">Các cuộc họp gần nhất</h3>
+                    <h3 className="section-title">{t('profile.recentMeetings')}</h3>
                     {statsData.recentBookings && statsData.recentBookings.length > 0 ? (
                       <div className="recent-bookings-table-wrapper">
                         <table className="recent-bookings-table">
                           <thead>
                             <tr>
-                              <th>Phòng họp</th>
-                              <th>Tiêu đề</th>
-                              <th>Thời gian</th>
-                              <th>Trạng thái</th>
+                              <th>{t('profile.room')}</th>
+                              <th>{t('profile.title')}</th>
+                              <th>{t('profile.time')}</th>
+                              <th>{t('profile.status')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -598,8 +601,8 @@ const ProfilePage = () => {
                                   </td>
                                   <td>
                                     <div className="time-cell">
-                                      <span>Bắt đầu: {formatDateTime(booking.startTime)}</span>
-                                      <span>Kết thúc: {formatDateTime(booking.endTime)}</span>
+                                      <span>{t('profile.start')} {formatDateTime(booking.startTime)}</span>
+                                      <span>{t('profile.end')} {formatDateTime(booking.endTime)}</span>
                                     </div>
                                   </td>
                                   <td>
@@ -615,14 +618,14 @@ const ProfilePage = () => {
                       </div>
                     ) : (
                       <div className="empty-bookings-notice">
-                        <p>Bạn chưa thực hiện cuộc họp nào gần đây.</p>
+                        <p>{t('profile.noRecentMeetings')}</p>
                       </div>
                     )}
                   </div>
                 </>
               ) : (
                 <div className="empty-bookings-notice">
-                  <p>Không có dữ liệu thống kê để hiển thị.</p>
+                  <p>{t('profile.noStats')}</p>
                 </div>
               )}
             </div>

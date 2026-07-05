@@ -1,24 +1,21 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './StatusBadge.css';
 
 const STATUS_CONFIG = {
   pending: {
-    label: 'Chờ duyệt',
     icon: '🟡',
     className: 'badge-pending',
   },
   approved: {
-    label: 'Đã duyệt',
     icon: '🟢',
     className: 'badge-approved',
   },
   rejected: {
-    label: 'Từ chối',
     icon: '🔴',
     className: 'badge-rejected',
   },
   cancelled: {
-    label: 'Đã hủy',
     icon: '⚪',
     className: 'badge-cancelled',
   },
@@ -29,16 +26,23 @@ const STATUS_CONFIG = {
  * @param {{ status: 'pending'|'approved'|'rejected'|'cancelled', showIcon?: boolean }} props
  */
 function StatusBadge({ status, showIcon = true }) {
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[status] || {
-    label: status,
     icon: '⚫',
     className: 'badge-default',
+  };
+
+  const statusLabel = {
+    pending: t('bookings.status.pending'),
+    approved: t('bookings.status.approved'),
+    rejected: t('bookings.status.rejected'),
+    cancelled: t('bookings.status.cancelled'),
   };
 
   return (
     <span className={`status-badge ${config.className}`}>
       {showIcon && <span className="badge-icon">{config.icon}</span>}
-      {config.label}
+      {statusLabel[status] || status}
     </span>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FiX, FiCalendar, FiZap } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import bookingService from '../../services/booking.service';
 import roomService from '../../services/room.service';
@@ -24,6 +25,7 @@ function toLocalDateTimeInput(date) {
  * @param {{ startTime: Date, endTime: Date, onClose: () => void, onSuccess: () => void }} props
  */
 function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
+  const { t } = useTranslation();
   const [rooms, setRooms] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
   const [isLoadingRooms, setIsLoadingRooms] = useState(false);
@@ -73,12 +75,12 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
 
   const validate = () => {
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = 'Vui lòng nhập tiêu đề';
-    if (!form.roomId) newErrors.roomId = 'Vui lòng chọn phòng';
-    if (!form.startTime) newErrors.startTime = 'Vui lòng chọn giờ bắt đầu';
-    if (!form.endTime) newErrors.endTime = 'Vui lòng chọn giờ kết thúc';
+    if (!form.title.trim()) newErrors.title = t('calendar.quickBookModal.validation.titleRequired');
+    if (!form.roomId) newErrors.roomId = t('calendar.quickBookModal.validation.roomRequired');
+    if (!form.startTime) newErrors.startTime = t('calendar.quickBookModal.validation.startRequired');
+    if (!form.endTime) newErrors.endTime = t('calendar.quickBookModal.validation.endRequired');
     if (form.startTime && form.endTime && new Date(form.startTime) >= new Date(form.endTime)) {
-      newErrors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
+      newErrors.endTime = t('calendar.quickBookModal.validation.endBeforeStart');
     }
     return newErrors;
   };
@@ -99,14 +101,14 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
         startTime: new Date(form.startTime).toISOString(),
         endTime: new Date(form.endTime).toISOString(),
       });
-      toast.success('Đặt phòng thành công! Đang chờ duyệt.');
+      toast.success(t('calendar.quickBookModal.toast.success'));
       onSuccess();
       onClose();
     } catch (err) {
       if (err.response?.status === 409) {
-        toast.error('Thời gian bị trùng! Vui lòng chọn thời gian hoặc phòng khác.');
+        toast.error(t('calendar.quickBookModal.toast.conflict'));
       } else {
-        const msg = err.response?.data?.message || 'Đặt phòng thất bại.';
+        const msg = err.response?.data?.message || t('calendar.quickBookModal.toast.fail');
         toast.error(msg);
       }
     } finally {
@@ -118,17 +120,17 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
 
   return (
     <div className="qbm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="qbm" role="dialog" aria-modal="true" aria-label="Đặt phòng nhanh">
+      <div className="qbm" role="dialog" aria-modal="true" aria-label={t('calendar.quickBookModal.title')}>
         {/* Header */}
         <div className="qbm__header">
           <div className="qbm__header-icon">
             <FiZap />
           </div>
           <div>
-            <h2 className="qbm__title">Đặt phòng nhanh</h2>
-            <p className="qbm__subtitle">Điền thông tin để đặt phòng họp</p>
+            <h2 className="qbm__title">{t('calendar.quickBookModal.title')}</h2>
+            <p className="qbm__subtitle">{t('calendar.quickBookModal.subtitle')}</p>
           </div>
-          <button className="qbm__close" onClick={onClose} aria-label="Đóng">
+          <button className="qbm__close" onClick={onClose} aria-label={t('common.close')}>
             <FiX />
           </button>
         </div>
@@ -138,13 +140,13 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
           {/* Title */}
           <div className="qbm__field">
             <label htmlFor="qbm-title" className="qbm__label">
-              Tiêu đề cuộc họp <span className="form-required">*</span>
+              {t('calendar.quickBookModal.meetingTitle')} <span className="form-required">*</span>
             </label>
             <input
               id="qbm-title"
               type="text"
               className={`qbm__input ${errors.title ? 'qbm__input--error' : ''}`}
-              placeholder="Họp sprint planning, Team review..."
+              placeholder={t('calendar.quickBookModal.meetingTitlePlaceholder')}
               value={form.title}
               onChange={(e) => handleChange('title', e.target.value)}
               maxLength={200}
@@ -157,7 +159,7 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
           <div className="qbm__time-row">
             <div className="qbm__field">
               <label htmlFor="qbm-start" className="qbm__label">
-                <FiCalendar /> Bắt đầu <span className="form-required">*</span>
+                <FiCalendar /> {t('bookings.startTime')} <span className="form-required">*</span>
               </label>
               <input
                 id="qbm-start"
@@ -171,7 +173,7 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
 
             <div className="qbm__field">
               <label htmlFor="qbm-end" className="qbm__label">
-                <FiCalendar /> Kết thúc <span className="form-required">*</span>
+                <FiCalendar /> {t('bookings.endTime')} <span className="form-required">*</span>
               </label>
               <input
                 id="qbm-end"
@@ -187,10 +189,10 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
           {/* Room */}
           <div className="qbm__field">
             <label htmlFor="qbm-room" className="qbm__label">
-              Phòng họp <span className="form-required">*</span>
-              {isLoadingRooms && <span className="qbm__loading-hint"> đang tải...</span>}
+              {t('rooms.title')} <span className="form-required">*</span>
+              {isLoadingRooms && <span className="qbm__loading-hint"> {t('common.loading')}</span>}
               {availableRooms.length > 0 && !isLoadingRooms && (
-                <span className="qbm__available-hint"> ({availableRooms.length} phòng trống)</span>
+                <span className="qbm__available-hint"> ({availableRooms.length} {t('calendar.quickBookModal.availableRooms')})</span>
               )}
             </label>
             <select
@@ -200,11 +202,11 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
               onChange={(e) => handleChange('roomId', e.target.value)}
               disabled={isLoadingRooms}
             >
-              <option value="">-- Chọn phòng --</option>
+              <option value="">{t('calendar.quickBookModal.selectRoomPlaceholder')}</option>
               {displayRooms.map((room) => (
                 <option key={room.id} value={room.id}>
                   {room.name}
-                  {room.capacity ? ` (${room.capacity} người)` : ''}
+                  {room.capacity ? ` (${room.capacity} ${t('rooms.capacityUnit')})` : ''}
                   {room.location ? ` — ${room.location}` : ''}
                 </option>
               ))}
@@ -220,7 +222,7 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
               onClick={onClose}
               disabled={isSubmitting}
             >
-              Hủy
+              {t('common.cancel')}
             </button>
             <button
               id="qbm-submit-btn"
@@ -228,7 +230,7 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
               className="btn btn--primary"
               disabled={isSubmitting}
             >
-              {isSubmitting ? '⏳ Đang đặt...' : '⚡ Đặt phòng ngay'}
+              {isSubmitting ? `⏳ ${t('calendar.quickBookModal.bookingLoading')}` : `⚡ ${t('calendar.quickBookModal.bookingBtn')}`}
             </button>
           </div>
         </form>

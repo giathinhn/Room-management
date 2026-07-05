@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { format, subDays, subMonths } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import './DateRangeFilter.css';
-
-const PRESETS = [
-  { label: '7 ngày', days: 7 },
-  { label: '30 ngày', days: 30 },
-  { label: '3 tháng', months: 3 },
-  { label: 'Tất cả', all: true },
-];
 
 /**
  * DateRangeFilter — quick preset buttons + custom date pickers.
@@ -16,13 +10,20 @@ const PRESETS = [
  *   onChange({ startDate, endDate })  — called when range changes
  */
 const DateRangeFilter = ({ onChange }) => {
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const { t } = useTranslation();
   const [activePreset, setActivePreset] = useState(0);
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
 
+  const presets = [
+    { label: t('dashboard.presets.days7'), days: 7 },
+    { label: t('dashboard.presets.days30'), days: 30 },
+    { label: t('dashboard.presets.months3'), months: 3 },
+    { label: t('dashboard.presets.all'), all: true },
+  ];
+
   const applyPreset = (index) => {
-    const preset = PRESETS[index];
+    const preset = presets[index];
     setActivePreset(index);
     setCustomStart('');
     setCustomEnd('');
@@ -54,9 +55,9 @@ const DateRangeFilter = ({ onChange }) => {
   };
 
   return (
-    <div className="date-range-filter" role="group" aria-label="Lọc theo khoảng thời gian">
+    <div className="date-range-filter" role="group" aria-label={t('dashboard.filterTime')}>
       <div className="date-range-filter__presets">
-        {PRESETS.map((p, i) => (
+        {presets.map((p, i) => (
           <button
             key={p.label}
             id={`drf-preset-${i}`}
@@ -76,7 +77,7 @@ const DateRangeFilter = ({ onChange }) => {
           value={customStart}
           max={customEnd}
           onChange={(e) => setCustomStart(e.target.value)}
-          aria-label="Ngày bắt đầu"
+          aria-label={t('dashboard.startDate')}
         />
         <span className="date-range-filter__sep">→</span>
         <input
@@ -86,7 +87,7 @@ const DateRangeFilter = ({ onChange }) => {
           value={customEnd}
           min={customStart}
           onChange={(e) => setCustomEnd(e.target.value)}
-          aria-label="Ngày kết thúc"
+          aria-label={t('dashboard.endDate')}
         />
         <button
           id="drf-apply"
@@ -94,7 +95,7 @@ const DateRangeFilter = ({ onChange }) => {
           onClick={applyCustom}
           disabled={!customStart || !customEnd}
         >
-          Áp dụng
+          {t('dashboard.apply')}
         </button>
       </div>
     </div>

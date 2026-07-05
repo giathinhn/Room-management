@@ -3,6 +3,7 @@ import roomService from '../services/room.service';
 import RoomSearchForm from '../components/search/RoomSearchForm';
 import AvailableRoomCard from '../components/search/AvailableRoomCard';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import './RoomSearchPage.css';
 
 /**
@@ -10,6 +11,7 @@ import './RoomSearchPage.css';
  * Allows users to filter by date/time, capacity, location and equipment.
  */
 function RoomSearchPage() {
+  const { t } = useTranslation();
   const [rooms,          setRooms]          = useState([]);
   const [loading,        setLoading]        = useState(false);
   const [searched,       setSearched]       = useState(false);
@@ -20,22 +22,17 @@ function RoomSearchPage() {
     setSearched(true);
     setLastParams(params);
     try {
-      // Build ISO strings for API (backend expects full ISO datetime)
       const queryParams = { ...params };
-      if (queryParams.equipment) {
-        // equipment is an array — keep it as-is, roomService handles arrays
-      }
-
       const res = await roomService.getAvailableRooms(queryParams);
       setRooms(res.data || []);
 
       if ((res.data || []).length === 0) {
-        toast('Không tìm thấy phòng trống phù hợp', { icon: '🔍' });
+        toast(t('roomSearch.noAvailable'), { icon: '🔍' });
       } else {
-        toast.success(`Tìm thấy ${res.data.length} phòng trống`);
+        toast.success(t('roomSearch.foundSuccess', { count: res.data.length }));
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Tìm kiếm thất bại');
+      toast.error(err.response?.data?.message || t('roomSearch.failed'));
       setRooms([]);
     } finally {
       setLoading(false);
@@ -47,9 +44,9 @@ function RoomSearchPage() {
       {/* Page header */}
       <div className="rsp__header">
         <div className="rsp__title-area">
-          <h1 className="rsp__title">🔍 Tìm phòng trống</h1>
+          <h1 className="rsp__title">🔍 {t('roomSearch.title')}</h1>
           <p className="rsp__subtitle">
-            Tìm kiếm phòng họp phù hợp theo thời gian, sức chứa và thiết bị
+            {t('roomSearch.subtitle')}
           </p>
         </div>
       </div>
@@ -63,17 +60,17 @@ function RoomSearchPage() {
           <div className="rsp__results-header">
             <h2 className="rsp__results-title">
               {loading
-                ? 'Đang tìm kiếm...'
+                ? t('roomSearch.searching')
                 : rooms.length > 0
-                  ? `✅ Kết quả: ${rooms.length} phòng trống`
-                  : '❌ Không tìm thấy phòng trống'}
+                  ? t('roomSearch.resultsFound', { count: rooms.length })
+                  : t('roomSearch.noRooms')}
             </h2>
           </div>
 
           {loading ? (
             <div className="rsp__loading">
               <div className="rsp__spinner" />
-              <p>Đang tìm phòng...</p>
+              <p>{t('roomSearch.loading')}</p>
             </div>
           ) : rooms.length > 0 ? (
             <div className="rsp__list">
@@ -88,10 +85,9 @@ function RoomSearchPage() {
           ) : (
             <div className="rsp__empty">
               <div className="rsp__empty-icon">🏚️</div>
-              <h3>Không có phòng trống</h3>
+              <h3>{t('roomSearch.emptyTitle')}</h3>
               <p>
-                Tất cả phòng phù hợp đều đã được đặt trong khoảng thời gian này.
-                Hãy thử thay đổi thời gian hoặc bỏ bớt bộ lọc.
+                {t('roomSearch.emptyDesc')}
               </p>
             </div>
           )}
@@ -102,7 +98,7 @@ function RoomSearchPage() {
       {!searched && (
         <div className="rsp__prompt">
           <div className="rsp__prompt-icon">🏢</div>
-          <p>Nhập tiêu chí tìm kiếm và nhấn <strong>Tìm phòng trống</strong></p>
+          <p>{t('roomSearch.prompt')}</p>
         </div>
       )}
     </div>

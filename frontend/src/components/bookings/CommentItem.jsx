@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 /** Milliseconds in 5 minutes */
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
 
 /**
- * Returns time ago string in Vietnamese.
+ * Returns time ago string in selected language.
  * @param {string} dateStr
+ * @param {function} t
  */
-function timeAgo(dateStr) {
+function timeAgo(dateStr, t) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'vừa xong';
-  if (mins < 60) return `${mins} phút trước`;
+  if (mins < 1) return t('comments.timeAgo.justNow');
+  if (mins < 60) return t('comments.timeAgo.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 24) return t('comments.timeAgo.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days} ngày trước`;
+  return t('comments.timeAgo.daysAgo', { count: days });
 }
 
-/** Role badge label in Vietnamese */
-function roleBadge(role) {
-  if (role === 'admin')    return { label: 'Admin',       cls: 'comment-item__badge--admin' };
-  if (role === 'approver') return { label: 'Người duyệt', cls: 'comment-item__badge--approver' };
-  return                          { label: 'Người đặt',   cls: 'comment-item__badge--user' };
+/** Role badge label in selected language */
+function roleBadge(role, t) {
+  if (role === 'admin')    return { label: t('roles.admin'),    cls: 'comment-item__badge--admin' };
+  if (role === 'approver') return { label: t('roles.approver'), cls: 'comment-item__badge--approver' };
+  return                          { label: t('roles.user'),     cls: 'comment-item__badge--user' };
 }
 
 /**
@@ -37,6 +39,7 @@ function roleBadge(role) {
  * }} props
  */
 function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [editing, setEditing]     = useState(false);
   const [editText, setEditText]   = useState(comment.content);
@@ -49,7 +52,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
   const canEdit  = isOwner && ageMs <= EDIT_WINDOW_MS;
   const canDelete = (isOwner && ageMs <= EDIT_WINDOW_MS) || isAdmin;
 
-  const badge = roleBadge(comment.user?.role);
+  const badge = roleBadge(comment.user?.role, t);
   const initials = (comment.user?.fullName || comment.user?.email || '?')
     .split(' ')
     .map((w) => w[0])
@@ -69,7 +72,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Xóa bình luận này?')) return;
+    if (!window.confirm(t('comments.confirmDelete'))) return;
     setDeleting(true);
     try {
       await onDelete(comment.id);
@@ -93,7 +96,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
             {comment.user?.fullName || comment.user?.email}
           </span>
           <span className={`comment-item__badge ${badge.cls}`}>{badge.label}</span>
-          <span className="comment-item__time">{timeAgo(comment.createdAt)}</span>
+          <span className="comment-item__time">{timeAgo(comment.createdAt, t)}</span>
         </div>
 
         {/* Content or edit area */}
@@ -114,7 +117,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
                 onClick={handleSave}
                 disabled={saving || !editText.trim()}
               >
-                {saving ? 'Đang lưu...' : '✓ Lưu'}
+                {saving ? t('common.saving') : `✓ ${t('common.save')}`}
               </button>
               <button
                 id={`comment-cancel-${comment.id}`}
@@ -122,7 +125,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
                 onClick={() => { setEditing(false); setEditText(comment.content); }}
                 disabled={saving}
               >
-                Hủy
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -139,7 +142,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
                 className="comment-item__btn comment-item__btn--edit"
                 onClick={() => setEditing(true)}
               >
-                Sửa
+                {t('common.edit')}
               </button>
             )}
             {canDelete && (
@@ -149,7 +152,7 @@ function CommentItem({ comment, bookingId, onUpdate, onDelete }) {
                 onClick={handleDelete}
                 disabled={deleting}
               >
-                {deleting ? '...' : 'Xóa'}
+                {t('common.delete')}
               </button>
             )}
           </div>

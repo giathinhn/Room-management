@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiBell } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import NotificationDropdown from './NotificationDropdown';
 import './NotificationBell.css';
 
@@ -14,6 +15,7 @@ import './NotificationBell.css';
  * }} props
  */
 const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllAsRead }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const bellRef = useRef(null);
 
@@ -37,7 +39,11 @@ const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllA
         type="button"
         className={`notif-bell__btn ${open ? 'notif-bell__btn--active' : ''}`}
         onClick={handleToggle}
-        aria-label={`Thông báo${unreadCount > 0 ? ` (${displayCount} chưa đọc)` : ''}`}
+        aria-label={
+          unreadCount > 0
+            ? t('notifications.bellAria_other', { count: displayCount })
+            : t('notifications.bellAria_zero')
+        }
         aria-expanded={open}
         aria-haspopup="dialog"
         id="header-notification-bell"

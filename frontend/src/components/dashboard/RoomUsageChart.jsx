@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const GRADIENT_COLORS = [
   '#6366f1', '#7c3aed', '#8b5cf6', '#a78bfa',
@@ -15,6 +16,7 @@ const GRADIENT_COLORS = [
 ];
 
 const CustomTooltip = ({ active, payload }) => {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
@@ -27,8 +29,8 @@ const CustomTooltip = ({ active, payload }) => {
     }}>
       <div style={{ fontWeight: 700, color: '#f1f5f9', marginBottom: 4 }}>{d.roomName}</div>
       {d.location && <div style={{ color: '#64748b', marginBottom: 4 }}>📍 {d.location}</div>}
-      <div style={{ color: '#a78bfa' }}>📋 {d.bookingCount} lần đặt</div>
-      <div style={{ color: '#60a5fa' }}>⏱ {d.totalHours} giờ</div>
+      <div style={{ color: '#a78bfa' }}>📋 {t('dashboard.countTime', { count: d.bookingCount })}</div>
+      <div style={{ color: '#60a5fa' }}>⏱ {t('dashboard.hoursUnit', { count: d.totalHours })}</div>
     </div>
   );
 };
@@ -40,6 +42,7 @@ const CustomTooltip = ({ active, payload }) => {
  *   loading {boolean}
  */
 const RoomUsageChart = ({ data = [], loading = false }) => {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <div className="chart-skeleton">
@@ -51,7 +54,7 @@ const RoomUsageChart = ({ data = [], loading = false }) => {
   }
 
   if (!data.length) {
-    return <div className="chart-empty">Chưa có dữ liệu trong khoảng thời gian này</div>;
+    return <div className="chart-empty">{t('dashboard.noData')}</div>;
   }
 
   const displayData = data.slice(0, 10);

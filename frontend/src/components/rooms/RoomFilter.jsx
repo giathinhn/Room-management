@@ -1,22 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
-const EQUIPMENT_OPTIONS = [
-  { value: 'Máy chiếu', icon: '📽️' },
-  { value: 'Micro',     icon: '🎤' },
-  { value: 'Bảng trắng', icon: '📋' },
-  { value: 'TV',        icon: '🖥️' },
-  { value: 'Webcam',    icon: '📷' },
-  { value: 'Loa',       icon: '🔊' },
-  { value: 'Điều hòa',  icon: '❄️' },
-];
-
-const CAPACITY_OPTIONS = [
-  { label: 'Tất cả sức chứa', value: '' },
-  { label: '1 – 5 người',    value: '1'  },
-  { label: '6 – 10 người',   value: '6'  },
-  { label: '11 – 20 người',  value: '11' },
-  { label: '20+ người',      value: '20' },
-];
+import { useTranslation } from 'react-i18next';
 
 /**
  * RoomFilter — search + capacity + equipment filter bar.
@@ -26,10 +9,29 @@ const CAPACITY_OPTIONS = [
  *   onChange  {Function} Called with updated filters object
  */
 function RoomFilter({ filters, onChange }) {
+  const { t } = useTranslation();
   const [localSearch, setLocalSearch] = useState(filters.search || '');
   const [showEquip,   setShowEquip]   = useState(false);
   const debounceRef = useRef(null);
   const dropdownRef = useRef(null);
+
+  const capacityOptions = [
+    { label: t('rooms.filter.allCapacity'), value: '' },
+    { label: t('rooms.filter.capacityOption1'), value: '1' },
+    { label: t('rooms.filter.capacityOption2'), value: '6' },
+    { label: t('rooms.filter.capacityOption3'), value: '11' },
+    { label: t('rooms.filter.capacityOption4'), value: '20' },
+  ];
+
+  const equipmentOptions = [
+    { value: 'Máy chiếu', icon: '📽️', label: t('rooms.equipmentOptions.projector') },
+    { value: 'Micro',     icon: '🎤', label: t('rooms.equipmentOptions.microphone') },
+    { value: 'Bảng trắng', icon: '📋', label: t('rooms.equipmentOptions.whiteboard') },
+    { value: 'TV',        icon: '🖥️', label: t('rooms.equipmentOptions.tv') },
+    { value: 'Webcam',    icon: '📷', label: t('rooms.equipmentOptions.webcam') },
+    { value: 'Loa',       icon: '🔊', label: t('rooms.equipmentOptions.speaker') },
+    { value: 'Điều hòa',  icon: '❄️', label: t('rooms.equipmentOptions.airConditioner') },
+  ];
 
   // Sync localSearch when parent resets filters
   useEffect(() => {
@@ -47,6 +49,17 @@ function RoomFilter({ filters, onChange }) {
     }, 300);
   }
 
+  // Close equipment dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowEquip(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   function handleCapacityChange(e) {
     onChange({ ...filters, capacity: e.target.value, page: 1 });
   }
@@ -59,17 +72,6 @@ function RoomFilter({ filters, onChange }) {
     onChange({ ...filters, equipment: next, page: 1 });
   }
 
-  // Close equipment dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowEquip(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const selectedEquip = filters.equipment || [];
 
   return (
@@ -81,7 +83,7 @@ function RoomFilter({ filters, onChange }) {
           id="room-search-input"
           type="text"
           className="room-filter__search"
-          placeholder="Tìm kiếm phòng họp…"
+          placeholder={t('rooms.filter.searchPlaceholder')}
           value={localSearch}
           onChange={handleSearchChange}
         />
@@ -106,7 +108,7 @@ function RoomFilter({ filters, onChange }) {
         value={filters.capacity || ''}
         onChange={handleCapacityChange}
       >
-        {CAPACITY_OPTIONS.map((opt) => (
+        {capacityOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
@@ -120,7 +122,7 @@ function RoomFilter({ filters, onChange }) {
           className={`room-filter__equip-btn${selectedEquip.length > 0 ? ' active' : ''}`}
           onClick={() => setShowEquip((prev) => !prev)}
         >
-          🛠️ Thiết bị
+          🛠️ {t('rooms.filter.equipmentTrigger')}
           {selectedEquip.length > 0 && (
             <span className="room-filter__equip-count">{selectedEquip.length}</span>
           )}
@@ -129,7 +131,7 @@ function RoomFilter({ filters, onChange }) {
 
         {showEquip && (
           <div className="room-filter__equip-dropdown" role="group" aria-label="Filter by equipment">
-            {EQUIPMENT_OPTIONS.map(({ value, icon }) => (
+            {equipmentOptions.map(({ value, icon, label }) => (
               <label
                 key={value}
                 className={`room-filter__equip-option${selectedEquip.includes(value) ? ' selected' : ''}`}
@@ -143,25 +145,12 @@ function RoomFilter({ filters, onChange }) {
                   className="room-filter__equip-checkbox"
                 />
                 <span>{icon}</span>
-                <span>{value}</span>
+                <span>{label}</span>
               </label>
             ))}
           </div>
         )}
       </div>
-
-      {/* Favorite Filter */}
-      <label className="room-filter__fav-toggle" htmlFor="room-fav-filter">
-        <input
-          id="room-fav-filter"
-          type="checkbox"
-          checked={filters.onlyFavorites || false}
-          onChange={(e) => onChange({ ...filters, onlyFavorites: e.target.checked, page: 1 })}
-          className="room-fav-checkbox"
-        />
-        <span className="room-fav-toggle-star">⭐</span>
-        <span className="room-fav-toggle-text">Chỉ xem phòng yêu thích</span>
-      </label>
     </div>
   );
 }

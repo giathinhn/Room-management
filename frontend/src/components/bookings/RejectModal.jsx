@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './RejectModal.css';
 
 /**
@@ -12,6 +13,7 @@ import './RejectModal.css';
  * }} props
  */
 function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
+  const { t } = useTranslation();
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
 
@@ -19,11 +21,11 @@ function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
 
   const handleConfirm = () => {
     if (!reason.trim()) {
-      setError('Vui lòng nhập lý do từ chối');
+      setError(t('bookings.rejectModal.validation.reasonRequired'));
       return;
     }
     if (reason.trim().length > 500) {
-      setError('Lý do không được vượt quá 500 ký tự');
+      setError(t('bookings.rejectModal.validation.reasonMaxLength'));
       return;
     }
     setError('');
@@ -47,13 +49,13 @@ function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
       >
         <div className="reject-modal__header">
           <h2 id="reject-modal-title" className="reject-modal__title">
-            ✗ Từ chối booking
+            {t('bookings.rejectModal.title')}
           </h2>
           <button
             id="reject-modal-close"
             className="reject-modal__close"
             onClick={handleClose}
-            aria-label="Đóng"
+            aria-label={t('floorMap.close')}
           >
             ×
           </button>
@@ -61,10 +63,10 @@ function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
 
         <div className="reject-modal__body">
           <p className="reject-modal__desc">
-            Vui lòng nhập lý do từ chối để người đặt phòng được biết.
+            {t('bookings.rejectModal.desc')}
           </p>
           <label className="reject-modal__label" htmlFor="rejection-reason">
-            Lý do từ chối <span className="required">*</span>
+            {t('bookings.rejectionReason')} <span className="required">*</span>
           </label>
           <textarea
             id="rejection-reason"
@@ -74,7 +76,7 @@ function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
               setReason(e.target.value);
               if (error) setError('');
             }}
-            placeholder="Ví dụ: Phòng đang bảo trì, đã có lịch khác..."
+            placeholder={t('bookings.rejectModal.placeholder')}
             rows={4}
             maxLength={500}
           />
@@ -91,7 +93,7 @@ function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
             onClick={handleClose}
             disabled={isLoading}
           >
-            Hủy bỏ
+            {t('bookings.rejectModal.cancelBtn')}
           </button>
           <button
             id="reject-modal-confirm-btn"
@@ -99,7 +101,7 @@ function RejectModal({ isOpen, onClose, onConfirm, isLoading = false }) {
             onClick={handleConfirm}
             disabled={isLoading || !reason.trim()}
           >
-            {isLoading ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+            {isLoading ? t('bookings.rejectModal.processing') : t('bookings.rejectModal.confirmBtn')}
           </button>
         </div>
       </div>

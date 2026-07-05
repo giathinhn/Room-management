@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import './TopUsersTable.css';
 
 const RANK_COLORS = ['#f59e0b', '#94a3b8', '#cd7f32'];
@@ -9,6 +10,8 @@ const RANK_COLORS = ['#f59e0b', '#94a3b8', '#cd7f32'];
  *   loading {boolean}
  */
 const TopUsersTable = ({ data = [], loading = false }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="top-users-table">
@@ -24,17 +27,17 @@ const TopUsersTable = ({ data = [], loading = false }) => {
   }
 
   if (!data.length) {
-    return <div className="chart-empty">Chưa có dữ liệu trong khoảng thời gian này</div>;
+    return <div className="chart-empty">{t('dashboard.noData')}</div>;
   }
 
   return (
-    <div className="top-users-table" role="table" aria-label="Top người đặt phòng">
+    <div className="top-users-table" role="table" aria-label={t('dashboard.topBookers')}>
       {/* Header */}
       <div className="top-users-table__header" role="row">
         <span>#</span>
-        <span>Người dùng</span>
-        <span className="top-users-table__right">Lượt đặt</span>
-        <span className="top-users-table__right">Giờ</span>
+        <span>{t('dashboard.booker')}</span>
+        <span className="top-users-table__right">{t('dashboard.bookingCount')}</span>
+        <span className="top-users-table__right">{t('dashboard.hourUnit')}</span>
       </div>
 
       {data.map((user, idx) => {

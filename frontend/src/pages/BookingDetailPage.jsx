@@ -7,14 +7,15 @@ import StatusBadge from '../components/common/StatusBadge';
 import RejectModal from '../components/bookings/RejectModal';
 import CommentSection from '../components/bookings/CommentSection';
 import SaveAsTemplate from '../components/templates/SaveAsTemplate';
+import { useTranslation } from 'react-i18next';
 import './BookingDetailPage.css';
 
 /**
- * Format a full datetime string in Vietnamese locale.
+ * Format a full datetime string in active locale.
  */
-function formatFull(dateStr) {
+function formatFull(dateStr, lng) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString('vi-VN', {
+  return new Date(dateStr).toLocaleString(lng === 'vi' ? 'vi-VN' : 'en-US', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -24,24 +25,31 @@ function formatFull(dateStr) {
 }
 
 /**
- * Format a date to dd/mm/yyyy.
+ * Format a date to locale format.
  */
-function formatDate(dateStr) {
+function formatDate(dateStr, lng) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('vi-VN');
+  return new Date(dateStr).toLocaleDateString(lng === 'vi' ? 'vi-VN' : 'en-US');
 }
 
 /**
- * Format time range "09:00 – 10:30".
+ * Format time range.
  */
-function formatTimeRange(start, end) {
-  const s = new Date(start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-  const e = new Date(end).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+function formatTimeRange(start, end, t, lng) {
+  const s = new Date(start).toLocaleTimeString(lng === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+  const e = new Date(end).toLocaleTimeString(lng === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
   const diffMs = new Date(end) - new Date(start);
   const totalMins = Math.round(diffMs / 60000);
   const h = Math.floor(totalMins / 60);
   const m = totalMins % 60;
-  const dur = h > 0 && m > 0 ? `${h}h${m}p` : h > 0 ? `${h} giờ` : `${m} phút`;
+  let dur = '';
+  if (h > 0 && m > 0) {
+    dur = t('bookingDetail.durationHourMin', { h, m });
+  } else if (h > 0) {
+    dur = t('bookingDetail.durationHour', { h, count: h });
+  } else {
+    dur = t('bookingDetail.durationMin', { m, count: m });
+  }
   return `${s} – ${e} (${dur})`;
 }
 
@@ -49,6 +57,8 @@ function formatTimeRange(start, end) {
  * BookingDetailPage — full detail view of a single booking.
  */
 function BookingDetailPage() {
+  const { t, i18n } = useTranslation();
+  const lng = i18n.language || 'vi';
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -74,17 +84,17 @@ function BookingDetailPage() {
     bookingService.getBooking(id)
       .then((res) => setBooking(res.data))
       .catch((err) => {
-        toast.error(err.response?.data?.message || 'Không thể tải thông tin booking');
+        toast.error(t('bookingDetail.loadFailed'));
         navigate('/bookings');
       })
       .finally(() => setLoading(false));
-  }, [id, navigate]);
+  }, [id, navigate, t]);
 
   if (loading) {
     return (
       <div className="detail-page detail-page--loading">
         <div className="spinner" />
-        <p>Đang tải...</p>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }
@@ -110,7 +120,7 @@ function BookingDetailPage() {
   const formatCountdown = (secs) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
-    return `${m} phút ${s} giây`;
+    return `${m} ${t('bookingDetail.minutes')} ${s} ${t('bookingDetail.seconds')}`;
   };
 
   // Actions
@@ -119,9 +129,10 @@ function BookingDetailPage() {
     try {
       const res = await bookingService.approveBooking(id);
       setBooking(res.data);
-      toast.success('Đã duyệt booking!');
+      toast.success(t('bookingDetail.approveSuccess'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Duyệt thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setActionLoading(false);
     }
@@ -133,23 +144,25 @@ function BookingDetailPage() {
       const res = await bookingService.rejectBooking(id, reason);
       setBooking(res.data);
       setRejectModal(false);
-      toast.success('Đã từ chối booking');
+      toast.success(t('bookingDetail.rejectSuccess'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Từ chối thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleCancel = async () => {
-    if (!window.confirm('Bạn có chắc muốn hủy booking này?')) return;
+    if (!window.confirm(t('bookings.cancelConfirm'))) return;
     setActionLoading(true);
     try {
       const res = await bookingService.cancelBooking(id);
       setBooking(res.data);
-      toast.success('Đã hủy booking');
+      toast.success(t('bookings.cancelSuccess'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Hủy thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setActionLoading(false);
     }
@@ -160,9 +173,10 @@ function BookingDetailPage() {
     try {
       const res = await bookingService.checkInBooking(id);
       setBooking(res.data);
-      toast.success('Check-in thành công!');
+      toast.success(t('bookingDetail.checkInSuccess'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Check-in thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setActionLoading(false);
     }
@@ -176,7 +190,7 @@ function BookingDetailPage() {
         className="detail-page__back"
         onClick={() => navigate('/bookings')}
       >
-        ← Quay lại
+        ← {t('bookings.back')}
       </button>
 
       {/* Card */}
@@ -192,7 +206,7 @@ function BookingDetailPage() {
           <div className="detail-page__info-row">
             <span className="detail-page__info-icon">📍</span>
             <div>
-              <span className="detail-page__info-label">Phòng</span>
+              <span className="detail-page__info-label">{t('bookingDetail.room')}</span>
               <span className="detail-page__info-value">
                 {booking.room?.name}
                 {booking.room?.location ? ` — ${booking.room.location}` : ''}
@@ -203,7 +217,7 @@ function BookingDetailPage() {
           <div className="detail-page__info-row">
             <span className="detail-page__info-icon">👤</span>
             <div>
-              <span className="detail-page__info-label">Người đặt</span>
+              <span className="detail-page__info-label">{t('bookingDetail.bookedBy')}</span>
               <span className="detail-page__info-value">
                 {booking.user?.fullName || booking.user?.email}
               </span>
@@ -213,17 +227,17 @@ function BookingDetailPage() {
           <div className="detail-page__info-row">
             <span className="detail-page__info-icon">📅</span>
             <div>
-              <span className="detail-page__info-label">Ngày</span>
-              <span className="detail-page__info-value">{formatDate(booking.startTime)}</span>
+              <span className="detail-page__info-label">{t('bookingDetail.date')}</span>
+              <span className="detail-page__info-value">{formatDate(booking.startTime, lng)}</span>
             </div>
           </div>
 
           <div className="detail-page__info-row">
             <span className="detail-page__info-icon">🕐</span>
             <div>
-              <span className="detail-page__info-label">Thời gian</span>
+              <span className="detail-page__info-label">{t('bookingDetail.time')}</span>
               <span className="detail-page__info-value">
-                {formatTimeRange(booking.startTime, booking.endTime)}
+                {formatTimeRange(booking.startTime, booking.endTime, t, lng)}
               </span>
             </div>
           </div>
@@ -231,8 +245,8 @@ function BookingDetailPage() {
           <div className="detail-page__info-row">
             <span className="detail-page__info-icon">📝</span>
             <div>
-              <span className="detail-page__info-label">Tạo lúc</span>
-              <span className="detail-page__info-value">{formatFull(booking.createdAt)}</span>
+              <span className="detail-page__info-label">{t('bookingDetail.createdAt')}</span>
+              <span className="detail-page__info-value">{formatFull(booking.createdAt, lng)}</span>
             </div>
           </div>
 
@@ -241,8 +255,8 @@ function BookingDetailPage() {
             <div className="detail-page__info-row">
               <span className="detail-page__info-icon">👥</span>
               <div>
-                <span className="detail-page__info-label">Sức chứa</span>
-                <span className="detail-page__info-value">{booking.room.capacity} người</span>
+                <span className="detail-page__info-label">{t('bookingDetail.capacity')}</span>
+                <span className="detail-page__info-value">{t('bookingDetail.people', { count: booking.room.capacity })}</span>
               </div>
             </div>
           )}
@@ -251,7 +265,7 @@ function BookingDetailPage() {
             <div className="detail-page__info-row">
               <span className="detail-page__info-icon">🖥️</span>
               <div>
-                <span className="detail-page__info-label">Thiết bị</span>
+                <span className="detail-page__info-label">{t('bookingDetail.equipment')}</span>
                 <div className="detail-page__tags">
                   {booking.room.equipment.map((eq) => (
                     <span key={eq} className="detail-page__tag">{eq}</span>
@@ -269,7 +283,7 @@ function BookingDetailPage() {
             <div className="detail-page__rejection" style={{ borderLeft: '4px solid #ef4444', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '8px', margin: '16px 0' }}>
               <span className="detail-page__rejection-icon" style={{ fontSize: '1.25rem' }}>⚠️</span>
               <div>
-                <span className="detail-page__info-label" style={{ color: '#ef4444', fontWeight: 600 }}>Lý do hủy</span>
+                <span className="detail-page__info-label" style={{ color: '#ef4444', fontWeight: 600 }}>{t('bookingDetail.cancelReason')}</span>
                 <p className="detail-page__rejection-reason" style={{ margin: '4px 0 0', color: 'var(--color-text-primary)' }}>{booking.cancelReason}</p>
               </div>
             </div>
@@ -283,18 +297,18 @@ function BookingDetailPage() {
             <div style={{ padding: '12px 0' }}>
               {booking.checkedIn ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', fontWeight: 600 }}>
-                  <span>✅ Đã check-in lúc {formatFull(booking.checkInTime)}</span>
+                  <span>✅ {t('bookingDetail.checkedInAt', { time: formatFull(booking.checkInTime, lng) })}</span>
                 </div>
               ) : showCheckIn ? (
                 <div className="checkin-info">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                      <p style={{ margin: 0, fontWeight: 600 }}>📍 Cuộc họp đã sẵn sàng check-in</p>
+                      <p style={{ margin: 0, fontWeight: 600 }}>📍 {t('bookingDetail.readyToCheckIn')}</p>
                       <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                        Vui lòng bấm nút check-in bên phải để xác nhận cuộc họp của bạn.
+                        {t('bookingDetail.checkInInstruction')}
                       </p>
                       <p className="checkin-countdown">
-                        ⏱️ Tự động hủy sau: {formatCountdown(secondsLeft)}
+                        ⏱️ {t('bookingDetail.autoCancelAfter', { countdown: formatCountdown(secondsLeft) })}
                       </p>
                     </div>
                     {(isOwner || isAdmin || isApprover) && (
@@ -304,18 +318,18 @@ function BookingDetailPage() {
                         onClick={handleCheckIn}
                         disabled={actionLoading}
                       >
-                        📍 Check-in ngay
+                        📍 {t('bookingDetail.checkInNow')}
                       </button>
                     )}
                   </div>
                 </div>
               ) : isExpired ? (
                 <div style={{ color: '#ef4444', fontWeight: 600 }}>
-                  ⚠️ Quá hạn check-in (Lịch đặt đang chờ hệ thống hủy giải phóng)
+                  ⚠️ {t('bookingDetail.checkInExpired')}
                 </div>
               ) : (
                 <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
-                  ⏳ Có thể check-in trước giờ họp 10 phút (Hạn chót là 15 phút sau giờ họp).
+                  ⏳ {t('bookingDetail.checkInNotice')}
                 </div>
               )}
             </div>
@@ -331,7 +345,7 @@ function BookingDetailPage() {
                 <div className="detail-page__rejection">
                   <span className="detail-page__rejection-icon">❌</span>
                   <div>
-                    <span className="detail-page__info-label">Lý do từ chối</span>
+                    <span className="detail-page__info-label">{t('bookingDetail.rejectionReason')}</span>
                     <p className="detail-page__rejection-reason">{booking.rejectionReason}</p>
                   </div>
                 </div>
@@ -340,7 +354,7 @@ function BookingDetailPage() {
                 <span className="detail-page__info-icon">👤</span>
                 <div>
                   <span className="detail-page__info-label">
-                    {booking.status === 'rejected' ? 'Người từ chối' : 'Người duyệt'}
+                    {booking.status === 'rejected' ? t('bookingDetail.rejectedBy') : t('bookingDetail.approvedBy')}
                   </span>
                   <span className="detail-page__info-value">
                     {booking.approver?.fullName || booking.approver?.email}
@@ -352,9 +366,9 @@ function BookingDetailPage() {
                   <span className="detail-page__info-icon">📅</span>
                   <div>
                     <span className="detail-page__info-label">
-                      {booking.status === 'rejected' ? 'Từ chối lúc' : 'Duyệt lúc'}
+                      {booking.status === 'rejected' ? t('bookingDetail.rejectedAt') : t('bookingDetail.approvedAt')}
                     </span>
-                    <span className="detail-page__info-value">{formatFull(booking.approvedAt)}</span>
+                    <span className="detail-page__info-value">{formatFull(booking.approvedAt, lng)}</span>
                   </div>
                 </div>
               )}
@@ -373,7 +387,7 @@ function BookingDetailPage() {
                   onClick={handleApprove}
                   disabled={actionLoading}
                 >
-                  ✓ Duyệt
+                  {t('bookingDetail.approveBtn')}
                 </button>
                 <button
                   id="detail-reject-btn"
@@ -381,7 +395,7 @@ function BookingDetailPage() {
                   onClick={() => setRejectModal(true)}
                   disabled={actionLoading}
                 >
-                  ✗ Từ chối
+                  {t('bookingDetail.rejectBtn')}
                 </button>
               </>
             )}
@@ -392,7 +406,7 @@ function BookingDetailPage() {
                 onClick={handleCancel}
                 disabled={actionLoading}
               >
-                {actionLoading ? 'Đang xử lý...' : 'Hủy booking'}
+                {actionLoading ? t('bookingDetail.processing') : t('bookingDetail.cancelBtn')}
               </button>
             )}
             {/* Save as template — shown for approved bookings owned by user */}

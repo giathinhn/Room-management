@@ -7,9 +7,11 @@ import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import toast from 'react-hot-toast';
 import { FiClock, FiUsers, FiLayers, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import './QuickBookPage.css';
 
 function QuickBookPage() {
+  const { t } = useTranslation();
   const { id: roomId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -59,10 +61,10 @@ function QuickBookPage() {
 
       // Pre-fill default title
       if (user && !title) {
-        setTitle(`Họp nhanh - ${user.fullName}`);
+        setTitle(t('quickBook.quickMeetingTitle', { name: user.fullName }));
       }
     } catch (err) {
-      toast.error('Không thể tải thông tin phòng hoặc lịch đặt');
+      toast.error(t('quickBook.loadFailed'));
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -142,7 +144,6 @@ function QuickBookPage() {
   useEffect(() => {
     if (!isCustomTime) {
       const now = new Date();
-      // Round to nearest minute
       now.setSeconds(0, 0);
       const startStr = formatDateTimeLocal(now);
       const end = new Date(now.getTime() + selectedDuration * 60 * 1000);
@@ -167,7 +168,7 @@ function QuickBookPage() {
 
   const handleQuickDuration = (mins) => {
     if (mins > maxAllowedMinutes) {
-      toast.error(`Thời gian đặt vượt quá thời gian bắt đầu họp tiếp theo (${maxAllowedMinutes} phút)`);
+      toast.error(t('quickBook.durationExceeded', { minutes: maxAllowedMinutes }));
       return;
     }
     setSelectedDuration(mins);
@@ -184,7 +185,7 @@ function QuickBookPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      toast.error('Vui lòng nhập tiêu đề cuộc họp');
+      toast.error(t('quickBook.titleRequired'));
       return;
     }
 
@@ -193,18 +194,18 @@ function QuickBookPage() {
     const now = new Date();
 
     if (start >= end) {
-      toast.error('Thời gian bắt đầu phải trước thời gian kết thúc');
+      toast.error(t('quickBook.timeError'));
       return;
     }
 
     if (start < new Date(now.getTime() - 5 * 60 * 1000)) {
-      toast.error('Không thể đặt phòng trong quá khứ');
+      toast.error(t('quickBook.pastError'));
       return;
     }
 
     const durationMinutes = (end - start) / (60 * 1000);
     if (durationMinutes < 15) {
-      toast.error('Thời gian đặt tối thiểu là 15 phút');
+      toast.error(t('quickBook.minDurationError'));
       return;
     }
 
@@ -216,7 +217,7 @@ function QuickBookPage() {
     });
 
     if (hasConflict) {
-      toast.error('Thời gian đã chọn bị trùng lịch với cuộc họp khác');
+      toast.error(t('quickBook.conflictError'));
       return;
     }
 
@@ -228,10 +229,10 @@ function QuickBookPage() {
         startTime: start.toISOString(),
         endTime: end.toISOString(),
       });
-      toast.success('Đặt phòng nhanh thành công! 🎉');
+      toast.success(t('quickBook.success'));
       navigate('/bookings');
     } catch (err) {
-      const msg = err.response?.data?.message || 'Không thể tạo đặt phòng';
+      const msg = err.response?.data?.message || t('quickBook.failed');
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -242,7 +243,7 @@ function QuickBookPage() {
     return (
       <div className="quick-book-page__loading">
         <div className="spinner" />
-        <p>Đang tải thông tin phòng họp...</p>
+        <p>{t('quickBook.loading')}</p>
       </div>
     );
   }
@@ -259,11 +260,11 @@ function QuickBookPage() {
 
           <div className="quick-book-room-meta">
             <span className="quick-book-meta-badge">
-              <FiUsers /> {room.capacity} người
+              <FiUsers /> {t('quickBook.capacity', { count: room.capacity })}
             </span>
             {room.equipment && room.equipment.length > 0 && (
               <span className="quick-book-meta-badge">
-                <FiLayers /> {room.equipment.length} thiết bị
+                <FiLayers /> {t('quickBook.equipment', { count: room.equipment.length })}
               </span>
             )}
           </div>
@@ -275,14 +276,17 @@ function QuickBookPage() {
             <>
               <div className="status-badge-wrapper">
                 <FiCheckCircle className="status-icon" />
-                <span className="status-label">ĐANG TRỐNG</span>
+                <span className="status-label">{t('quickBook.available')}</span>
               </div>
               {nextBooking ? (
                 <p className="status-description">
-                  Phòng trống từ bây giờ đến <strong>{new Date(nextBooking.start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</strong> (còn {timeUntilNext} phút).
+                  {t('quickBook.availableUntil', {
+                    time: new Date(nextBooking.start).toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' }),
+                    minutes: timeUntilNext
+                  })}
                 </p>
               ) : (
-                <p className="status-description">Phòng trống suốt phần còn lại của ngày.</p>
+                <p className="status-description">{t('quickBook.availableRestOfDay')}</p>
               )}
             </>
           )}
@@ -291,10 +295,13 @@ function QuickBookPage() {
             <>
               <div className="status-badge-wrapper">
                 <FiAlertCircle className="status-icon animate-pulse" />
-                <span className="status-label">SẮP BẬN</span>
+                <span className="status-label">{t('quickBook.soonBusy')}</span>
               </div>
               <p className="status-description">
-                Sắp có cuộc họp lúc <strong>{new Date(nextBooking.start).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</strong> (sau {timeUntilNext} phút nữa).
+                {t('quickBook.soonBusyDesc', {
+                  time: new Date(nextBooking.start).toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' }),
+                  minutes: timeUntilNext
+                })}
               </p>
             </>
           )}
@@ -303,13 +310,13 @@ function QuickBookPage() {
             <>
               <div className="status-badge-wrapper">
                 <FiClock className="status-icon" />
-                <span className="status-label">ĐANG BẬN</span>
+                <span className="status-label">{t('quickBook.busy')}</span>
               </div>
               <p className="status-description">
-                Đang họp: <strong>{currentBooking.title}</strong>
+                {t('quickBook.busyDesc', { title: currentBooking.title })}
               </p>
               <div className="status-countdown">
-                Còn lại: <span className="countdown-timer">{countdownText}</span>
+                {t('quickBook.busyCountdown', { countdown: countdownText })}
               </div>
             </>
           )}
@@ -322,8 +329,8 @@ function QuickBookPage() {
               <Input
                 id="quick-book-title"
                 type="text"
-                label="Tiêu đề cuộc họp"
-                placeholder="Nhập tiêu đề cuộc họp..."
+                label={t('quickBook.meetingTitle')}
+                placeholder={t('quickBook.meetingTitlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -333,7 +340,7 @@ function QuickBookPage() {
             {/* Quick Duration Buttons (only if not customized time) */}
             {!isCustomTime && (
               <div className="form-section">
-                <label className="input-label">Chọn thời lượng đặt phòng nhanh</label>
+                <label className="input-label">{t('quickBook.selectDuration')}</label>
                 <div className="duration-buttons">
                   <button
                     type="button"
@@ -341,7 +348,7 @@ function QuickBookPage() {
                     onClick={() => handleQuickDuration(15)}
                     disabled={maxAllowedMinutes < 15}
                   >
-                    15 Phút
+                    {t('quickBook.durationMins', { minutes: 15 })}
                   </button>
                   <button
                     type="button"
@@ -349,7 +356,7 @@ function QuickBookPage() {
                     onClick={() => handleQuickDuration(30)}
                     disabled={maxAllowedMinutes < 30}
                   >
-                    30 Phút
+                    {t('quickBook.durationMins', { minutes: 30 })}
                   </button>
                   <button
                     type="button"
@@ -357,7 +364,7 @@ function QuickBookPage() {
                     onClick={() => handleQuickDuration(60)}
                     disabled={maxAllowedMinutes < 60}
                   >
-                    1 Giờ
+                    {t('quickBook.durationHour')}
                   </button>
                 </div>
               </div>
@@ -371,7 +378,7 @@ function QuickBookPage() {
                   checked={isCustomTime}
                   onChange={(e) => setIsCustomTime(e.target.checked)}
                 />
-                <span className="checkbox-label">Tùy chỉnh thời gian đặt phòng</span>
+                <span className="checkbox-label">{t('quickBook.customizeTime')}</span>
               </label>
             </div>
 
@@ -381,7 +388,7 @@ function QuickBookPage() {
                 <Input
                   id="quick-book-start"
                   type="datetime-local"
-                  label="Thời gian bắt đầu"
+                  label={t('quickBook.startTime')}
                   value={customStart}
                   onChange={handleCustomStartChange}
                   required
@@ -389,7 +396,7 @@ function QuickBookPage() {
                 <Input
                   id="quick-book-end"
                   type="datetime-local"
-                  label="Thời gian kết thúc"
+                  label={t('quickBook.endTime')}
                   value={customEnd}
                   onChange={handleCustomEndChange}
                   required
@@ -407,7 +414,7 @@ function QuickBookPage() {
                 className="btn-submit-quick-book"
                 disabled={maxAllowedMinutes < 15 && !isCustomTime}
               >
-                {maxAllowedMinutes < 15 && !isCustomTime ? 'KHÔNG THỂ ĐẶT NHANH' : 'ĐẶT PHÒNG NGAY'}
+                {maxAllowedMinutes < 15 && !isCustomTime ? t('quickBook.cannotBook') : t('quickBook.bookNow')}
               </Button>
               <Button
                 type="button"
@@ -416,19 +423,19 @@ function QuickBookPage() {
                 onClick={() => navigate('/rooms')}
                 className="btn-cancel-quick-book"
               >
-                Quay lại
+                {t('quickBook.back')}
               </Button>
             </div>
           </form>
         ) : (
           <div className="quick-book-busy-msg">
-            <p>Phòng hiện đang có cuộc họp diễn ra.</p>
+            <p>{t('quickBook.roomBusyMsg')}</p>
             <Button
               type="button"
               variant="primary"
               onClick={() => setIsCustomTime(true)}
             >
-              Đặt lịch cho khung giờ khác hôm nay
+              {t('quickBook.bookOtherTime')}
             </Button>
             <Button
               type="button"
@@ -436,7 +443,7 @@ function QuickBookPage() {
               onClick={() => navigate('/rooms')}
               style={{ marginTop: '0.75rem', width: '100%' }}
             >
-              Quay lại danh sách phòng
+              {t('quickBook.backToRooms')}
             </Button>
           </div>
         )}

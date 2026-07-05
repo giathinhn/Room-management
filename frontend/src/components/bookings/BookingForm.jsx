@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
 import DateTimePicker from '../common/DateTimePicker';
 import ConflictAlert from './ConflictAlert';
@@ -15,16 +16,16 @@ function combineDateTime(date, time) {
 /**
  * Calculate and format duration string from two Date values.
  */
-function calcDuration(startISO, endISO) {
+function calcDuration(startISO, endISO, t) {
   if (!startISO || !endISO) return null;
   const diff = new Date(endISO) - new Date(startISO);
   if (diff <= 0) return null;
   const totalMins = Math.round(diff / 60000);
   const h = Math.floor(totalMins / 60);
   const m = totalMins % 60;
-  if (h > 0 && m > 0) return `${h} giờ ${m} phút`;
-  if (h > 0) return `${h} giờ`;
-  return `${m} phút`;
+  if (h > 0 && m > 0) return t('bookingDetail.durationHourMin', { h, m });
+  if (h > 0) return t('bookingDetail.durationHour', { h, count: h });
+  return t('bookingDetail.durationMin', { m, count: m });
 }
 
 // ── Helper: extract date / time parts from ISO string ────────────────────
@@ -55,6 +56,8 @@ const extractTime = (iso) => {
  * }} props
  */
 function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initialValues = {} }) {
+  const { t, i18n } = useTranslation();
+  
   // ── State ─────────────────────────────────────────────────────────────────
   const [date, setDate] = useState(extractDate(initialValues.startTime) || '');
   const [startTime, setStartTime] = useState(extractTime(initialValues.startTime) || '');
@@ -99,107 +102,112 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
             
             // Smoothly scroll to the bottom of the page to focus on Step 3 info
             setTimeout(() => {
-              window.scrollTo({
-                top: document.documentElement.scrollHeight,
-                behavior: 'smooth'
-              });
-            }, 100);
+              const submitBtn = document.getElementById('submit-booking-btn');
+              if (submitBtn) {
+                submitBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              }
+            }, 300);
           })
-          .catch(() => {
-            setAvailableRooms([]);
-            setRoomsLoaded(true);
-          })
-          .finally(() => {
-            setRoomsLoading(false);
-          });
+          .catch(() => {})
+          .finally(() => setRoomsLoading(false));
       }
-    } else {
-      // Handle partial templates (e.g. from handleUseTemplate which only has startHHMM, endHHMM)
-      if (initialValues.startHHMM) setStartTime(initialValues.startHHMM);
-      if (initialValues.endHHMM) setEndTime(initialValues.endHHMM);
-      if (initialValues.roomId) setSelectedRoomId(initialValues.roomId);
-      if (initialValues.title) setTitle(initialValues.title);
     }
   }, [initialValues]);
 
-  // ── Derived values ────────────────────────────────────────────────────────
+  // Compute values
   const startISO = combineDateTime(date, startTime);
-  const endISO = combineDateTime(date, endTime);
-  const duration = calcDuration(startISO, endISO);
+  const endISO   = combineDateTime(date, endTime);
+  const duration = calcDuration(startISO, endISO, t);
 
-  const timeSelected = date && startTime && endTime;
-  const canSearch = timeSelected && startISO && endISO && new Date(startISO) < new Date(endISO);
+  const canSearch = date && startTime && endTime && (new Date(startISO) < new Date(endISO));
 
-  // ── Load available rooms whenever time changes ─────────────────────────────
+  // Find Room info
+  const selectedRoom = availableRooms.find((r) => r.id === selectedRoomId);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const loadAvailableRooms = useCallback(async () => {
     if (!canSearch) return;
-
+    onClearConflicts?.();
     setRoomsLoading(true);
     setRoomsLoaded(false);
-    // Only clear selectedRoomId if there was no pre-filled value
-    if (!initialValues.roomId) {
-      setSelectedRoomId('');
-    }
-    onClearConflicts?.();
-
+    setSelectedRoomId('');
     try {
-      const res = await roomService.getAvailableRooms({ startTime: startISO, endTime: endISO });
+      const res = await roomService.getAvailableRooms({
+        startTime: startISO,
+        endTime:   endISO,
+      });
       setAvailableRooms(res.data || []);
       setRoomsLoaded(true);
-    } catch {
-      setAvailableRooms([]);
-      setRoomsLoaded(true);
+      
+      // Auto scroll to Step 2
+      setTimeout(() => {
+        const findBtn = document.getElementById('find-rooms-btn');
+        if (findBtn) {
+          findBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } catch (err) {
+      toast.error(t('roomSearch.failed'));
     } finally {
       setRoomsLoading(false);
     }
-  }, [startISO, endISO, canSearch, initialValues.roomId]);
+  }, [canSearch, startISO, endISO, onClearConflicts, t]);
 
-  // ── Validation ────────────────────────────────────────────────────────────
-  function validate() {
+  const validate = () => {
     const newErrors = {};
-    if (!date) newErrors.date = 'Vui lòng chọn ngày';
-    if (!startTime) newErrors.startTime = 'Vui lòng chọn giờ bắt đầu';
-    if (!endTime) newErrors.endTime = 'Vui lòng chọn giờ kết thúc';
-    if (startISO && endISO && new Date(startISO) >= new Date(endISO)) {
-      newErrors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
+    if (!date) newErrors.date = t('bookings.form.validation.dateRequired');
+    if (!startTime) newErrors.startTime = t('bookings.form.validation.startTimeRequired');
+    if (!endTime) newErrors.endTime = t('bookings.form.validation.endTimeRequired');
+    if (startTime && endTime && startTime >= endTime) {
+      newErrors.endTime = t('bookings.form.validation.endTimeAfterStart');
     }
-    if (!selectedRoomId) newErrors.room = 'Vui lòng chọn phòng';
-    if (!title.trim()) newErrors.title = 'Vui lòng nhập tiêu đề cuộc họp';
-    if (title.length > 200) newErrors.title = 'Tiêu đề không được vượt quá 200 ký tự';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    await onSubmit({ roomId: selectedRoomId, title: title.trim(), startTime: startISO, endTime: endISO });
+    if (!selectedRoomId) newErrors.room = t('bookings.form.validation.roomRequired');
+    if (!title.trim()) newErrors.title = t('bookings.form.validation.titleRequired');
+    if (title.length > 200) newErrors.title = t('bookings.form.validation.titleMaxLength');
+    return newErrors;
   };
 
-  const selectedRoom = availableRooms.find((r) => r.id === selectedRoomId);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
+    onSubmit({
+      roomId:    selectedRoomId,
+      title:     title.trim(),
+      startTime: startISO,
+      endTime:   endISO,
+    });
+  };
+
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
 
   return (
     <form className="booking-form" onSubmit={handleSubmit} noValidate>
-      {/* ── Conflict Alert ─────────────────────────────────────────────── */}
-      {conflicts && conflicts.length > 0 && (
+      {/* Conflicts warning */}
+      {conflicts.length > 0 && (
         <ConflictAlert
           conflicts={conflicts}
           roomId={selectedRoomId}
           startTime={startISO}
           endTime={endISO}
           onDismiss={onClearConflicts}
-          onSelectRoom={(room) => {
-            setSelectedRoomId(room.id);
-            onClearConflicts?.();
+          onSelectRoom={(altRoom) => {
+            setSelectedRoomId(altRoom.id);
+            onClearConflicts();
           }}
-          onSelectSlot={(slot) => {
-            // slot has startTime / endTime ISO strings
-            const st = new Date(slot.startTime);
-            const et = new Date(slot.endTime);
-            setDate(st.toISOString().slice(0, 10));
-            setStartTime(`${String(st.getHours()).padStart(2,'0')}:${String(st.getMinutes()).padStart(2,'0')}`);
-            setEndTime(`${String(et.getHours()).padStart(2,'0')}:${String(et.getMinutes()).padStart(2,'0')}`);
-            onClearConflicts?.();
+          onSelectSlot={(altSlot) => {
+            const d = extractDate(altSlot.startTime);
+            const st = extractTime(altSlot.startTime);
+            const et = extractTime(altSlot.endTime);
+            setDate(d);
+            setStartTime(st);
+            setEndTime(et);
+            onClearConflicts();
+            setRoomsLoaded(false);
           }}
         />
       )}
@@ -208,13 +216,13 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
       <div className="booking-form__step">
         <div className="booking-form__step-header">
           <span className="booking-form__step-num">1</span>
-          <h3 className="booking-form__step-title">Chọn thời gian</h3>
+          <h3 className="booking-form__step-title">{t('bookings.form.selectTime')}</h3>
         </div>
 
         <div className="booking-form__time-grid">
           <div className="booking-form__field">
             <label className="booking-form__label" htmlFor="booking-date">
-              📅 Ngày họp
+              {t('bookings.form.meetingDate')}
             </label>
             <DateTimePicker
               id="booking-date-start"
@@ -226,13 +234,13 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
               error={errors.date || errors.startTime}
             />
             <div className="booking-form__time-labels">
-              <span>Ngày &amp; giờ bắt đầu</span>
+              <span>{t('bookings.form.startDateTime')}</span>
             </div>
           </div>
 
           <div className="booking-form__field">
             <label className="booking-form__label" htmlFor="booking-end-time">
-              🕐 Giờ kết thúc
+              {t('bookings.form.endTime')}
             </label>
             <div className="booking-form__end-time">
               <select
@@ -241,7 +249,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
                 value={endTime}
                 onChange={(e) => { setEndTime(e.target.value); setRoomsLoaded(false); }}
               >
-                <option value="">-- Chọn giờ kết thúc --</option>
+                <option value="">{t('bookings.form.selectEndTimePlaceholder')}</option>
                 {['07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
                   '12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00',
                   '16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30',
@@ -266,10 +274,10 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
         >
           {roomsLoading ? (
             <>
-              <span className="spinner-sm" /> Đang tìm phòng...
+              <span className="spinner-sm" /> {t('bookings.form.searchingRooms')}
             </>
           ) : (
-            '🔍 Tìm phòng trống'
+            t('bookings.form.searchRoomsBtn')
           )}
         </button>
       </div>
@@ -279,16 +287,16 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
         <div className="booking-form__step">
           <div className="booking-form__step-header">
             <span className="booking-form__step-num">2</span>
-            <h3 className="booking-form__step-title">Chọn phòng trống</h3>
+            <h3 className="booking-form__step-title">{t('bookings.form.selectAvailableRoom')}</h3>
           </div>
 
           {roomsLoading ? (
             <div className="booking-form__rooms-loading">
-              <span className="spinner-sm" /> Đang tải danh sách phòng...
+              <span className="spinner-sm" /> {t('bookings.form.loadingRooms')}
             </div>
           ) : availableRooms.length === 0 ? (
             <div className="booking-form__no-rooms">
-              😔 Không có phòng trống trong khung giờ này. Hãy chọn thời gian khác.
+              {t('bookings.form.noRoomsAvailable')}
             </div>
           ) : (
             <div className="booking-form__rooms-grid">
@@ -311,7 +319,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
                       {room.name}
                     </div>
                     <div className="booking-form__room-info">
-                      <span>👥 {room.capacity} người</span>
+                      <span>👥 {room.capacity} {t('rooms.capacityUnit')}</span>
                       {room.location && <span>📍 {room.location}</span>}
                     </div>
                   {room.equipment && room.equipment.length > 0 && (
@@ -341,12 +349,12 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
         <div className="booking-form__step">
           <div className="booking-form__step-header">
             <span className="booking-form__step-num">3</span>
-            <h3 className="booking-form__step-title">Thông tin cuộc họp</h3>
+            <h3 className="booking-form__step-title">{t('bookings.form.meetingInfo')}</h3>
           </div>
 
           <div className="booking-form__field">
             <label className="booking-form__label" htmlFor="booking-title">
-              📝 Tiêu đề / Mục đích cuộc họp <span className="required">*</span>
+              {t('bookings.form.meetingTitleLabel')} <span className="required">*</span>
             </label>
             <input
               id="booking-title"
@@ -354,7 +362,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
               className={`booking-form__input ${errors.title ? 'input-error' : ''}`}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ví dụ: Họp sprint planning Q3, Review design..."
+              placeholder={t('bookings.form.titlePlaceholder')}
               maxLength={200}
             />
             <div className="booking-form__input-meta">
@@ -366,21 +374,21 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
           {/* Summary */}
           {selectedRoom && (
             <div className="booking-form__summary">
-              <h4 className="booking-form__summary-title">📋 Tóm tắt đặt phòng</h4>
+              <h4 className="booking-form__summary-title">{t('bookings.form.summaryTitle')}</h4>
               <div className="booking-form__summary-row">
-                <span>Phòng:</span>
+                <span>{t('bookings.form.summaryRoom')}</span>
                 <strong>{selectedRoom.name}</strong>
               </div>
               {selectedRoom.location && (
                 <div className="booking-form__summary-row">
-                  <span>Vị trí:</span>
+                  <span>{t('rooms.location')}:</span>
                   <strong>{selectedRoom.location}</strong>
                 </div>
               )}
               <div className="booking-form__summary-row">
-                <span>Thời gian:</span>
+                <span>{t('bookings.form.summaryTime')}</span>
                 <strong>
-                  {new Date(startISO).toLocaleDateString('vi-VN')} &nbsp;
+                  {new Date(startISO).toLocaleDateString(locale)} &nbsp;
                   {startTime} – {endTime} ({duration})
                 </strong>
               </div>
@@ -395,10 +403,10 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
           >
             {isLoading ? (
               <>
-                <span className="spinner-sm" /> Đang đặt phòng...
+                <span className="spinner-sm" /> {t('bookings.form.submitting')}
               </>
             ) : (
-              '✓ Xác nhận đặt phòng'
+              t('bookings.form.submitBtn')
             )}
           </button>
         </div>

@@ -1,16 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './AvailableRoomCard.css';
-
-const EQUIPMENT_ICONS = {
-  'Máy chiếu': '📽️',
-  'Micro':     '🎤',
-  'Bảng trắng': '📋',
-  'TV':        '🖥️',
-  'Webcam':    '📷',
-  'Loa':       '🔊',
-  'Điều hòa':  '❄️',
-};
 
 /**
  * AvailableRoomCard — compact card for an available room in search results.
@@ -21,6 +12,7 @@ const EQUIPMENT_ICONS = {
  * }} props
  */
 function AvailableRoomCard({ room, searchParams = {} }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleBooking = () => {
@@ -29,6 +21,26 @@ function AvailableRoomCard({ room, searchParams = {} }) {
     if (searchParams.startTime) qs.set('startTime', searchParams.startTime);
     if (searchParams.endTime)   qs.set('endTime',   searchParams.endTime);
     navigate(`/bookings/new?${qs.toString()}`);
+  };
+
+  const EQUIPMENT_ICONS = {
+    'Máy chiếu': '📽️',
+    'Micro':     '🎤',
+    'Bảng trắng': '📋',
+    'TV':        '🖥️',
+    'Webcam':    '📷',
+    'Loa':       '🔊',
+    'Điều hòa':  '❄️',
+  };
+
+  const equipmentLabel = {
+    'Máy chiếu': t('rooms.equipmentOptions.projector'),
+    'Micro':     t('rooms.equipmentOptions.microphone'),
+    'Bảng trắng': t('rooms.equipmentOptions.whiteboard'),
+    'TV':        t('rooms.equipmentOptions.tv'),
+    'Webcam':    t('rooms.equipmentOptions.webcam'),
+    'Loa':       t('rooms.equipmentOptions.speaker'),
+    'Điều hòa':  t('rooms.equipmentOptions.airConditioner'),
   };
 
   return (
@@ -44,7 +56,7 @@ function AvailableRoomCard({ room, searchParams = {} }) {
         </div>
 
         <div className="arc__meta">
-          <span className="arc__capacity">👥 {room.capacity} người</span>
+          <span className="arc__capacity">👥 {room.capacity} {t('rooms.capacityUnit')}</span>
         </div>
 
         {/* Equipment tags */}
@@ -52,7 +64,7 @@ function AvailableRoomCard({ room, searchParams = {} }) {
           <div className="arc__equipment">
             {room.equipment.map((eq) => (
               <span key={eq} className="arc__equip-tag">
-                {EQUIPMENT_ICONS[eq] || '🔧'} {eq}
+                {EQUIPMENT_ICONS[eq] || '🔧'} {equipmentLabel[eq] || eq}
               </span>
             ))}
           </div>
@@ -61,13 +73,13 @@ function AvailableRoomCard({ room, searchParams = {} }) {
 
       {/* Action */}
       <div className="arc__actions">
-        <span className="arc__available-badge">✅ Còn trống</span>
+        <span className="arc__available-badge">✅ {t('rooms.available')}</span>
         <button
           id={`book-room-${room.id}`}
           className="arc__book-btn"
           onClick={handleBooking}
         >
-          Đặt phòng →
+          {t('roomSearch.form.bookRoom')} →
         </button>
       </div>
     </div>

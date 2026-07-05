@@ -8,6 +8,7 @@ import exportService from '../services/export.service';
 import BookingCard from '../components/bookings/BookingCard';
 import BookingFilter from '../components/bookings/BookingFilter';
 import RejectModal from '../components/bookings/RejectModal';
+import { useTranslation } from 'react-i18next';
 import './BookingsPage.css';
 
 const LIMIT = 10;
@@ -16,6 +17,7 @@ const LIMIT = 10;
  * BookingsPage — lists all bookings with filter, pagination, approve/reject/cancel.
  */
 function BookingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -56,11 +58,11 @@ function BookingsPage() {
       setBookings(res.data || []);
       setPagination(res.pagination || { total: 0, page: 1, totalPages: 1 });
     } catch {
-      toast.error('Không thể tải danh sách booking');
+      toast.error(t('bookings.loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, t]);
 
   useEffect(() => {
     fetchBookings();
@@ -70,10 +72,11 @@ function BookingsPage() {
   const handleApprove = async (id) => {
     try {
       await bookingService.approveBooking(id);
-      toast.success('Đã duyệt booking!');
+      toast.success(t('bookings.approveSuccess'));
       fetchBookings();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Duyệt thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     }
   };
 
@@ -85,24 +88,26 @@ function BookingsPage() {
     setRejectLoading(true);
     try {
       await bookingService.rejectBooking(rejectModal.bookingId, reason);
-      toast.success('Đã từ chối booking');
+      toast.success(t('bookings.rejectSuccess'));
       setRejectModal({ open: false, bookingId: null });
       fetchBookings();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Từ chối thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setRejectLoading(false);
     }
   };
 
   const handleCancel = async (id) => {
-    if (!window.confirm('Bạn có chắc muốn hủy booking này?')) return;
+    if (!window.confirm(t('bookings.cancelConfirm'))) return;
     try {
       await bookingService.cancelBooking(id);
-      toast.success('Đã hủy booking');
+      toast.success(t('bookings.cancelSuccess'));
       fetchBookings();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Hủy thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     }
   };
 
@@ -129,9 +134,10 @@ function BookingsPage() {
         endDate:   filters.endDate   || undefined,
       };
       await exportService.exportBookings(exportFilters);
-      toast.success('Đã tải xuống file Excel thành công!');
+      toast.success(t('bookings.exportSuccess'));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Xuất Excel thất bại');
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
     } finally {
       setExportLoading(false);
     }
@@ -145,11 +151,11 @@ function BookingsPage() {
       {/* Header */}
       <div className="bookings-page__header">
         <div className="bookings-page__title-area">
-          <h1 className="bookings-page__title">📋 Lịch đặt phòng</h1>
+          <h1 className="bookings-page__title">📋 {t('bookings.title')}</h1>
           <p className="bookings-page__subtitle">
             {pagination.total > 0
-              ? `${pagination.total} booking được tìm thấy`
-              : 'Quản lý lịch đặt phòng của bạn'}
+              ? t('bookings.countFound', { count: pagination.total })
+              : t('bookings.manageTitle')}
           </p>
         </div>
         <div className="bookings-page__header-actions">
@@ -159,14 +165,14 @@ function BookingsPage() {
               className="bookings-page__export-btn"
               onClick={handleExport}
               disabled={exportLoading}
-              title="Xuất danh sách booking ra Excel"
+              title={t('bookings.exportTooltip')}
             >
               {exportLoading ? (
                 <span className="bookings-page__export-spinner" />
               ) : (
                 '📥'
               )}
-              {exportLoading ? 'Đang xuất...' : 'Export Excel'}
+              {exportLoading ? t('bookings.exporting') : t('bookings.exportExcel')}
             </button>
           )}
           <button
@@ -174,7 +180,7 @@ function BookingsPage() {
             className="bookings-page__new-btn"
             onClick={() => navigate('/bookings/new')}
           >
-            ➕ Đặt phòng mới
+            ➕ {t('sidebar.newBooking')}
           </button>
         </div>
       </div>
@@ -192,19 +198,19 @@ function BookingsPage() {
         {loading ? (
           <div className="bookings-page__loading">
             <div className="spinner" />
-            <p>Đang tải...</p>
+            <p>{t('common.loading')}</p>
           </div>
         ) : bookings.length === 0 ? (
           <div className="bookings-page__empty">
             <div className="bookings-page__empty-icon">📭</div>
-            <h3>Không có booking nào</h3>
-            <p>Chưa có lịch đặt phòng phù hợp với bộ lọc hiện tại.</p>
+            <h3>{t('bookings.noBookings')}</h3>
+            <p>{t('bookings.noBookingsDesc')}</p>
             <button
               id="empty-new-booking-btn"
               className="bookings-page__new-btn"
               onClick={() => navigate('/bookings/new')}
             >
-              ➕ Đặt phòng mới
+              ➕ {t('sidebar.newBooking')}
             </button>
           </div>
         ) : (
