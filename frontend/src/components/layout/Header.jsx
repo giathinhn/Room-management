@@ -81,7 +81,7 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
             <div className="user-avatar">
               {user?.avatar ? (
                 <img
-                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`}
+                  src={`${import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://localhost:5000') : ''}${user.avatar}`}
                   alt="Avatar"
                   className="avatar-img"
                 />
@@ -104,7 +104,7 @@ const Header = ({ onMenuToggle, sidebarOpen }) => {
                 <div className="user-avatar user-avatar--lg">
                   {user?.avatar ? (
                     <img
-                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`}
+                      src={`${import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://localhost:5000') : ''}${user.avatar}`}
                       alt="Avatar"
                       className="avatar-img"
                     />

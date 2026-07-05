@@ -244,7 +244,7 @@ const ProfilePage = () => {
           <div className="profile-avatar-large">
             {user?.avatar ? (
               <img
-                src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`}
+                src={`${import.meta.env.DEV ? (import.meta.env.VITE_API_URL || 'http://localhost:5000') : ''}${user.avatar}`}
                 alt="Profile Avatar"
                 className="avatar-large-img"
               />

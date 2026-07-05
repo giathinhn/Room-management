@@ -3,8 +3,33 @@ const express = require('express');
 const router = express.Router();
 
 /**
- * GET /api/health
- * Health check endpoint
+ * @swagger
+ * /health:
+ *   get:
+ *     tags: [System]
+ *     summary: Kiểm tra trạng thái hoạt động của hệ thống (Health Check)
+ *     description: Trả về trạng thái hoạt động hiện tại của server, thời gian chạy và môi trường.
+ *     responses:
+ *       200:
+ *         description: Server hoạt động bình thường
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2026-07-05T08:00:00.000Z
+ *                 uptime:
+ *                   type: number
+ *                   example: 124.5
+ *                 environment:
+ *                   type: string
+ *                   example: development
  */
 router.get('/health', (_req, res) => {
   res.json({

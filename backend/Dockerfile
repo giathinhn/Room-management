@@ -1,21 +1,18 @@
-FROM node:20-alpine
-
+# Build stage
+FROM node:20-alpine AS builder
 RUN apk add --no-cache openssl
-
 WORKDIR /app
-
-# Copy package files first for better layer caching
 COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
-
-# Copy source code
-COPY . .
-
-# Generate Prisma client
+COPY prisma ./prisma/
+RUN npm ci
 RUN npx prisma generate
 
+# Production stage
+FROM node:20-alpine
+RUN apk add --no-cache openssl
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY . .
 EXPOSE 5000
-
-CMD ["sh", "-c", "npx prisma generate && node src/server.js"]
+CMD ["node", "src/server.js"]

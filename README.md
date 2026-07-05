@@ -18,30 +18,23 @@ Trước khi bắt đầu, hãy đảm bảo máy tính của bạn đã cài đ
 
 Có 2 cách để khởi chạy dự án: **Chạy nhanh bằng Docker (Khuyên dùng)** hoặc **Chạy thủ công từng phần**.
 
-### 🐳 Cách 1: Sử dụng Docker & Docker Compose (Khuyên dùng)
+### 🐳 Cách 1: Sử dụng Docker & Docker Compose (Khuyên dùng cho Production)
 
-Cách này sẽ tự động thiết lập và chạy cơ sở dữ liệu PostgreSQL, Backend API và Frontend React trong các container Docker.
+Cách này sẽ tự động thiết lập và chạy cơ sở dữ liệu PostgreSQL, Backend API (phục vụ qua Nginx reverse proxy) và Frontend React được build tối ưu trong các container Docker. Các bước chạy migration và seed dữ liệu mẫu sẽ được thực hiện tự động khi container backend khởi chạy.
 
-**Bước 1:** Khởi chạy các dịch vụ Docker (chạy ở chế độ background):
-
-```bash
-docker compose up -d
-```
-
-**Bước 2:** Chạy migrations để khởi tạo cấu trúc cơ sở dữ liệu và seed dữ liệu mẫu:
+**Bước 1:** Cấu hình và khởi chạy các dịch vụ Docker:
 
 ```bash
-# Tạo cấu trúc các bảng dữ liệu
-docker exec -it roomsync_backend npx prisma migrate deploy
-
-# Khởi tạo dữ liệu mẫu (Tài khoản, Phòng họp mẫu, v.v...)
-docker exec -it roomsync_backend npx prisma db seed
+docker compose up --build -d
 ```
 
-**Bước 3:** Truy cập ứng dụng:
+*Lưu ý: Quá trình build lần đầu có thể mất một vài phút do sử dụng multi-stage builds giúp tối ưu kích thước image và tính bảo mật.*
 
-* **Giao diện người dùng (Frontend):** [http://localhost:5173](http://localhost:5173)
-* **Cổng API Backend:** [http://localhost:5000](http://localhost:5000)
+**Bước 2:** Truy cập ứng dụng và tài liệu API:
+
+* **Giao diện người dùng (Frontend):** [http://localhost](http://localhost) (Cổng 80)
+* **Tài liệu API (Swagger UI):** [http://localhost/api-docs](http://localhost/api-docs) (Hoặc cổng API backend trực tiếp tại [http://localhost:5000/api-docs](http://localhost:5000/api-docs))
+* **Cổng API Backend trực tiếp:** [http://localhost:5000](http://localhost:5000)
 
 **Bước 4:** Để dừng các dịch vụ:
 

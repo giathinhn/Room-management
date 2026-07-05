@@ -20,6 +20,15 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// ─── Swagger UI ─────────────────────────────────────────────────────────────
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Meeting Room API Docs',
+}));
+
 // ─── Routes ─────────────────────────────────────────────────────────────────
 app.use('/api', routes);
 
