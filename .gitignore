@@ -10,3 +10,4 @@ prisma/migrations/dev.db
 report.md
 picture/
 *.pptx
+report_latex/

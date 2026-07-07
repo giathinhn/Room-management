@@ -74,10 +74,12 @@
 
 .input-icon--left {
   left: 12px;
+  right: auto;
 }
 
 .input-icon--right {
   right: 12px;
+  left: auto;
 }
 
 .input-toggle-btn {
