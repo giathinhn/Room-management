@@ -241,7 +241,6 @@ const roomRepository = {
       else if (nextBooking) status = 'upcoming';
 
       const isFavorite = userId ? (room.favoritedBy && room.favoritedBy.length > 0) : false;
-      const { favoritedBy, ...rest } = room;
 
       return {
         id: room.id,

@@ -5,7 +5,7 @@ const dashboardService = require('../services/dashboard.service');
  * Defaults: last 7 days when not provided.
  */
 function parseDateRange(query) {
-  let { startDate, endDate } = query;
+  const { startDate, endDate } = query;
 
   if (!startDate || !endDate) {
     // Default: last 7 days

@@ -148,7 +148,7 @@ async function callGemini(history, userMessage, systemPrompt) {
 
   const url = `${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`;
 
-  let maxRetries = 3;
+  const maxRetries = 3;
   let delayMs = 1000;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {

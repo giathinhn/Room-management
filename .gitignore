@@ -7,3 +7,6 @@ Thumbs.db
 coverage/
 .nyc_output/
 prisma/migrations/dev.db
+report.md
+picture/
+*.pptx
