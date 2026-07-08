@@ -299,7 +299,8 @@ const roomRepository = {
    * @param {string} building
    */
   async autoAssignGridPosition(floor, building) {
-    const MAX_COLS = 4;
+    const setting = await this.getFloorSetting(building, floor);
+    const MAX_COLS = setting?.cols || 4;
     const existing = await prisma.room.findMany({
       where: { floor, building, isActive: true },
       select: { mapX: true, mapY: true },
@@ -359,6 +360,46 @@ const roomRepository = {
           disconnect: { id: roomId },
         },
       },
+    });
+  },
+
+  /**
+   * Get settings (e.g. columns/rows count) for a specific floor of a building.
+   * @param {string} building
+   * @param {string} floor
+   */
+  async getFloorSetting(building, floor) {
+    if (!building || !floor) return { cols: 4, rows: 4 };
+    const setting = await prisma.floorSetting.findUnique({
+      where: {
+        building_floor: { building, floor }
+      }
+    });
+    return setting || { cols: 4, rows: 4 };
+  },
+
+  /**
+   * Create or update settings (e.g. columns/rows count) for a specific floor.
+   * @param {string} building
+   * @param {string} floor
+   * @param {object} data
+   */
+  async upsertFloorSetting(building, floor, data) {
+    const updateData = {};
+    if (data.cols !== undefined) updateData.cols = data.cols;
+    if (data.rows !== undefined) updateData.rows = data.rows;
+
+    return prisma.floorSetting.upsert({
+      where: {
+        building_floor: { building, floor }
+      },
+      update: updateData,
+      create: {
+        building,
+        floor,
+        cols: data.cols !== undefined ? data.cols : 4,
+        rows: data.rows !== undefined ? data.rows : 4,
+      }
     });
   },
 };

@@ -99,6 +99,9 @@ router.get('/floors',     authenticate, roomController.getFloors);
  */
 router.get('/floor-map',  authenticate, roomController.getFloorMap);
 
+router.get('/floor-setting', authenticate, roomController.getFloorSetting);
+router.put('/floor-setting', authenticate, authorize('admin'), roomController.updateFloorSetting);
+
 // ⚠️  /available MUST be before /:id
 /**
  * @swagger

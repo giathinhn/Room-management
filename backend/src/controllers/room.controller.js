@@ -180,6 +180,34 @@ const roomController = {
       return next(err);
     }
   },
+
+  /**
+   * GET /api/rooms/floor-setting
+   * Query: building, floor
+   */
+  async getFloorSetting(req, res, next) {
+    try {
+      const { building, floor } = req.query;
+      const setting = await roomService.getFloorSetting(building, floor);
+      return res.status(200).json({ success: true, data: setting });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+   * PUT /api/rooms/floor-setting
+   * Body: { building, floor, cols }
+   */
+  async updateFloorSetting(req, res, next) {
+    try {
+      const { building, floor, cols, rows } = req.body;
+      const setting = await roomService.updateFloorSetting(building, floor, cols, rows);
+      return res.status(200).json({ success: true, data: setting });
+    } catch (err) {
+      return next(err);
+    }
+  },
 };
 
 module.exports = roomController;

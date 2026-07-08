@@ -47,6 +47,30 @@ const floorMapService = {
     const { data } = await api.put(`/rooms/${roomId}/map-position`, mapData);
     return data.data;
   },
+
+  /**
+   * Get settings (cols count) for a specific floor.
+   * @param {string} building
+   * @param {string} floor
+   * @returns {Promise<object>}
+   */
+  async getFloorSetting(building, floor) {
+    const { data } = await api.get('/rooms/floor-setting', { params: { building, floor } });
+    return data.data;
+  },
+
+  /**
+   * Update settings (cols/rows count) for a specific floor (admin only).
+   * @param {string} building
+   * @param {string} floor
+   * @param {number} [cols]
+   * @param {number} [rows]
+   * @returns {Promise<object>}
+   */
+  async updateFloorSetting(building, floor, cols, rows) {
+    const { data } = await api.put('/rooms/floor-setting', { building, floor, cols, rows });
+    return data.data;
+  },
 };
 
 export default floorMapService;

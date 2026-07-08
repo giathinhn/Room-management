@@ -36,6 +36,10 @@ const FloorMapPage = () => {
   const timerRef = useRef(null);
   const countdownRef = useRef(null);
 
+  // ── Dynamic Grid Columns & Rows Settings ───────────────────────────────────
+  const [colsCount, setColsCount] = useState(4);
+  const [rowsCount, setRowsCount] = useState(4);
+
   // ── Stats ──────────────────────────────────────────────────────────────────
   const stats = {
     total: rooms.length,
@@ -75,6 +79,18 @@ const FloorMapPage = () => {
     }
   }, [selectedFloor]);
 
+  // ── Fetch floor setting ────────────────────────────────────────────────────
+  const fetchFloorSetting = useCallback(async () => {
+    if (!selectedBuilding || !selectedFloor) return;
+    try {
+      const setting = await floorMapService.getFloorSetting(selectedBuilding, selectedFloor);
+      setColsCount(setting?.cols || 4);
+      setRowsCount(setting?.rows || 4);
+    } catch (err) {
+      console.error('Lỗi lấy cấu hình tầng:', err);
+    }
+  }, [selectedBuilding, selectedFloor]);
+
   // ── Fetch floor map rooms ──────────────────────────────────────────────────
   const fetchFloorMap = useCallback(
     async (silent = false) => {
@@ -88,7 +104,7 @@ const FloorMapPage = () => {
         // Ensure every room has valid mapX and mapY grid values
         const positioned = [];
         data.forEach(r => {
-          if (r.mapX != null && r.mapY != null) {
+          if (r.mapX != null && r.mapY != null && r.mapX < colsCount && r.mapY < rowsCount) {
             positioned.push(r);
           }
         });
@@ -98,10 +114,10 @@ const FloorMapPage = () => {
         
         const finalizedRooms = [...data];
         finalizedRooms.forEach(room => {
-          if (room.mapX == null || room.mapY == null) {
+          if (room.mapX == null || room.mapY == null || room.mapX >= colsCount || room.mapY >= rowsCount) {
             while (finalizedRooms.some(r => r.mapX === currentX && r.mapY === currentY && r.id !== room.id)) {
               currentX++;
-              if (currentX >= 4) {
+              if (currentX >= colsCount) {
                 currentX = 0;
                 currentY++;
               }
@@ -109,7 +125,7 @@ const FloorMapPage = () => {
             room.mapX = currentX;
             room.mapY = currentY;
             currentX++;
-            if (currentX >= 4) {
+            if (currentX >= colsCount) {
               currentX = 0;
               currentY++;
             }
@@ -124,7 +140,7 @@ const FloorMapPage = () => {
         setRefreshing(false);
       }
     },
-    [selectedFloor, selectedBuilding, t]
+    [selectedFloor, selectedBuilding, colsCount, rowsCount, t]
   );
 
   // ── Init ──
@@ -137,6 +153,12 @@ const FloorMapPage = () => {
       fetchFloorsForBuilding(selectedBuilding);
     }
   }, [selectedBuilding, fetchFloorsForBuilding]);
+
+  useEffect(() => {
+    if (selectedFloor && selectedBuilding) {
+      fetchFloorSetting();
+    }
+  }, [selectedFloor, selectedBuilding, fetchFloorSetting]);
 
   useEffect(() => {
     if (selectedFloor && selectedBuilding) {
@@ -206,6 +228,28 @@ const FloorMapPage = () => {
     }
   };
 
+  const handleColsChange = async (newCols) => {
+    if (!selectedBuilding || !selectedFloor) return;
+    try {
+      await floorMapService.updateFloorSetting(selectedBuilding, selectedFloor, newCols, undefined);
+      setColsCount(newCols);
+      fetchFloorMap(true);
+    } catch (err) {
+      console.error('Lỗi cập nhật cấu hình cột:', err);
+    }
+  };
+
+  const handleRowsChange = async (newRows) => {
+    if (!selectedBuilding || !selectedFloor) return;
+    try {
+      await floorMapService.updateFloorSetting(selectedBuilding, selectedFloor, undefined, newRows);
+      setRowsCount(newRows);
+      fetchFloorMap(true);
+    } catch (err) {
+      console.error('Lỗi cập nhật cấu hình hàng:', err);
+    }
+  };
+
   // ── Handlers ──
   const handleBuildingChange = (building) => {
     setSelectedBuilding(building);
@@ -245,11 +289,11 @@ const FloorMapPage = () => {
 
   // ── Render Cells logic ──
   const maxRow = rooms.reduce((max, r) => Math.max(max, r.mapY || 0), 0);
-  const rowCount = Math.max(4, maxRow + 1 + (isEditMode ? 1 : 0));
+  const rowCount = Math.max(rowsCount, maxRow + 1 + (isEditMode ? 1 : 0));
   
   const gridCells = [];
   for (let row = 0; row < rowCount; row++) {
-    for (let col = 0; col < 4; col++) {
+    for (let col = 0; col < colsCount; col++) {
       const room = rooms.find(r => r.mapX === col && r.mapY === row);
       gridCells.push({ col, row, room });
     }
@@ -271,7 +315,38 @@ const FloorMapPage = () => {
           </div>
         </div>
 
-        <div className="fmp__header-right">
+        <div className="fmp__header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {isAdmin && isEditMode && (
+            <>
+              <div className="fmp__cols-selector">
+                <span>🔲 Cột:</span>
+                <select
+                  value={colsCount}
+                  onChange={(e) => handleColsChange(Number(e.target.value))}
+                >
+                  {[2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <option key={num} value={num}>
+                      {num} cột
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="fmp__rows-selector">
+                <span>🔳 Hàng:</span>
+                <select
+                  value={rowsCount}
+                  onChange={(e) => handleRowsChange(Number(e.target.value))}
+                >
+                  {[2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20].map((num) => (
+                    <option key={num} value={num}>
+                      {num} hàng
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
           {isAdmin && (
             <button
               className={`fmp__edit-mode-btn ${isEditMode ? 'fmp__edit-mode-btn--active' : ''}`}
@@ -378,9 +453,14 @@ const FloorMapPage = () => {
             className="fmp__canvas fmp__canvas--map"
             role="region"
             aria-label={`Sơ đồ tòa ${selectedBuilding} tầng ${selectedFloor}`}
+            style={{ gridTemplateColumns: `repeat(${colsCount}, 1fr)` }}
           >
             {/* Grid lines background helper */}
-            <div className="fmp__canvas-grid" aria-hidden="true" />
+            <div
+              className="fmp__canvas-grid"
+              aria-hidden="true"
+              style={{ backgroundSize: `${100 / colsCount}% 150px` }}
+            />
 
             {/* Room and Placeholder Cells */}
             {gridCells.map(({ col, row, room }) => {
@@ -446,6 +526,8 @@ const FloorMapPage = () => {
               <RoomPositionEditor
                 room={editingRoom}
                 floors={floors}
+                colsCount={colsCount}
+                rowsCount={rowsCount}
                 onSaved={handlePositionSaved}
                 onClose={() => setEditingRoom(null)}
               />

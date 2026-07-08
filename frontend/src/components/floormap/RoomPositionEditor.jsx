@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import floorMapService from '../../services/floormap.service';
 import './RoomPositionEditor.css';
 
-const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
+const RoomPositionEditor = ({ room, floors, colsCount = 4, rowsCount = 4, onSaved, onClose }) => {
   const { t } = useTranslation();
   const [position, setPosition] = useState({
     floor: room.floor || '1',
@@ -19,7 +19,8 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
     if (field === 'mapX' || field === 'mapY') {
       const num = parseInt(value, 10);
       val = isNaN(num) ? 0 : Math.max(0, num);
-      if (field === 'mapX') val = Math.min(3, val); // MAX 4 columns (0-3)
+      if (field === 'mapX') val = Math.min(colsCount - 1, val); // MAX columns limit
+      if (field === 'mapY') val = Math.min(rowsCount - 1, val); // MAX rows limit
     } else if (field === 'building') {
       val = value.toUpperCase();
     }
@@ -90,10 +91,11 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
               value={position.mapX}
               onChange={(e) => handleChange('mapX', e.target.value)}
             >
-              <option value={0}>{t('floorMap.col1')}</option>
-              <option value={1}>{t('floorMap.col2')}</option>
-              <option value={2}>{t('floorMap.col3')}</option>
-              <option value={3}>{t('floorMap.col4')}</option>
+              {Array.from({ length: colsCount }).map((_, i) => (
+                <option key={i} value={i}>
+                  {t(`floorMap.col${i + 1}`) || `Cột ${i + 1}`}
+                </option>
+              ))}
             </select>
           </div>
           <div className="pos-editor__field">
@@ -104,6 +106,7 @@ const RoomPositionEditor = ({ room, floors, onSaved, onClose }) => {
               className="pos-editor__input"
               value={position.mapY}
               min={0}
+              max={rowsCount - 1}
               step={1}
               onChange={(e) => handleChange('mapY', e.target.value)}
             />

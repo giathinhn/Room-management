@@ -260,3 +260,17 @@ model SystemSettings {
   @@map("system_settings")
 }
 
+model FloorSetting {
+  id        String   @id @default(uuid())
+  building  String   @db.VarChar(50)
+  floor     String   @db.VarChar(50)
+  cols      Int      @default(4)
+  rows      Int      @default(4)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([building, floor])
+  @@map("floor_settings")
+}
+
+

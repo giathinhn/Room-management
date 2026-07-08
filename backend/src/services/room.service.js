@@ -257,6 +257,46 @@ const roomService = {
     }
     return roomRepository.unfavoriteRoom(userId, roomId);
   },
+
+  /**
+   * Get settings for a floor (admin/user).
+   * @param {string} building
+   * @param {string} floor
+   */
+  async getFloorSetting(building, floor) {
+    if (!building || !floor) {
+      throw ApiError.badRequest('Building and floor are required');
+    }
+    return roomRepository.getFloorSetting(building, floor);
+  },
+
+  /**
+   * Update settings (cols count) for a floor (admin only).
+   * @param {string} building
+   * @param {string} floor
+   * @param {number} cols
+   */
+  async updateFloorSetting(building, floor, cols, rows) {
+    if (!building || !floor) {
+      throw ApiError.badRequest('Building and floor are required');
+    }
+    const updateData = {};
+    if (cols !== undefined) {
+      const colsNum = parseInt(cols, 10);
+      if (isNaN(colsNum) || colsNum < 2 || colsNum > 8) {
+        throw ApiError.badRequest('Columns must be a number between 2 and 8');
+      }
+      updateData.cols = colsNum;
+    }
+    if (rows !== undefined) {
+      const rowsNum = parseInt(rows, 10);
+      if (isNaN(rowsNum) || rowsNum < 2 || rowsNum > 20) {
+        throw ApiError.badRequest('Rows must be a number between 2 and 20');
+      }
+      updateData.rows = rowsNum;
+    }
+    return roomRepository.upsertFloorSetting(building, floor, updateData);
+  },
 };
 
 module.exports = roomService;
