@@ -313,7 +313,9 @@
       "approveBtn": "✓ Approve",
       "rejectBtn": "✗ Reject",
       "cancelBtn": "Cancel booking",
-      "processing": "Processing..."
+      "processing": "Processing...",
+      "rejectionReasonSeed": "Room has been booked already.",
+      "cancelReasonAuto": "System automatically cancelled due to check-in timeout (No-Show)."
     }
   },
   "calendar": {
@@ -1066,5 +1068,45 @@
       "Post-it boards": "Post-it Boards",
       "Ghe bean bag": "Bean Bag Chairs"
     }
+  },
+  "bookingDetail": {
+    "loadFailed": "Failed to load booking details",
+    "hours": "hours",
+    "minutes": "mins",
+    "seconds": "secs",
+    "durationHourMin": "{{h}}h{{m}}m",
+    "durationMin": "{{m}} mins",
+    "durationHour": "{{h}} hours",
+    "approveSuccess": "Booking approved successfully!",
+    "rejectSuccess": "Booking rejected successfully",
+    "checkInSuccess": "Checked in successfully!",
+    "checkInFailed": "Check-in failed",
+    "room": "Room",
+    "bookedBy": "Booked by",
+    "date": "Date",
+    "time": "Time",
+    "createdAt": "Created at",
+    "capacity": "Capacity",
+    "people": "{{count}} people",
+    "equipment": "Equipment",
+    "cancelReason": "Cancellation reason",
+    "checkedInAt": "Checked in at {{time}}",
+    "readyToCheckIn": "Meeting is ready to check in",
+    "checkInInstruction": "Please click the check-in button on the right to confirm your meeting.",
+    "autoCancelAfter": "Auto cancel in: {{countdown}}",
+    "checkInNow": "Check in now",
+    "checkInExpired": "Check-in expired (Waiting for system release)",
+    "checkInNotice": "Check-in is available 10 minutes before the meeting (Deadline is 15 minutes after start).",
+    "rejectionReason": "Rejection reason",
+    "rejectedBy": "Rejected by",
+    "approvedBy": "Approved by",
+    "rejectedAt": "Rejected at",
+    "approvedAt": "Approved at",
+    "approveBtn": "✓ Approve",
+    "rejectBtn": "✗ Reject",
+    "cancelBtn": "Cancel booking",
+    "processing": "Processing...",
+    "rejectionReasonSeed": "Room has been booked already.",
+    "cancelReasonAuto": "System automatically cancelled due to check-in timeout (No-Show)."
   }
 }

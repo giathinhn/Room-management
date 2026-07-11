@@ -313,7 +313,9 @@
       "approveBtn": "✓ Duyệt",
       "rejectBtn": "✗ Từ chối",
       "cancelBtn": "Hủy booking",
-      "processing": "Đang xử lý..."
+      "processing": "Đang xử lý...",
+      "rejectionReasonSeed": "Phòng đã được đặt trước.",
+      "cancelReasonAuto": "Hệ thống tự động hủy do quá giờ check-in (No-Show)."
     }
   },
   "calendar": {
@@ -1060,5 +1062,45 @@
       "Post-it boards": "Bảng Post-it",
       "Ghe bean bag": "Ghế lười bean bag"
     }
+  },
+  "bookingDetail": {
+    "loadFailed": "Không thể tải thông tin booking",
+    "hours": "giờ",
+    "minutes": "phút",
+    "seconds": "giây",
+    "durationHourMin": "{{h}}h{{m}}p",
+    "durationMin": "{{m}} phút",
+    "durationHour": "{{h}} giờ",
+    "approveSuccess": "Đã duyệt booking!",
+    "rejectSuccess": "Đã từ chối booking",
+    "checkInSuccess": "Check-in thành công!",
+    "checkInFailed": "Check-in thất bại",
+    "room": "Phòng",
+    "bookedBy": "Người đặt",
+    "date": "Ngày",
+    "time": "Thời gian",
+    "createdAt": "Tạo lúc",
+    "capacity": "Sức chứa",
+    "people": "{{count}} người",
+    "equipment": "Thiết bị",
+    "cancelReason": "Lý do hủy",
+    "checkedInAt": "Đã check-in lúc {{time}}",
+    "readyToCheckIn": "Cuộc họp đã sẵn sàng check-in",
+    "checkInInstruction": "Vui lòng bấm nút check-in bên phải để xác nhận cuộc họp của bạn.",
+    "autoCancelAfter": "Tự động hủy sau: {{countdown}}",
+    "checkInNow": "Check-in ngay",
+    "checkInExpired": "Quá hạn check-in (Lịch đặt đang chờ hệ thống hủy giải phóng)",
+    "checkInNotice": "Có thể check-in trước giờ họp 10 phút (Hạn chót là 15 phút sau giờ họp).",
+    "rejectionReason": "Lý do từ chối",
+    "rejectedBy": "Người từ chối",
+    "approvedBy": "Người duyệt",
+    "rejectedAt": "Từ chối lúc",
+    "approvedAt": "Duyệt lúc",
+    "approveBtn": "✓ Duyệt",
+    "rejectBtn": "✗ Từ chối",
+    "cancelBtn": "Hủy booking",
+    "processing": "Đang xử lý...",
+    "rejectionReasonSeed": "Phòng đã được đặt trước.",
+    "cancelReasonAuto": "Hệ thống tự động hủy do quá giờ check-in (No-Show)."
   }
 }

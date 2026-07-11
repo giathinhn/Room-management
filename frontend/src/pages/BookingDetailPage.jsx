@@ -8,6 +8,7 @@ import RejectModal from '../components/bookings/RejectModal';
 import CommentSection from '../components/bookings/CommentSection';
 import SaveAsTemplate from '../components/templates/SaveAsTemplate';
 import { useTranslation } from 'react-i18next';
+import { translateRoom } from '../utils/roomTranslate';
 import './BookingDetailPage.css';
 
 /**
@@ -51,6 +52,21 @@ function formatTimeRange(start, end, t, lng) {
     dur = t('bookingDetail.durationMin', { m, count: m });
   }
   return `${s} – ${e} (${dur})`;
+}
+
+/**
+ * Translate database cancellation or rejection reasons.
+ */
+function translateReason(reason, t) {
+  if (!reason) return reason;
+  const normalized = reason.trim().toLowerCase();
+  if (normalized.includes('tự động hủy do quá giờ check-in') || normalized.includes('auto-released') || normalized.includes('no-show')) {
+    return t('bookingDetail.cancelReasonAuto');
+  }
+  if (normalized === 'phòng đã được đặt trước.' || normalized === 'phong da duoc dat truoc.') {
+    return t('bookingDetail.rejectionReasonSeed');
+  }
+  return reason;
 }
 
 /**
@@ -100,6 +116,8 @@ function BookingDetailPage() {
   }
 
   if (!booking) return null;
+
+  const room = translateRoom(booking.room, t);
 
   // Permissions
   const isOwner = user?.id === booking.userId;
@@ -208,8 +226,8 @@ function BookingDetailPage() {
             <div>
               <span className="detail-page__info-label">{t('bookingDetail.room')}</span>
               <span className="detail-page__info-value">
-                {booking.room?.name}
-                {booking.room?.location ? ` — ${booking.room.location}` : ''}
+                {room?.name}
+                {room?.location ? ` — ${room.location}` : ''}
               </span>
             </div>
           </div>
@@ -251,23 +269,23 @@ function BookingDetailPage() {
           </div>
 
           {/* Room capacity & equipment */}
-          {booking.room?.capacity && (
+          {room?.capacity && (
             <div className="detail-page__info-row">
               <span className="detail-page__info-icon">👥</span>
               <div>
                 <span className="detail-page__info-label">{t('bookingDetail.capacity')}</span>
-                <span className="detail-page__info-value">{t('bookingDetail.people', { count: booking.room.capacity })}</span>
+                <span className="detail-page__info-value">{t('bookingDetail.people', { count: room.capacity })}</span>
               </div>
             </div>
           )}
 
-          {booking.room?.equipment?.length > 0 && (
+          {room?.equipment?.length > 0 && (
             <div className="detail-page__info-row">
               <span className="detail-page__info-icon">🖥️</span>
               <div>
                 <span className="detail-page__info-label">{t('bookingDetail.equipment')}</span>
                 <div className="detail-page__tags">
-                  {booking.room.equipment.map((eq) => (
+                  {room.equipment.map((eq) => (
                     <span key={eq} className="detail-page__tag">{eq}</span>
                   ))}
                 </div>
@@ -284,7 +302,7 @@ function BookingDetailPage() {
               <span className="detail-page__rejection-icon" style={{ fontSize: '1.25rem' }}>⚠️</span>
               <div>
                 <span className="detail-page__info-label" style={{ color: '#ef4444', fontWeight: 600 }}>{t('bookingDetail.cancelReason')}</span>
-                <p className="detail-page__rejection-reason" style={{ margin: '4px 0 0', color: 'var(--color-text-primary)' }}>{booking.cancelReason}</p>
+                <p className="detail-page__rejection-reason" style={{ margin: '4px 0 0', color: 'var(--color-text-primary)' }}>{translateReason(booking.cancelReason, t)}</p>
               </div>
             </div>
           </div>
@@ -346,7 +364,7 @@ function BookingDetailPage() {
                   <span className="detail-page__rejection-icon">❌</span>
                   <div>
                     <span className="detail-page__info-label">{t('bookingDetail.rejectionReason')}</span>
-                    <p className="detail-page__rejection-reason">{booking.rejectionReason}</p>
+                    <p className="detail-page__rejection-reason">{translateReason(booking.rejectionReason, t)}</p>
                   </div>
                 </div>
               )}
