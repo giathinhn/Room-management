@@ -1,5 +1,6 @@
 const { verifyToken } = require('../utils/jwt');
 const ApiError = require('../utils/ApiError');
+const userRepository = require('../repositories/user.repository');
 
 /**
  * authenticate — verifies the JWT access token in the Authorization header.
@@ -10,7 +11,7 @@ const ApiError = require('../utils/ApiError');
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -21,7 +22,18 @@ function authenticate(req, res, next) {
 
   try {
     const decoded = verifyToken(token);
-    req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+    
+    // Fetch latest user details from DB to verify active status and role
+    const user = await userRepository.findById(decoded.id);
+    if (!user) {
+      return next(ApiError.unauthorized('Tài khoản không tồn tại trên hệ thống'));
+    }
+    
+    if (!user.isActive) {
+      return next(ApiError.forbidden('Tài khoản đã bị khóa hoặc ngừng hoạt động'));
+    }
+
+    req.user = { id: user.id, email: user.email, role: user.role };
     return next();
   } catch (err) {
     return next(err);

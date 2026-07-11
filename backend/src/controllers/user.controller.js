@@ -50,7 +50,22 @@ const userController = {
       if (!validRoles.includes(role)) {
         throw ApiError.badRequest(`Role must be one of: ${validRoles.join(', ')}`);
       }
-      const user = await userRepository.updateRole(req.params.id, role);
+
+      const targetUserId = req.params.id;
+      const targetUser = await userRepository.findById(targetUserId);
+      if (!targetUser) {
+        throw ApiError.notFound('Không tìm thấy người dùng');
+      }
+
+      // Nếu đang chuyển vai trò của Admin thành vai trò khác, cần kiểm tra xem họ có phải Admin đang hoạt động duy nhất hay không
+      if (targetUser.role === 'admin' && role !== 'admin' && targetUser.isActive) {
+        const activeAdmins = await userRepository.findByRole('admin');
+        if (activeAdmins.length <= 1) {
+          throw ApiError.badRequest('Hệ thống phải có tối thiểu một quản trị viên (Admin) đang hoạt động');
+        }
+      }
+
+      const user = await userRepository.updateRole(targetUserId, role);
       return res.status(200).json({ success: true, data: user });
     } catch (err) {
       return next(err);
@@ -72,7 +87,21 @@ const userController = {
         throw ApiError.badRequest('No valid fields provided for update');
       }
 
-      const user = await userRepository.update(req.params.id, updateData);
+      const targetUserId = req.params.id;
+      const targetUser = await userRepository.findById(targetUserId);
+      if (!targetUser) {
+        throw ApiError.notFound('Không tìm thấy người dùng');
+      }
+
+      // Nếu đang vô hiệu hóa một Admin đang hoạt động, cần kiểm tra xem có phải Admin đang hoạt động duy nhất không
+      if (isActive === false && targetUser.role === 'admin' && targetUser.isActive) {
+        const activeAdmins = await userRepository.findByRole('admin');
+        if (activeAdmins.length <= 1) {
+          throw ApiError.badRequest('Hệ thống phải có tối thiểu một quản trị viên (Admin) đang hoạt động');
+        }
+      }
+
+      const user = await userRepository.update(targetUserId, updateData);
       return res.status(200).json({ success: true, data: user });
     } catch (err) {
       return next(err);
