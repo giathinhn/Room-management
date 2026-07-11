@@ -1,5 +1,6 @@
 const roomRepository = require('../repositories/room.repository');
 const ApiError = require('../utils/ApiError');
+const sseManager = require('../utils/sseManager');
 const {
   createRoomSchema,
   updateRoomSchema,
@@ -95,6 +96,9 @@ const roomService = {
       mapX,
       mapY,
     });
+
+    sseManager.broadcast({ event: 'rooms_changed', data: { roomId: room.id, action: 'create' } });
+
     return room;
   },
 
@@ -156,6 +160,9 @@ const roomService = {
     }
 
     const updated = await roomRepository.update(id, { ...parsed.data, ...extraFields });
+
+    sseManager.broadcast({ event: 'rooms_changed', data: { roomId: id, action: 'update' } });
+
     return updated;
   },
 
@@ -170,6 +177,8 @@ const roomService = {
     }
 
     await roomRepository.softDelete(id);
+
+    sseManager.broadcast({ event: 'rooms_changed', data: { roomId: id, action: 'delete' } });
   },
 
   /**

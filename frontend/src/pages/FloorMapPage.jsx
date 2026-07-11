@@ -9,6 +9,7 @@ import RoomBlock from '../components/floormap/RoomBlock';
 import RoomQuickViewModal from '../components/floormap/RoomQuickViewModal';
 import RoomPositionEditor from '../components/floormap/RoomPositionEditor';
 import { useTranslation } from 'react-i18next';
+import useSSEEvent from '../hooks/useSSEEvent';
 import './FloorMapPage.css';
 
 const AUTO_REFRESH_SEC = 30;
@@ -184,6 +185,14 @@ const FloorMapPage = () => {
       clearInterval(countdownRef.current);
     };
   }, [fetchFloorMap]);
+
+  const handleLiveRefresh = useCallback(() => {
+    fetchFloorMap(true);
+    setCountdown(AUTO_REFRESH_SEC);
+  }, [fetchFloorMap]);
+
+  useSSEEvent('bookings_changed', handleLiveRefresh);
+  useSSEEvent('rooms_changed', handleLiveRefresh);
 
   // ── Drag & Drop handlers ──────────────────────────────────────────────────
   const handleDragStart = (room) => {

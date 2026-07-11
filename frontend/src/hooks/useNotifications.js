@@ -48,15 +48,28 @@ function useNotifications() {
 
     const connectSSE = () => {
       const url = `/api/notifications/stream?token=${encodeURIComponent(token)}`;
+      console.log(`[SSE] Connecting to: ${url}`);
       const es = new EventSource(url);
       eventSourceRef.current = es;
 
+      es.onopen = () => {
+        console.log('[SSE] Connection opened successfully.');
+      };
+
       es.onmessage = (event) => {
         try {
+          console.log('[SSE] Message received:', event.data);
           const payload = JSON.parse(event.data);
 
           // Ignore heartbeat / connected events
           if (payload.event === 'connected') return;
+
+          // Dispatch event to window so other components can listen to it
+          if (payload.event) {
+            window.dispatchEvent(
+              new CustomEvent(payload.event, { detail: payload.data })
+            );
+          }
 
           if (payload.event === 'notification' && payload.data) {
             const notification = payload.data;
@@ -77,16 +90,18 @@ function useNotifications() {
               duration: 4000,
             });
           }
-        } catch (_parseErr) {
-          // Ignore malformed SSE data
+        } catch (err) {
+          console.error('[SSE] Error parsing message payload:', err);
         }
       };
 
-      es.onerror = () => {
+      es.onerror = (err) => {
+        console.error('[SSE] Connection error:', err);
         // Auto-reconnect after 5 seconds if connection drops
         es.close();
         setTimeout(() => {
           if (eventSourceRef.current === es) {
+            console.log('[SSE] Attempting to reconnect...');
             connectSSE();
           }
         }, 5000);

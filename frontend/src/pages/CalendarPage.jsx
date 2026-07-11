@@ -9,6 +9,7 @@ import bookingService from '../services/booking.service';
 import RoomFilter from '../components/calendar/RoomFilter';
 import EventPopover from '../components/calendar/EventPopover';
 import QuickBookingModal from '../components/calendar/QuickBookingModal';
+import useSSEEvent from '../hooks/useSSEEvent';
 import './CalendarPage.css';
 
 /**
@@ -124,13 +125,15 @@ function CalendarPage() {
   };
 
   // ── Refresh (after booking action) ────────────────────────────────────────
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     const api = calendarRef.current?.getApi();
     if (api) {
       const view = api.view;
       fetchEvents(view.activeStart, view.activeEnd, selectedRoomId);
     }
-  };
+  }, [fetchEvents, selectedRoomId]);
+
+  useSSEEvent('bookings_changed', handleRefresh);
 
   // ── Click on empty slot ───────────────────────────────────────────────────
   const handleDateSelect = useCallback((selectInfo) => {

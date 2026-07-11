@@ -9,6 +9,7 @@ import RoomFilter from '../components/rooms/RoomFilter';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import Pagination from '../components/common/Pagination';
 import { useTranslation } from 'react-i18next';
+import useSSEEvent from '../hooks/useSSEEvent';
 import '../components/rooms/RoomCard.css';
 import './RoomsPage.css';
 
@@ -66,6 +67,12 @@ function RoomsPage() {
   useEffect(() => {
     fetchRooms(filters);
   }, [filters, fetchRooms]);
+
+  const handleRoomsChange = useCallback(() => {
+    fetchRooms(filters);
+  }, [fetchRooms, filters]);
+
+  useSSEEvent('rooms_changed', handleRoomsChange);
 
   // ── Filter change ────────────────────────────────────────────────────────────
   function handleFilterChange(newFilters) {

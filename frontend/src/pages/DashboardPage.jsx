@@ -12,6 +12,7 @@ import PeakHoursHeatmap from '../components/dashboard/PeakHoursHeatmap';
 import TopUsersTable from '../components/dashboard/TopUsersTable';
 import TrendChart from '../components/dashboard/TrendChart';
 import { useTranslation } from 'react-i18next';
+import useSSEEvent from '../hooks/useSSEEvent';
 import '../components/dashboard/chart.utils.css';
 import './DashboardPage.css';
 
@@ -183,6 +184,18 @@ const DashboardPage = () => {
       fetchPersonalStats();
     }
   }, [isAdmin, fetchOverview, fetchRoomUsage, fetchPeakHours, fetchTopUsers, fetchTrends, fetchPersonalStats]);
+
+  useSSEEvent('bookings_changed', () => {
+    if (isAdmin) {
+      fetchOverview();
+      fetchRoomUsage();
+      fetchPeakHours();
+      fetchTopUsers();
+      fetchTrends();
+    } else {
+      fetchPersonalStats();
+    }
+  });
 
   // ── Render helpers ────────────────────────────────────────────────────────
 

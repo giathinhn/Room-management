@@ -7,6 +7,7 @@ const notificationService = require('./notification.service');
 const settingsService = require('./settings.service');
 const logger = require('../utils/logger');
 const prisma = require('../config/database');
+const sseManager = require('../utils/sseManager');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PAST_TOLERANCE_MS = 5 * 60 * 1000;       // 5 minutes grace period
@@ -136,6 +137,8 @@ const bookingService = {
       }
     });
 
+    sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: booking.id, action: 'create' } });
+
     return booking;
   },
 
@@ -231,6 +234,8 @@ const bookingService = {
       }
     });
 
+    sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: updatedBooking.id, action: 'approve' } });
+
     return updatedBooking;
   },
 
@@ -279,6 +284,8 @@ const bookingService = {
         logger.error('[BookingService] Failed to send in-app rejection notification:', err.message);
       }
     });
+
+    sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: updatedBooking.id, action: 'reject' } });
 
     return updatedBooking;
   },
@@ -344,6 +351,8 @@ const bookingService = {
       }
     });
 
+    sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: updatedBooking.id, action: 'cancel' } });
+
     return updatedBooking;
   },
 
@@ -383,10 +392,14 @@ const bookingService = {
       throw ApiError.badRequest('VALIDATION_ERROR');
     }
 
-    return bookingRepository.update(bookingId, {
+    const updated = await bookingRepository.update(bookingId, {
       checkedIn: true,
       checkInTime: now,
     });
+
+    sseManager.broadcast({ event: 'bookings_changed', data: { bookingId, action: 'checkin' } });
+
+    return updated;
   },
 
   /**
@@ -491,6 +504,8 @@ const bookingService = {
           status: 'cancelled',
           cancelReason
         });
+
+        sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: booking.id, action: 'auto_release' } });
 
         // 1. Send email cancellation notification (fire-and-forget)
         emailService.sendBookingCancelled(booking, cancelReason).catch(err => 

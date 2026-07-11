@@ -70,6 +70,23 @@ class SSEManager {
     this.clients.forEach((set) => { total += set.size; });
     return total;
   }
+
+  /**
+   * Broadcast an event to all active connections.
+   * @param {object} data
+   */
+  broadcast(data) {
+    const message = `data: ${JSON.stringify(data)}\n\n`;
+    this.clients.forEach((userClients) => {
+      userClients.forEach((res) => {
+        try {
+          res.write(message);
+        } catch (_err) {
+          userClients.delete(res);
+        }
+      });
+    });
+  }
 }
 
 // Export as singleton

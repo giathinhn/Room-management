@@ -9,6 +9,7 @@ import BookingCard from '../components/bookings/BookingCard';
 import BookingFilter from '../components/bookings/BookingFilter';
 import RejectModal from '../components/bookings/RejectModal';
 import { useTranslation } from 'react-i18next';
+import useSSEEvent from '../hooks/useSSEEvent';
 import './BookingsPage.css';
 
 const LIMIT = 10;
@@ -67,6 +68,8 @@ function BookingsPage() {
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
+
+  useSSEEvent('bookings_changed', fetchBookings);
 
   // ── Actions ───────────────────────────────────────────────────────────────
   const handleApprove = async (id) => {

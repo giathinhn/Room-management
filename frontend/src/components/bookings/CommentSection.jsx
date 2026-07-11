@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import commentService from '../../services/comment.service';
 import CommentItem from './CommentItem';
 import CommentInput from './CommentInput';
+import useSSEEvent from '../../hooks/useSSEEvent';
 import './CommentSection.css';
 
 /**
@@ -33,6 +34,12 @@ function CommentSection({ bookingId }) {
   useEffect(() => {
     loadComments();
   }, [loadComments]);
+
+  useSSEEvent('comments_changed', useCallback((data) => {
+    if (data && data.bookingId === bookingId) {
+      loadComments();
+    }
+  }, [bookingId, loadComments]));
 
   const handleCreate = async (content) => {
     try {

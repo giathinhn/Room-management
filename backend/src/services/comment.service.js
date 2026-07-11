@@ -1,6 +1,7 @@
 const commentRepository = require('../repositories/comment.repository');
 const bookingRepository = require('../repositories/booking.repository');
 const ApiError = require('../utils/ApiError');
+const sseManager = require('../utils/sseManager');
 
 /** Edit/delete window in milliseconds (5 minutes) */
 const EDIT_WINDOW_MS = 5 * 60 * 1000;
@@ -54,11 +55,15 @@ const commentService = {
       throw ApiError.forbidden('FORBIDDEN');
     }
 
-    return commentRepository.create({
+    const comment = await commentRepository.create({
       bookingId,
       userId: user.id,
       content: content.trim(),
     });
+
+    sseManager.broadcast({ event: 'comments_changed', data: { bookingId, action: 'create', commentId: comment.id } });
+
+    return comment;
   },
 
   /**
@@ -92,7 +97,11 @@ const commentService = {
       throw ApiError.forbidden('COMMENT_EDIT_TIMEOUT');
     }
 
-    return commentRepository.update(commentId, content.trim());
+    const updated = await commentRepository.update(commentId, content.trim());
+
+    sseManager.broadcast({ event: 'comments_changed', data: { bookingId: comment.bookingId, action: 'update', commentId } });
+
+    return updated;
   },
 
   /**
@@ -124,6 +133,8 @@ const commentService = {
     }
 
     await commentRepository.delete(commentId);
+
+    sseManager.broadcast({ event: 'comments_changed', data: { bookingId: comment.bookingId, action: 'delete', commentId } });
   },
 };
 
