@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { FiBell, FiCheckCircle, FiLoader } from 'react-icons/fi';
 import useNotifications, { getNotificationIcon } from '../hooks/useNotifications';
-import { formatRelativeTime } from '../components/notifications/NotificationItem';
+import { formatRelativeTime, translateNotification } from '../components/notifications/NotificationItem';
+import { translateRoom } from '../utils/roomTranslate';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './NotificationsPage.css';
@@ -75,36 +76,40 @@ const NotificationsPage = () => {
           </div>
         ) : (
           <div className="notifications-page__list">
-            {notifications.map((n) => (
-              <button
-                key={n.id}
-                type="button"
-                className={`notifications-page__item ${!n.isRead ? 'notifications-page__item--unread' : ''}`}
-                onClick={() => handleItemClick(n)}
-                id={`notifications-page-item-${n.id}`}
-              >
-                {!n.isRead && <span className="notifications-page__item-dot" />}
+            {notifications.map((n) => {
+              const { title, message } = translateNotification(n, t);
+              const room = n.booking?.room ? translateRoom(n.booking.room, t) : null;
+              return (
+                <button
+                  key={n.id}
+                  type="button"
+                  className={`notifications-page__item ${!n.isRead ? 'notifications-page__item--unread' : ''}`}
+                  onClick={() => handleItemClick(n)}
+                  id={`notifications-page-item-${n.id}`}
+                >
+                  {!n.isRead && <span className="notifications-page__item-dot" />}
 
-                <span className="notifications-page__item-icon">
-                  {getNotificationIcon(n.type)}
-                </span>
+                  <span className="notifications-page__item-icon">
+                    {getNotificationIcon(n.type)}
+                  </span>
 
-                <div className="notifications-page__item-body">
-                  <div className="notifications-page__item-header">
-                    <p className="notifications-page__item-title">{n.title}</p>
-                    <span className="notifications-page__item-time">
-                      {formatRelativeTime(n.createdAt)}
-                    </span>
+                  <div className="notifications-page__item-body">
+                    <div className="notifications-page__item-header">
+                      <p className="notifications-page__item-title">{title}</p>
+                      <span className="notifications-page__item-time">
+                        {formatRelativeTime(n.createdAt)}
+                      </span>
+                    </div>
+                    <p className="notifications-page__item-message">{message}</p>
+                    {room && (
+                      <span className="notifications-page__item-room">
+                        📍 {room.name}
+                      </span>
+                    )}
                   </div>
-                  <p className="notifications-page__item-message">{n.message}</p>
-                  {n.booking?.room && (
-                    <span className="notifications-page__item-room">
-                      📍 {n.booking.room.name}
-                    </span>
-                  )}
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
 

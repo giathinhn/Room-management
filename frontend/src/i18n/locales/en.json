@@ -519,6 +519,15 @@
       "yesterday": "Yesterday",
       "daysAgo_one": "1 day ago",
       "daysAgo_other": "{{count}} days ago"
+    },
+    "messages": {
+      "new_booking_pending": "Booking request \"{{title}}\" in {{room}} at {{time}} is pending approval.",
+      "booking_approved": "Meeting \"{{title}}\" in {{room}} at {{time}} has been successfully approved.",
+      "booking_rejected": "Meeting \"{{title}}\" in {{room}} at {{time}} has been rejected.{{reason}}",
+      "booking_cancelled_auto": "Meeting \"{{title}}\" in {{room}} was automatically cancelled due to no-show.",
+      "booking_cancelled_admin": "Meeting \"{{title}}\" in {{room}} at {{time}} has been cancelled.",
+      "reasonLabel": " Reason: {{reason}}",
+      "noReason": " No reason provided"
     }
   },
   "templates": {

@@ -516,6 +516,15 @@
       "hoursAgo": "{{count}} giờ trước",
       "yesterday": "Hôm qua",
       "daysAgo": "{{count}} ngày trước"
+    },
+    "messages": {
+      "new_booking_pending": "Yêu cầu đặt phòng \"{{title}}\" tại {{room}} lúc {{time}} đang chờ duyệt.",
+      "booking_approved": "Lịch họp \"{{title}}\" tại {{room}} lúc {{time}} đã được duyệt thành công.",
+      "booking_rejected": "Lịch họp \"{{title}}\" tại {{room}} lúc {{time}} bị từ chối.{{reason}}",
+      "booking_cancelled_auto": "Lịch họp \"{{title}}\" tại {{room}} đã bị tự động hủy do không check-in đúng giờ.",
+      "booking_cancelled_admin": "Lịch họp \"{{title}}\" tại {{room}} lúc {{time}} đã bị hủy.",
+      "reasonLabel": " Lý do: {{reason}}",
+      "noReason": " Không có lý do"
     }
   },
   "templates": {

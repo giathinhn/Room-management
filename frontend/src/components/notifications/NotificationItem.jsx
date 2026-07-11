@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import { getNotificationIcon } from '../../hooks/useNotifications';
+import { translateRoom } from '../../utils/roomTranslate';
 
 /**
  * Formats a date as a relative time string.
@@ -28,6 +29,73 @@ function formatRelativeTime(date) {
 }
 
 /**
+ * Dynamically translates the title and message of a notification.
+ * @param {object} notification
+ * @param {function} t
+ */
+export function translateNotification(notification, t) {
+  const { type, title: dbTitle, message: dbMessage, booking } = notification;
+
+  if (!booking) return { title: dbTitle, message: dbMessage };
+
+  const locale = i18next.language === 'en' ? 'en-US' : 'vi-VN';
+  const roomName = booking.room ? translateRoom(booking.room, t).name : '';
+  const startLabel = booking.startTime
+    ? new Date(booking.startTime).toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' })
+    : '';
+
+  // 1. Title translation
+  const translatedTitle = t(`notifications.types.${type}`) !== `notifications.types.${type}`
+    ? t(`notifications.types.${type}`)
+    : dbTitle;
+
+  // 2. Message translation
+  let translatedMessage = dbMessage;
+  if (type === 'new_booking_pending') {
+    translatedMessage = t('notifications.messages.new_booking_pending', {
+      title: booking.title,
+      room: roomName,
+      time: startLabel
+    });
+  } else if (type === 'booking_approved') {
+    translatedMessage = t('notifications.messages.booking_approved', {
+      title: booking.title,
+      room: roomName,
+      time: startLabel
+    });
+  } else if (type === 'booking_rejected') {
+    const rawReason = dbMessage.includes('Lý do: ')
+      ? dbMessage.split('Lý do: ')[1]
+      : (dbMessage.includes('Ly do: ') ? dbMessage.split('Ly do: ')[1] : '');
+    const reason = rawReason
+      ? t('notifications.messages.reasonLabel', { reason: rawReason.trim() })
+      : t('notifications.messages.noReason');
+    translatedMessage = t('notifications.messages.booking_rejected', {
+      title: booking.title,
+      room: roomName,
+      time: startLabel,
+      reason
+    });
+  } else if (type === 'booking_cancelled') {
+    const isAuto = dbMessage.includes('tự động') || dbMessage.includes('tu dong') || dbMessage.includes('auto');
+    if (isAuto) {
+      translatedMessage = t('notifications.messages.booking_cancelled_auto', {
+        title: booking.title,
+        room: roomName
+      });
+    } else {
+      translatedMessage = t('notifications.messages.booking_cancelled_admin', {
+        title: booking.title,
+        room: roomName,
+        time: startLabel
+      });
+    }
+  }
+
+  return { title: translatedTitle, message: translatedMessage };
+}
+
+/**
  * NotificationItem — single row in the notification list.
  *
  * @param {{ notification: object, onRead: function, onClick?: function }} props
@@ -35,7 +103,8 @@ function formatRelativeTime(date) {
 const NotificationItem = ({ notification, onRead, onClick }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { id, type, title, message, isRead, createdAt, bookingId } = notification;
+  const { id, type, isRead, createdAt, bookingId } = notification;
+  const { title, message } = translateNotification(notification, t);
 
   const handleClick = async () => {
     if (!isRead) {
