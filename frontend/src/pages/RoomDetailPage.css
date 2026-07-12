@@ -143,17 +143,17 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
   border-radius: 10px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #a78bfa;
+  color: var(--color-primary-light);
   transition: background 0.15s;
 }
 
 .room-detail__equipment-badge:hover {
-  background: rgba(139, 92, 246, 0.18);
+  background: rgba(99, 102, 241, 0.15);
 }
 
 .room-detail__equipment-icon {
@@ -200,9 +200,9 @@
   padding: 0.3rem 0.7rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: var(--color-primary-light);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -210,9 +210,9 @@
 }
 
 .room-detail__equip-edit-btn:hover {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.5);
-  color: #c4b5fd;
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--color-primary);
 }
 
 /* ─── Inline equipment editor wrapper ───────────────────────────────────────── */
@@ -221,8 +221,8 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   animation: equip-slide-in 0.18s ease;
 }
@@ -245,8 +245,8 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.55rem 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
@@ -254,13 +254,13 @@
 }
 
 .room-detail__equip-option:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-input-hover-bg);
 }
 
 .room-detail__equip-option.selected {
-  background: rgba(139, 92, 246, 0.15);
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.12);
+  background: rgba(99, 102, 241, 0.12);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
 }
 
 .room-detail__equip-checkbox {
@@ -277,17 +277,17 @@
 
 .room-detail__equip-label {
   font-size: 0.8rem;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--color-text-secondary);
   font-weight: 500;
   flex: 1;
 }
 
 .room-detail__equip-option.selected .room-detail__equip-label {
-  color: #a78bfa;
+  color: var(--color-primary-light);
 }
 
 .room-detail__equip-check {
-  color: #a78bfa;
+  color: var(--color-primary-light);
   flex-shrink: 0;
 }
 
@@ -297,7 +297,7 @@
   align-items: center;
   gap: 0.6rem;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-border);
 }
 
 /* ─── Tiny spinner for saving state ─────────────────────────────────────────── */

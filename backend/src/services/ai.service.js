@@ -136,7 +136,6 @@ async function handleQueryRooms(params) {
 
   // Resolve endTime
   let resolvedEnd = endTime;
-  const duration = durationMinutes || 60;
   if (!resolvedEnd && durationMinutes) {
     const [h, m] = startTime.split(':').map(Number);
     const totalMin = h * 60 + m + durationMinutes;

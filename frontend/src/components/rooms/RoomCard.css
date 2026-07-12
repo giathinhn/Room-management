@@ -96,16 +96,16 @@
   align-items: center;
   gap: 0.3rem;
   padding: 0.2rem 0.55rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.75rem;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--color-text-secondary);
   transition: background 0.15s;
 }
 
 .room-card__equipment-badge:hover {
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--color-bg-card-hover);
 }
 
 .room-card__equipment-icon {
@@ -126,7 +126,7 @@
   gap: 0.5rem;
   margin-top: auto;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-border);
   flex-wrap: wrap;
 }
 

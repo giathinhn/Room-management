@@ -555,6 +555,55 @@ const bookingService = {
         logger.error(`[CheckInJob] Failed to auto-release booking ${booking.id}: ${err.message}`);
       }
     }
+
+    // 4. Auto-reject expired pending bookings (startTime + noShowMin min)
+    const expiredPendingBookings = await prisma.booking.findMany({
+      where: {
+        status: 'pending',
+        startTime: { lt: limitTime },
+        endTime: { gt: now }
+      },
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+        room: { select: { id: true, name: true, location: true } }
+      }
+    });
+
+    for (const booking of expiredPendingBookings) {
+      try {
+        const rejectionReason = `Hệ thống tự động từ chối do quá hạn duyệt (Trễ ${noShowMin} phút so với giờ bắt đầu họp)`;
+        
+        await bookingRepository.update(booking.id, {
+          status: 'rejected',
+          rejectionReason
+        });
+
+        sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: booking.id, action: 'auto_reject' } });
+
+        // 1. Send email rejection notification (fire-and-forget)
+        emailService.sendBookingRejected({
+          ...booking,
+          rejectionReason
+        }).catch(err => 
+          logger.error(`[CheckInJob] Failed to send email rejection notification for booking ${booking.id}: ${err.message}`)
+        );
+
+        // 2. Send In-app notification
+        await notificationService.createNotification(
+          booking.userId,
+          'booking_rejected',
+          'Yêu cầu đặt phòng bị từ chối tự động',
+          `Yêu cầu đặt phòng "${booking.title}" tại ${booking.room.name} đã bị tự động từ chối do quá hạn duyệt.`,
+          booking.id
+        ).catch(err => 
+          logger.error(`[CheckInJob] Failed to create in-app rejection notification for booking ${booking.id}: ${err.message}`)
+        );
+
+        logger.info(`[CheckInJob] Auto-rejected pending booking ${booking.id} due to expiration`);
+      } catch (err) {
+        logger.error(`[CheckInJob] Failed to auto-reject pending booking ${booking.id}: ${err.message}`);
+      }
+    }
   },
 };
 
