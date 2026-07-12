@@ -4,15 +4,35 @@ import roomService from '../../services/room.service';
 import { translateRoom } from '../../utils/roomTranslate';
 import './TemplateForm.css';
 
+// Valid business hours options: 07:00 - 22:00 every 30 minutes
+const START_TIME_OPTIONS = (() => {
+  const options = [];
+  for (let h = 7; h <= 21; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const hh = String(h).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      options.push(`${hh}:${mm}`);
+    }
+  }
+  return options;
+})();
+
+const END_TIME_OPTIONS = (() => {
+  const options = [];
+  for (let h = 7; h <= 22; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      if (h === 7 && m === 0) continue; // min end time 07:30
+      if (h === 22 && m > 0) break;      // max end time 22:00
+      const hh = String(h).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      options.push(`${hh}:${mm}`);
+    }
+  }
+  return options;
+})();
+
 /**
  * TemplateForm — Modal for creating or editing a booking template.
- *
- * Props:
- *   mode        — 'create' | 'edit'
- *   initial     — initial field values (for edit mode)
- *   onSave      — async (formData) => void
- *   onClose     — close the modal
- *   isLoading   — submit in progress
  */
 function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoading }) {
   const { t } = useTranslation();
@@ -52,6 +72,18 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
   };
+
+  const startOptions = React.useMemo(() => {
+    const val = form.startTime;
+    if (!val || START_TIME_OPTIONS.includes(val)) return START_TIME_OPTIONS;
+    return [...START_TIME_OPTIONS, val].sort();
+  }, [form.startTime]);
+
+  const endOptions = React.useMemo(() => {
+    const val = form.endTime;
+    if (!val || END_TIME_OPTIONS.includes(val)) return END_TIME_OPTIONS;
+    return [...END_TIME_OPTIONS, val].sort();
+  }, [form.endTime]);
 
   const validate = () => {
     const newErrors = {};
@@ -181,13 +213,17 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
               <label htmlFor="tpl-start" className="tpl-modal__label">
                 {t('templates.startTimeLabel')} <span className="tpl-modal__required">*</span>
               </label>
-              <input
+              <select
                 id="tpl-start"
-                type="time"
-                className="tpl-modal__input"
+                className="tpl-modal__select"
                 value={form.startTime}
                 onChange={(e) => handleChange('startTime', e.target.value)}
-              />
+              >
+                <option value="">-- Chọn giờ bắt đầu --</option>
+                {startOptions.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
               {errors.startTime && <span className="tpl-modal__error">{errors.startTime}</span>}
             </div>
 
@@ -195,13 +231,17 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
               <label htmlFor="tpl-end" className="tpl-modal__label">
                 {t('templates.endTimeLabel')} <span className="tpl-modal__required">*</span>
               </label>
-              <input
+              <select
                 id="tpl-end"
-                type="time"
-                className="tpl-modal__input"
+                className="tpl-modal__select"
                 value={form.endTime}
                 onChange={(e) => handleChange('endTime', e.target.value)}
-              />
+              >
+                <option value="">-- Chọn giờ kết thúc --</option>
+                {endOptions.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
               {errors.endTime && <span className="tpl-modal__error">{errors.endTime}</span>}
             </div>
           </div>

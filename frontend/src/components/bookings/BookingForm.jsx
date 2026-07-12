@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import roomService from '../../services/room.service';
 import DateTimePicker from '../common/DateTimePicker';
 import ConflictAlert from './ConflictAlert';
@@ -80,8 +81,6 @@ function BookingFormInner({ onSubmit, isLoading, conflicts, onClearConflicts, in
   const [roomsLoaded, setRoomsLoaded] = useState(false);
 
   const [errors, setErrors] = useState({});
-
-  // Sync state if initialValues changes (e.g. from suggestions or templates)
   useEffect(() => {
     // Case 1: Full ISO datetime provided (from room search / suggestions)
     if (initialValues.startTime && initialValues.endTime) {
@@ -153,6 +152,16 @@ function BookingFormInner({ onSubmit, isLoading, conflicts, onClearConflicts, in
   // Auto-search available rooms if date, startTime, and endTime are all present and rooms are not loaded yet
   useEffect(() => {
     if (date && startTime && endTime && !roomsLoaded && !roomsLoading) {
+      // Validate business hours
+      if (startTime < '07:00' || endTime > '22:00') {
+        toast.error('Thời gian của mẫu nằm ngoài giờ hoạt động (07:00 - 22:00)!');
+        return;
+      }
+      if (startTime >= endTime) {
+        toast.error('Thời gian của mẫu không hợp lệ (Giờ kết thúc phải sau giờ bắt đầu)!');
+        return;
+      }
+
       const start = combineDateTime(date, startTime);
       const end = combineDateTime(date, endTime);
       if (start && end && new Date(start) < new Date(end)) {
@@ -164,19 +173,25 @@ function BookingFormInner({ onSubmit, isLoading, conflicts, onClearConflicts, in
             setRoomsLoaded(true);
             
             // Preserve pre-filled/selected room if it's still available
-            if (selectedRoomId && !rooms.some((r) => r.id === selectedRoomId)) {
-              setSelectedRoomId('');
-            }
-
-            // Smoothly scroll to the bottom of the page to focus on Step 3 info
-            setTimeout(() => {
-              const submitBtn = document.getElementById('submit-booking-btn');
-              if (submitBtn) {
-                submitBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            if (selectedRoomId) {
+              const roomStillAvailable = rooms.some((r) => r.id === selectedRoomId);
+              if (roomStillAvailable) {
+                // Smoothly scroll to the bottom of the page to focus on Step 3 info
+                setTimeout(() => {
+                  const submitBtn = document.getElementById('submit-booking-btn');
+                  if (submitBtn) {
+                    submitBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                  }
+                }, 300);
+              } else {
+                setSelectedRoomId('');
+                toast.error('Phòng họp trong mẫu của bạn hiện đã bị trùng lịch hoặc không hoạt động vào ngày này!');
               }
-            }, 300);
+            }
           })
-          .catch(() => {})
+          .catch(() => {
+            toast.error('Không thể kiểm tra danh sách phòng trống');
+          })
           .finally(() => setRoomsLoading(false));
       }
     }
@@ -524,17 +539,7 @@ function BookingFormInner({ onSubmit, isLoading, conflicts, onClearConflicts, in
 }
 
 function BookingForm(props) {
-  try {
-    return <BookingFormInner {...props} />;
-  } catch (err) {
-    return (
-      <div style={{ padding: '20px', background: '#ef4444', color: '#fff', borderRadius: '12px', margin: '20px 0', fontFamily: 'sans-serif' }}>
-        <h3 style={{ margin: '0 0 10px 0' }}>🔴 Lỗi hiển thị Form (BookingForm):</h3>
-        <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>{err.message}</p>
-        <pre style={{ whiteSpace: 'pre-wrap', fontSize: '11px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '6px', margin: 0 }}>{err.stack}</pre>
-      </div>
-    );
-  }
+  return <BookingFormInner {...props} />;
 }
 
 export default BookingForm;
