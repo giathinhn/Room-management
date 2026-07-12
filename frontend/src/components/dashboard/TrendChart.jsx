@@ -13,7 +13,7 @@ import { vi, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 
 const CustomDot = ({ cx, cy, fill }) => (
-  <circle cx={cx} cy={cy} r={4} fill={fill} stroke="rgba(255,255,255,0.2)" strokeWidth={2} />
+  <circle cx={cx} cy={cy} r={4} fill={fill} stroke="var(--color-bg)" strokeWidth={2} />
 );
 
 /**
@@ -37,14 +37,14 @@ const TrendChart = ({ data = [], granularity = 'week', loading = false }) => {
     if (!active || !payload?.length) return null;
     return (
       <div style={{
-        background: '#1e1e35',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--color-bg-card)',
+        border: '1px solid var(--color-border)',
         borderRadius: 10,
         padding: '10px 14px',
         fontSize: 13,
         minWidth: 140,
       }}>
-        <div style={{ fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>{label}</div>
+        <div style={{ fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 8 }}>{label}</div>
         {payload.map((p) => (
           <div key={p.dataKey} style={{ color: p.color, marginBottom: 3 }}>
             {lines.find((l) => l.key === p.dataKey)?.label}: {p.value}
@@ -91,15 +91,15 @@ const TrendChart = ({ data = [], granularity = 'week', loading = false }) => {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={chartData} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
         <XAxis
           dataKey="label"
-          tick={{ fill: '#64748b', fontSize: 11 }}
+          tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fill: '#64748b', fontSize: 11 }}
+          tick={{ fill: 'var(--color-text-secondary)', fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           allowDecimals={false}
@@ -108,7 +108,7 @@ const TrendChart = ({ data = [], granularity = 'week', loading = false }) => {
         <Legend
           formatter={(value) => {
             const found = lines.find((l) => l.key === value);
-            return <span style={{ color: '#94a3b8', fontSize: 12 }}>{found?.label || value}</span>;
+            return <span style={{ color: 'var(--color-text-secondary)', fontSize: 12 }}>{found?.label || value}</span>;
           }}
         />
         {lines.map((line) => (
