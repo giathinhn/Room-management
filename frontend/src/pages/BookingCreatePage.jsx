@@ -27,10 +27,11 @@ function BookingCreatePage() {
     const startHHMM = params.get('startHHMM') || '';
     const endHHMM = params.get('endHHMM') || '';
     return {
-      roomId:    params.get('roomId')    || '',
-      startTime: params.get('startTime') || '',
-      endTime:   params.get('endTime')   || '',
-      title:     params.get('title')     || '',
+      roomId:       params.get('roomId')       || '',
+      startTime:    params.get('startTime')    || '',
+      endTime:      params.get('endTime')      || '',
+      title:        params.get('title')        || '',
+      templateName: params.get('templateName') || '',
       // Time-of-day HH:mm from template pre-fill (used by BookingForm if startTime empty)
       startHHMM,
       endHHMM,
@@ -54,13 +55,15 @@ function BookingCreatePage() {
     const params = new URLSearchParams();
     if (tpl.roomId) params.set('roomId', tpl.roomId);
     if (tpl.title) params.set('title', tpl.title);
+    if (tpl.name) params.set('templateName', tpl.name);
+    // Must use getUTCHours/getUTCMinutes because Prisma @db.Time() stores as 1970-01-01THH:MM:00Z
     if (tpl.startTime) {
       const d = new Date(tpl.startTime);
-      params.set('startHHMM', `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
+      params.set('startHHMM', `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`);
     }
     if (tpl.endTime) {
       const d = new Date(tpl.endTime);
-      params.set('endHHMM', `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
+      params.set('endHHMM', `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`);
     }
     navigate(`/bookings/new?${params.toString()}`);
   }, [navigate]);
@@ -221,12 +224,13 @@ function BookingCreatePage() {
                 </div>
                 <div className="create-page__templates-scroll">
                   {templates.map((tpl) => {
-                    const startStr = tpl.startTime
-                      ? new Date(tpl.startTime).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
-                      : '';
-                    const endStr = tpl.endTime
-                      ? new Date(tpl.endTime).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
-                      : '';
+                    const toHHMM = (t) => {
+                      if (!t) return '';
+                      const d = new Date(t);
+                      return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;
+                    };
+                    const startStr = toHHMM(tpl.startTime);
+                    const endStr = toHHMM(tpl.endTime);
                     return (
                       <button
                         key={tpl.id}

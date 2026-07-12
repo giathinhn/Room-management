@@ -33,7 +33,19 @@ function SaveAsTemplate({ booking }) {
     }
     setIsLoading(true);
     try {
-      await templateService.createFromBooking(booking.id, templateName.trim());
+      // Extract times locally to avoid timezone offsets on the server
+      const startDate = new Date(booking.startTime);
+      const endDate = new Date(booking.endTime);
+      const startHH = String(startDate.getHours()).padStart(2, '0');
+      const startMM = String(startDate.getMinutes()).padStart(2, '0');
+      const endHH = String(endDate.getHours()).padStart(2, '0');
+      const endMM = String(endDate.getMinutes()).padStart(2, '0');
+
+      await templateService.createFromBooking(booking.id, {
+        name: templateName.trim(),
+        startTime: `${startHH}:${startMM}`,
+        endTime: `${endHH}:${endMM}`,
+      });
       toast.success(t('templates.saveSuccess'));
       handleClose();
     } catch (err) {

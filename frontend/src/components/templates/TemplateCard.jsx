@@ -4,14 +4,16 @@ import { translateRoom } from '../../utils/roomTranslate';
 import './TemplateCard.css';
 
 /**
- * Format a Prisma Time field (1970-01-01T...) to "HH:mm".
+ * Format a Prisma Time field (1970-01-01THH:mm:ssZ UTC) to "HH:mm" (local display).
+ * Must use UTC hours/minutes because Prisma @db.Time() stores times as UTC epoch.
  * @param {string} timeStr
- * @param {string} locale
  */
-function formatTime(timeStr, locale) {
+function formatTime(timeStr) {
   if (!timeStr) return '--:--';
   const d = new Date(timeStr);
-  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
 }
 
 /**
@@ -28,7 +30,7 @@ function TemplateCard({ template, onUse, onEdit, onDelete }) {
   const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
   const room = translateRoom(template.room, t);
 
-  const timeRange = `${formatTime(template.startTime, locale)} – ${formatTime(template.endTime, locale)}`;
+  const timeRange = `${formatTime(template.startTime)} – ${formatTime(template.endTime)}`;
 
   return (
     <div className="tpl-card" tabIndex={0} role="article" aria-label={`Template: ${template.name}`}>

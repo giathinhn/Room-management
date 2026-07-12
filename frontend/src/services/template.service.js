@@ -40,13 +40,9 @@ const templateService = {
     return data;
   },
 
-  /**
-   * Save an existing booking as a template.
-   * @param {string} bookingId
-   * @param {string} name  — template name
-   */
-  async createFromBooking(bookingId, name) {
-    const { data } = await api.post(`/templates/from-booking/${bookingId}`, { name });
+  async createFromBooking(bookingId, nameOrData) {
+    const payload = typeof nameOrData === 'string' ? { name: nameOrData } : nameOrData;
+    const { data } = await api.post(`/templates/from-booking/${bookingId}`, payload);
     return data;
   },
 };

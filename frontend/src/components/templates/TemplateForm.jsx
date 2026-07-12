@@ -42,8 +42,9 @@ function TemplateForm({ mode = 'create', initial = {}, onSave, onClose, isLoadin
     if (!timeStr) return '';
     const d = new Date(timeStr);
     if (isNaN(d.getTime())) return '';
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
+    // Use UTC because Prisma @db.Time() stores as 1970-01-01THH:MM:00Z (UTC)
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    const mm = String(d.getUTCMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
   }
 

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import roomService from '../../services/room.service';
 import DateTimePicker from '../common/DateTimePicker';
 import ConflictAlert from './ConflictAlert';
 import { translateRoom } from '../../utils/roomTranslate';
+import useSSEEvent from '../../hooks/useSSEEvent';
 import './BookingForm.css';
 
 /**
@@ -56,15 +57,23 @@ const extractTime = (iso) => {
  *   initialValues?: { roomId?: string, startTime?: string, endTime?: string },
  * }} props
  */
-function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initialValues = {} }) {
+function BookingFormInner({ onSubmit, isLoading, conflicts, onClearConflicts, initialValues = {} }) {
   const { t, i18n } = useTranslation();
   
   // ── State ─────────────────────────────────────────────────────────────────
-  const [date, setDate] = useState(extractDate(initialValues.startTime) || '');
-  const [startTime, setStartTime] = useState(extractTime(initialValues.startTime) || '');
-  const [endTime, setEndTime] = useState(extractTime(initialValues.endTime) || '');
+  const [date, setDate] = useState(
+    extractDate(initialValues.startTime) || 
+    (initialValues.startHHMM ? new Date().toISOString().split('T')[0] : '')
+  );
+  // Pre-fill time from full ISO or from template HH:mm shorthand
+  const [startTime, setStartTime] = useState(
+    extractTime(initialValues.startTime) || initialValues.startHHMM || ''
+  );
+  const [endTime, setEndTime] = useState(
+    extractTime(initialValues.endTime) || initialValues.endHHMM || ''
+  );
   const [selectedRoomId, setSelectedRoomId] = useState(initialValues.roomId || '');
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialValues.title || '');
 
   const [availableRooms, setAvailableRooms] = useState([]);
   const [roomsLoading, setRoomsLoading] = useState(false);
@@ -74,6 +83,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
 
   // Sync state if initialValues changes (e.g. from suggestions or templates)
   useEffect(() => {
+    // Case 1: Full ISO datetime provided (from room search / suggestions)
     if (initialValues.startTime && initialValues.endTime) {
       const d = extractDate(initialValues.startTime);
       const st = extractTime(initialValues.startTime);
@@ -113,7 +123,64 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
           .finally(() => setRoomsLoading(false));
       }
     }
+    // Case 2: Template pre-fill — only time-of-day (HH:mm) provided, no date yet
+    else if (initialValues.startHHMM || initialValues.endHHMM) {
+      if (initialValues.startHHMM) setStartTime(initialValues.startHHMM);
+      if (initialValues.endHHMM) setEndTime(initialValues.endHHMM);
+      if (initialValues.roomId) setSelectedRoomId(initialValues.roomId);
+      if (initialValues.title) setTitle(initialValues.title);
+      if (!date) {
+        setDate(new Date().toISOString().split('T')[0]);
+      }
+      setRoomsLoaded(false);
+    }
   }, [initialValues]);
+
+  // Dynamically include endTime in options if it is not in the default 30-min options
+  const endTimeOptions = useMemo(() => {
+    const defaultOptions = [
+      '07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
+      '12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00',
+      '16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30',
+      '21:00','21:30','22:00'
+    ];
+    if (!endTime || defaultOptions.includes(endTime)) {
+      return defaultOptions;
+    }
+    return [...defaultOptions, endTime].sort();
+  }, [endTime]);
+
+  // Auto-search available rooms if date, startTime, and endTime are all present and rooms are not loaded yet
+  useEffect(() => {
+    if (date && startTime && endTime && !roomsLoaded && !roomsLoading) {
+      const start = combineDateTime(date, startTime);
+      const end = combineDateTime(date, endTime);
+      if (start && end && new Date(start) < new Date(end)) {
+        setRoomsLoading(true);
+        roomService.getAvailableRooms({ startTime: start, endTime: end })
+          .then((res) => {
+            const rooms = res.data || [];
+            setAvailableRooms(rooms);
+            setRoomsLoaded(true);
+            
+            // Preserve pre-filled/selected room if it's still available
+            if (selectedRoomId && !rooms.some((r) => r.id === selectedRoomId)) {
+              setSelectedRoomId('');
+            }
+
+            // Smoothly scroll to the bottom of the page to focus on Step 3 info
+            setTimeout(() => {
+              const submitBtn = document.getElementById('submit-booking-btn');
+              if (submitBtn) {
+                submitBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              }
+            }, 300);
+          })
+          .catch(() => {})
+          .finally(() => setRoomsLoading(false));
+      }
+    }
+  }, [date, startTime, endTime, roomsLoaded, roomsLoading, selectedRoomId]);
 
   // Compute values
   const startISO = combineDateTime(date, startTime);
@@ -131,14 +198,19 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
     onClearConflicts?.();
     setRoomsLoading(true);
     setRoomsLoaded(false);
-    setSelectedRoomId('');
     try {
       const res = await roomService.getAvailableRooms({
         startTime: startISO,
         endTime:   endISO,
       });
-      setAvailableRooms(res.data || []);
+      const rooms = res.data || [];
+      setAvailableRooms(rooms);
       setRoomsLoaded(true);
+      
+      // Preserve selection if still available
+      if (selectedRoomId && !rooms.some((r) => r.id === selectedRoomId)) {
+        setSelectedRoomId('');
+      }
       
       // Auto scroll to Step 2
       setTimeout(() => {
@@ -152,7 +224,28 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
     } finally {
       setRoomsLoading(false);
     }
-  }, [canSearch, startISO, endISO, onClearConflicts, t]);
+  }, [canSearch, startISO, endISO, onClearConflicts, t, selectedRoomId]);
+
+  // Refresh available rooms list dynamically in response to booking changes
+  const refreshAvailableRooms = useCallback(async () => {
+    if (!canSearch || !roomsLoaded) return;
+    try {
+      const res = await roomService.getAvailableRooms({
+        startTime: startISO,
+        endTime:   endISO,
+      });
+      const newRooms = res.data || [];
+      setAvailableRooms(newRooms);
+      // Retain selection if the selected room is still available, otherwise clear it
+      if (selectedRoomId && !newRooms.some((r) => r.id === selectedRoomId)) {
+        setSelectedRoomId('');
+      }
+    } catch (_err) {
+      // Fail silently for background refreshes
+    }
+  }, [canSearch, roomsLoaded, startISO, endISO, selectedRoomId]);
+
+  useSSEEvent('bookings_changed', refreshAvailableRooms);
 
   const validate = () => {
     const newErrors = {};
@@ -213,6 +306,20 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
         />
       )}
 
+      {initialValues.templateName && (
+        <div className="booking-form__template-banner">
+          <span className="booking-form__template-banner-icon">🔖</span>
+          <div className="booking-form__template-banner-content">
+            <span className="booking-form__template-banner-text">
+              Đang áp dụng mẫu: <strong>{initialValues.templateName}</strong>
+            </span>
+            <span className="booking-form__template-banner-sub">
+              Vui lòng chọn ngày họp bên dưới để kiểm tra phòng trống.
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── Step 1: Time Selection ─────────────────────────────────────── */}
       <div className="booking-form__step">
         <div className="booking-form__step-header">
@@ -251,10 +358,7 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
                 onChange={(e) => { setEndTime(e.target.value); setRoomsLoaded(false); }}
               >
                 <option value="">{t('bookings.form.selectEndTimePlaceholder')}</option>
-                {['07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
-                  '12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00',
-                  '16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30',
-                  '21:00','21:30','22:00'].map((t) => (
+                {endTimeOptions.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
@@ -417,6 +521,20 @@ function BookingForm({ onSubmit, isLoading, conflicts, onClearConflicts, initial
       )}
     </form>
   );
+}
+
+function BookingForm(props) {
+  try {
+    return <BookingFormInner {...props} />;
+  } catch (err) {
+    return (
+      <div style={{ padding: '20px', background: '#ef4444', color: '#fff', borderRadius: '12px', margin: '20px 0', fontFamily: 'sans-serif' }}>
+        <h3 style={{ margin: '0 0 10px 0' }}>🔴 Lỗi hiển thị Form (BookingForm):</h3>
+        <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>{err.message}</p>
+        <pre style={{ whiteSpace: 'pre-wrap', fontSize: '11px', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '6px', margin: 0 }}>{err.stack}</pre>
+      </div>
+    );
+  }
 }
 
 export default BookingForm;

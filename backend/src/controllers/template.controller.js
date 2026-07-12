@@ -123,7 +123,7 @@ const templateController = {
   async createFromBooking(req, res, next) {
     try {
       const { bookingId } = req.params;
-      const { name } = req.body;
+      const { name, startTime, endTime } = req.body;
 
       if (!name || typeof name !== 'string' || name.trim().length === 0) {
         return res.status(400).json({
@@ -138,7 +138,9 @@ const templateController = {
       const template = await templateService.createFromBooking(
         req.user.id,
         bookingData,
-        name.trim()
+        name.trim(),
+        startTime,
+        endTime
       );
 
       return res.status(201).json({

@@ -62,6 +62,14 @@ function DateTimePicker({
   const today = getTodayStr();
   const maxDate = getMaxDateStr();
 
+  // Dynamically include timeValue if it is not in the default 30-min interval options
+  const timeOptions = useMemo(() => {
+    if (!timeValue || TIME_OPTIONS.includes(timeValue)) {
+      return TIME_OPTIONS;
+    }
+    return [...TIME_OPTIONS, timeValue].sort();
+  }, [timeValue]);
+
   return (
     <div className={`dtp-wrapper ${error ? 'dtp-error' : ''}`}>
       {label && (
@@ -88,7 +96,7 @@ function DateTimePicker({
           disabled={disabled}
         >
           <option value="">-- Chọn giờ --</option>
-          {TIME_OPTIONS.map((t) => (
+          {timeOptions.map((t) => (
             <option key={t} value={t}>
               {t}
             </option>

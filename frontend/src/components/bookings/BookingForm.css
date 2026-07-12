@@ -352,3 +352,39 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Template Banner ─────────────────────────────────────────────────────── */
+.booking-form__template-banner {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-left: 4px solid var(--color-primary-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.booking-form__template-banner-icon {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary-light);
+  flex-shrink: 0;
+}
+
+.booking-form__template-banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.booking-form__template-banner-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.booking-form__template-banner-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+

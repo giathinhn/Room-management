@@ -3,6 +3,8 @@ const recurringRepository = require('../repositories/recurring.repository');
 const roomRepository = require('../repositories/room.repository');
 const { generateSlots } = require('../utils/recurring');
 const prisma = require('../config/database');
+const sseManager = require('../utils/sseManager');
+
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BUSINESS_HOUR_START = 7;  // 07:00
@@ -218,6 +220,9 @@ const recurringService = {
       },
       data: { status: 'cancelled' },
     });
+
+    // Broadcast change so calendars and lists on other clients reload automatically
+    sseManager.broadcast({ event: 'bookings_changed', data: { recurringId, action: 'cancel' } });
 
     return {
       message: `Cancelled ${count} bookings in the series`,

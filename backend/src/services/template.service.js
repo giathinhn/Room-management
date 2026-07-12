@@ -13,7 +13,8 @@ const MAX_TEMPLATES = 10;
  */
 function parseTime(timeStr) {
   const [hours, minutes] = timeStr.split(':').map(Number);
-  const d = new Date(1970, 0, 1, hours, minutes, 0, 0);
+  // Use UTC to prevent local timezone offsets on the server from shifting the time stored in DB
+  const d = new Date(Date.UTC(1970, 0, 1, hours, minutes, 0, 0));
   return d;
 }
 
@@ -143,27 +144,34 @@ const templateService = {
    * @param {{ roomId, title, startTime, endTime }} booking  (full DateTime objects)
    * @param {string} name  template name supplied by user
    */
-  async createFromBooking(userId, booking, name) {
+  async createFromBooking(userId, booking, name, startTime, endTime) {
     const count = await templateRepository.countByUserId(userId);
     if (count >= MAX_TEMPLATES) {
       throw ApiError.badRequest('TEMPLATE_LIMIT_REACHED');
     }
 
-    // Extract HH:mm from booking DateTime
-    const startDate = new Date(booking.startTime);
-    const endDate = new Date(booking.endTime);
-    const startHH = String(startDate.getHours()).padStart(2, '0');
-    const startMM = String(startDate.getMinutes()).padStart(2, '0');
-    const endHH = String(endDate.getHours()).padStart(2, '0');
-    const endMM = String(endDate.getMinutes()).padStart(2, '0');
+    let startHHMM = startTime;
+    let endHHMM = endTime;
+
+    // Fallback to server side extraction if client did not supply them
+    if (!startHHMM || !endHHMM) {
+      const startDate = new Date(booking.startTime);
+      const endDate = new Date(booking.endTime);
+      const startHH = String(startDate.getHours()).padStart(2, '0');
+      const startMM = String(startDate.getMinutes()).padStart(2, '0');
+      const endHH = String(endDate.getHours()).padStart(2, '0');
+      const endMM = String(endDate.getMinutes()).padStart(2, '0');
+      startHHMM = `${startHH}:${startMM}`;
+      endHHMM = `${endHH}:${endMM}`;
+    }
 
     return templateRepository.create({
       userId,
       name,
       roomId: booking.roomId || null,
       title: booking.title,
-      startTime: parseTime(`${startHH}:${startMM}`),
-      endTime: parseTime(`${endHH}:${endMM}`),
+      startTime: parseTime(startHHMM),
+      endTime: parseTime(endHHMM),
     });
   },
 };

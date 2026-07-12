@@ -9,6 +9,7 @@ import { EQUIPMENT_ICONS } from '../components/rooms/RoomCard';
 import RoomQRModal from '../components/rooms/RoomQRModal';
 import { translateRoom } from '../utils/roomTranslate';
 import { BsQrCode } from 'react-icons/bs';
+import { FiEdit2, FiCheck, FiX } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import '../components/rooms/RoomCard.css';
 import './RoomDetailPage.css';
@@ -45,6 +46,11 @@ function RoomDetailPage() {
   // QR modal
   const [qrOpen, setQrOpen] = useState(false);
 
+  // Inline equipment edit
+  const [equipEditMode, setEquipEditMode] = useState(false);
+  const [equipDraft,    setEquipDraft]    = useState([]);
+  const [equipSaving,   setEquipSaving]   = useState(false);
+
   // Fetch room
   useEffect(() => {
     async function load() {
@@ -73,6 +79,37 @@ function RoomDetailPage() {
       toast.error(err.response?.data?.message || t('common.error'));
     } finally {
       setEditLoading(false);
+    }
+  }
+
+  // ── Inline equipment edit ──────────────────────────────────────────────────
+  function startEquipEdit() {
+    setEquipDraft(rawRoom?.equipment ? [...rawRoom.equipment] : []);
+    setEquipEditMode(true);
+  }
+
+  function cancelEquipEdit() {
+    setEquipEditMode(false);
+    setEquipDraft([]);
+  }
+
+  function toggleEquipItem(value) {
+    setEquipDraft((prev) =>
+      prev.includes(value) ? prev.filter((e) => e !== value) : [...prev, value]
+    );
+  }
+
+  async function saveEquipment() {
+    setEquipSaving(true);
+    try {
+      const result = await roomService.updateRoom(id, { equipment: equipDraft });
+      setRoom(result.data);
+      setEquipEditMode(false);
+      toast.success(t('roomDetail.equipmentUpdated', 'Thiết bị đã được cập nhật'));
+    } catch (err) {
+      toast.error(err.response?.data?.message || t('common.error'));
+    } finally {
+      setEquipSaving(false);
     }
   }
 
@@ -182,8 +219,80 @@ function RoomDetailPage() {
 
         {/* Equipment */}
         <div className="room-detail__section">
-          <h2 className="room-detail__section-title">{t('roomDetail.equipment')}</h2>
-          {room.equipment && room.equipment.length > 0 ? (
+          <div className="room-detail__section-header">
+            <h2 className="room-detail__section-title">{t('roomDetail.equipment')}</h2>
+            {isAdmin && !equipEditMode && (
+              <button
+                id="edit-equipment-btn"
+                className="room-detail__equip-edit-btn"
+                onClick={startEquipEdit}
+                title={t('roomDetail.editEquipment', 'Chỉnh sửa thiết bị')}
+              >
+                <FiEdit2 size={14} />
+                <span>{t('common.edit')}</span>
+              </button>
+            )}
+          </div>
+
+          {equipEditMode ? (
+            /* ── Edit mode ── */
+            <div className="room-detail__equip-editor">
+              <div className="room-detail__equip-grid">
+                {[
+                  { value: 'Máy chiếu', icon: '📽️', label: t('rooms.equipmentOptions.projector') },
+                  { value: 'Micro',     icon: '🎤', label: t('rooms.equipmentOptions.microphone') },
+                  { value: 'Bảng trắng', icon: '📋', label: t('rooms.equipmentOptions.whiteboard') },
+                  { value: 'TV',        icon: '🖥️', label: t('rooms.equipmentOptions.tv') },
+                  { value: 'Webcam',    icon: '📷', label: t('rooms.equipmentOptions.webcam') },
+                  { value: 'Loa',       icon: '🔊', label: t('rooms.equipmentOptions.speaker') },
+                  { value: 'Điều hòa',  icon: '❄️', label: t('rooms.equipmentOptions.airConditioner') },
+                ].map(({ value, icon, label }) => {
+                  const checked = equipDraft.includes(value);
+                  return (
+                    <label
+                      key={value}
+                      htmlFor={`equip-inline-${value}`}
+                      className={`room-detail__equip-option${checked ? ' selected' : ''}`}
+                    >
+                      <input
+                        id={`equip-inline-${value}`}
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleEquipItem(value)}
+                        className="room-detail__equip-checkbox"
+                      />
+                      <span className="room-detail__equip-icon">{icon}</span>
+                      <span className="room-detail__equip-label">{label}</span>
+                      {checked && <FiCheck className="room-detail__equip-check" size={13} />}
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="room-detail__equip-actions">
+                <button
+                  id="save-equipment-btn"
+                  className="btn btn--primary btn--sm"
+                  onClick={saveEquipment}
+                  disabled={equipSaving}
+                >
+                  {equipSaving ? (
+                    <><span className="spinner-xs" /> {t('rooms.form.saving')}</>
+                  ) : (
+                    <><FiCheck size={14} /> {t('common.save', 'Lưu')}</>
+                  )}
+                </button>
+                <button
+                  id="cancel-equipment-btn"
+                  className="btn btn--secondary btn--sm"
+                  onClick={cancelEquipEdit}
+                  disabled={equipSaving}
+                >
+                  <FiX size={14} /> {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          ) : room.equipment && room.equipment.length > 0 ? (
+            /* ── View mode — has equipment ── */
             <div className="room-detail__equipment">
               {room.equipment.map((item) => (
                 <div key={item} className="room-detail__equipment-badge">
@@ -195,6 +304,7 @@ function RoomDetailPage() {
               ))}
             </div>
           ) : (
+            /* ── View mode — no equipment ── */
             <p className="room-detail__no-equipment">{t('roomDetail.noEquipment')}</p>
           )}
         </div>

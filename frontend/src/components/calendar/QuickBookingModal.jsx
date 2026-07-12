@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiX, FiCalendar, FiZap } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import bookingService from '../../services/booking.service';
 import roomService from '../../services/room.service';
+import useSSEEvent from '../../hooks/useSSEEvent';
 import './QuickBookingModal.css';
 
 /**
@@ -46,8 +47,8 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
     }).catch(() => {});
   }, []);
 
-  // Load available rooms when time changes
-  useEffect(() => {
+  // Load available rooms from server
+  const loadAvailableRooms = useCallback(() => {
     if (!form.startTime || !form.endTime) return;
     const start = new Date(form.startTime);
     const end = new Date(form.endTime);
@@ -66,7 +67,15 @@ function QuickBookingModal({ startTime, endTime, onClose, onSuccess }) {
         setAvailableRooms(rooms); // fallback to all rooms
       })
       .finally(() => setIsLoadingRooms(false));
-  }, [form.startTime, form.endTime]);
+  }, [form.startTime, form.endTime, rooms]);
+
+  // Load available rooms when time changes
+  useEffect(() => {
+    loadAvailableRooms();
+  }, [loadAvailableRooms]);
+
+  // Listen to bookings_changed to refresh available rooms list immediately
+  useSSEEvent('bookings_changed', loadAvailableRooms);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));

@@ -62,15 +62,17 @@ function TemplatesPage() {
     const params = new URLSearchParams();
     if (template.roomId) params.set('roomId', template.roomId);
     if (template.title) params.set('title', template.title);
+    if (template.name) params.set('templateName', template.name);
 
-    // Extract HH:mm for startTime and endTime from the Time field
+    // Extract HH:mm for startTime and endTime from the Prisma Time field (UTC epoch)
+    // Must use getUTCHours/getUTCMinutes because @db.Time() stores as 1970-01-01THH:MM:00Z
     if (template.startTime) {
       const d = new Date(template.startTime);
-      params.set('startHHMM', `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
+      params.set('startHHMM', `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`);
     }
     if (template.endTime) {
       const d = new Date(template.endTime);
-      params.set('endHHMM', `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
+      params.set('endHHMM', `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`);
     }
 
     navigate(`/bookings/new?${params.toString()}`);
