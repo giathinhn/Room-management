@@ -126,10 +126,10 @@ function SaveAsTemplate({ booking }) {
       <style>{`
         .save-tpl-btn {
           padding: 8px 16px;
-          background: rgba(99,102,241,0.15);
-          border: 1px solid rgba(99,102,241,0.3);
+          background: var(--fc-button-bg);
+          border: 1px solid rgba(99, 102, 241, 0.25);
           border-radius: var(--radius-md);
-          color: #a5b4fc;
+          color: var(--fc-button-text);
           font-size: var(--font-size-sm);
           font-weight: 600;
           font-family: var(--font-family);
@@ -137,9 +137,9 @@ function SaveAsTemplate({ booking }) {
           transition: all var(--transition-fast);
         }
         .save-tpl-btn:hover {
-          background: rgba(99,102,241,0.25);
+          background: var(--color-primary);
           color: #fff;
-          box-shadow: 0 4px 12px rgba(99,102,241,0.25);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
         }
         .save-tpl-backdrop {
           position: fixed;
@@ -153,13 +153,13 @@ function SaveAsTemplate({ booking }) {
           padding: 16px;
         }
         .save-tpl-modal {
-          background: var(--color-surface);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: var(--color-bg-card);
+          border: 1px solid var(--color-border);
           border-radius: var(--radius-xl);
           padding: 28px;
           width: 100%;
           max-width: 400px;
-          box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+          box-shadow: var(--shadow-lg);
           animation: modalSlideIn 0.25s cubic-bezier(0.34,1.2,0.64,1);
         }
         .save-tpl-modal__title {
@@ -188,8 +188,8 @@ function SaveAsTemplate({ booking }) {
         }
         .save-tpl-modal__input {
           padding: 10px 14px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: var(--color-input-bg);
+          border: 1px solid var(--color-border);
           border-radius: var(--radius-md);
           color: var(--color-text-primary);
           font-size: var(--font-size-sm);
@@ -218,12 +218,12 @@ function SaveAsTemplate({ booking }) {
         }
         .save-tpl-modal__btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .save-tpl-modal__btn--cancel {
-          background: rgba(255,255,255,0.06);
+          background: var(--color-input-hover-bg);
           color: var(--color-text-secondary);
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid var(--color-border);
         }
         .save-tpl-modal__btn--cancel:hover:not(:disabled) {
-          background: rgba(255,255,255,0.1);
+          background: var(--color-border-hover);
           color: var(--color-text-primary);
         }
         .save-tpl-modal__btn--save {

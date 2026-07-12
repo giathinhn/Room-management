@@ -78,8 +78,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: linear-gradient(135deg, rgba(30, 30, 53, 0.8), rgba(22, 33, 62, 0.8));
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   overflow: hidden;
 }
@@ -93,7 +93,7 @@
   padding: 18px 24px;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
   text-align: left;
   position: relative;
@@ -105,7 +105,7 @@
 }
 
 .notifications-page__item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-bg-card-hover);
 }
 
 .notifications-page__item--unread {
@@ -189,8 +189,8 @@
   justify-content: center;
   padding: 80px 24px;
   text-align: center;
-  background: linear-gradient(135deg, rgba(30, 30, 53, 0.6), rgba(22, 33, 62, 0.6));
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
 }
 
@@ -204,13 +204,13 @@
 .notifications-page__empty h3 {
   font-size: 18px;
   font-weight: 700;
-  color: rgba(241, 245, 249, 0.7);
+  color: var(--color-text-primary);
   margin: 0 0 8px;
 }
 
 .notifications-page__empty p {
   font-size: 14px;
-  color: rgba(241, 245, 249, 0.4);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -221,7 +221,7 @@
   justify-content: center;
   gap: 10px;
   padding: 24px;
-  color: rgba(241, 245, 249, 0.4);
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
