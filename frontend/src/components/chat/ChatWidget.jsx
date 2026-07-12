@@ -9,7 +9,7 @@ import './ChatWidget.css';
 
 // --- Sub-components ----------------------------------------------------------
 
-const RoomCard = ({ room, onBook }) => {
+const RoomCard = ({ room, onBook, requestedSlot }) => {
   const { t } = useTranslation();
   return (
     <div className="chat-room-card">
@@ -17,6 +17,15 @@ const RoomCard = ({ room, onBook }) => {
         <span className="chat-room-card__name">{room.name}</span>
         <span className="chat-room-card__capacity"><FiUsers size={12} /> {room.capacity} {t('rooms.capacityUnit')}</span>
       </div>
+      {requestedSlot && (
+        <div className="chat-room-card__slot">
+          <FiClock size={11} />
+          {requestedSlot.startTime}–{requestedSlot.endTime}
+          {requestedSlot.date && (
+            <span>, {new Date(`${requestedSlot.date}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}</span>
+          )}
+        </div>
+      )}
       <div className="chat-room-card__info">
         <span><FiMapPin size={11} /> {room.location}</span>
       </div>
@@ -97,6 +106,46 @@ const BookingItem = ({ booking }) => {
   );
 };
 
+const NoRoomsCard = ({ requestedSlot, suggestions, onSelectSlot }) => {
+  const { t } = useTranslation();
+  const fmt = (slot) => {
+    const dateStr = slot.date
+      ? new Date(`${slot.date}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+      : '';
+    return `${slot.startTime}–${slot.endTime}${dateStr ? `, ${dateStr}` : ''}`;
+  };
+  return (
+    <div className="chat-no-rooms-card">
+      <div className="chat-no-rooms-card__icon">🔍</div>
+      <div className="chat-no-rooms-card__msg">
+        Không có phòng trống lúc <strong>{requestedSlot?.startTime}</strong> ngày{' '}
+        <strong>
+          {requestedSlot?.date
+            ? new Date(`${requestedSlot.date}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+            : ''}
+        </strong>
+      </div>
+      {suggestions && suggestions.length > 0 && (
+        <>
+          <div className="chat-no-rooms-card__hint">Khung giờ thay thế còn trống:</div>
+          <div className="chat-no-rooms-card__suggestions">
+            {suggestions.map((s, i) => (
+              <button
+                key={i}
+                className="chat-slot-chip"
+                onClick={() => onSelectSlot(s)}
+              >
+                <FiClock size={11} /> {fmt(s)}
+                <span className="chat-slot-chip__count">({s.roomCount} phòng)</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const TypingIndicator = () => (
   <div className="chat-message chat-message--ai">
     <div className="chat-bubble chat-bubble--ai">
@@ -108,6 +157,34 @@ const TypingIndicator = () => (
     </div>
   </div>
 );
+
+/**
+ * RoomsSection — renders up to 3 room cards with an expand toggle.
+ */
+const RoomsSection = ({ rooms, requestedSlot, onBook }) => {
+  const [expanded, setExpanded] = useState(false);
+  const LIMIT = 3;
+  const visible = expanded ? rooms : rooms.slice(0, LIMIT);
+  const extra = rooms.length - LIMIT;
+
+  return (
+    <div className="chat-cards">
+      {visible.map((room) => (
+        <RoomCard key={room.id} room={room} onBook={onBook} requestedSlot={requestedSlot} />
+      ))}
+      {!expanded && extra > 0 && (
+        <button className="chat-show-more-btn" onClick={() => setExpanded(true)}>
+          Xem thêm {extra} phòng ▼
+        </button>
+      )}
+      {expanded && rooms.length > LIMIT && (
+        <button className="chat-show-more-btn" onClick={() => setExpanded(false)}>
+          Thu gọn ▲
+        </button>
+      )}
+    </div>
+  );
+};
 
 // --- Main ChatWidget ---------------------------------------------------------
 
@@ -235,6 +312,14 @@ const ChatWidget = () => {
     handleSend(bookPrompt);
   };
 
+  // When user clicks an alternative slot suggestion in NoRoomsCard
+  const handleSelectAltSlot = (slot) => {
+    const prompt = i18n.language === 'en'
+      ? `Find rooms on ${slot.date} from ${slot.startTime} to ${slot.endTime}`
+      : `Tìm phòng ngày ${slot.date} từ ${slot.startTime} đến ${slot.endTime}`;
+    handleSend(prompt);
+  };
+
   const handleConfirmProposal = async (proposalArg) => {
     const proposal = proposalArg || pendingProposal;
     if (!proposal || confirmingProposal) return;
@@ -340,6 +425,8 @@ const ChatWidget = () => {
     const isUser = msg.role === 'user';
     const meta = msg.metadata;
     const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN';
+    const hasRooms = Array.isArray(meta?.rooms) && meta.rooms.length > 0;
+    const hasNoRooms = meta?.action === 'query_rooms' && Array.isArray(meta?.rooms) && meta.rooms.length === 0;
 
     return (
       <div key={msg.id} className={`chat-message chat-message--${isUser ? 'user' : 'ai'}`}>
@@ -347,21 +434,32 @@ const ChatWidget = () => {
           <div className="chat-avatar">🤖</div>
         )}
         <div className="chat-bubble-wrapper">
-          <div className={`chat-bubble chat-bubble--${isUser ? 'user' : 'ai'}`}>
-            {msg.content.split('\n').map((line, i, arr) => (
-              <span key={i}>
-                {renderContent(line)}
-                {i < arr.length - 1 && <br />}
-              </span>
-            ))}
-          </div>
-
-          {Array.isArray(meta?.rooms) && meta.rooms.length > 0 && (
-            <div className="chat-cards">
-              {meta.rooms.map((room) => (
-                <RoomCard key={room.id} room={room} onBook={handleBookRoom} />
+          {/* Hide text bubble when rooms are shown — it's redundant */}
+          {(!hasRooms) && (
+            <div className={`chat-bubble chat-bubble--${isUser ? 'user' : 'ai'}`}>
+              {msg.content.split('\n').map((line, i, arr) => (
+                <span key={i}>
+                  {renderContent(line)}
+                  {i < arr.length - 1 && <br />}
+                </span>
               ))}
             </div>
+          )}
+
+          {hasRooms && (
+            <RoomsSection
+              rooms={meta.rooms}
+              requestedSlot={meta.requestedSlot}
+              onBook={handleBookRoom}
+            />
+          )}
+
+          {hasNoRooms && (
+            <NoRoomsCard
+              requestedSlot={meta.requestedSlot}
+              suggestions={meta.suggestions}
+              onSelectSlot={handleSelectAltSlot}
+            />
           )}
 
           {meta?.proposal && (

@@ -1,4 +1,4 @@
-﻿/* --- Chat Bubble Button ---------------------------------------------------- */
+/* --- Chat Bubble Button ---------------------------------------------------- */
 .chat-bubble-btn {
   position: fixed;
   bottom: 28px;
@@ -572,4 +572,101 @@
   .chat-bubble-wrapper {
     max-width: 88%;
   }
+}
+
+/* --- Room Card Slot Badge -------------------------------------------------- */
+.chat-room-card__slot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--color-primary-light);
+  background: rgba(99, 102, 241, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+/* --- Show More Button ------------------------------------------------------- */
+.chat-show-more-btn {
+  width: 100%;
+  padding: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px dashed var(--color-border-hover);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  margin-top: 4px;
+}
+
+.chat-show-more-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+/* --- No Rooms Card ---------------------------------------------------------- */
+.chat-no-rooms-card {
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-top: 8px;
+}
+
+.chat-no-rooms-card__icon {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.chat-no-rooms-card__msg {
+  font-size: 0.83rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.chat-no-rooms-card__hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.chat-no-rooms-card__suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* --- Slot Chip (alternative time button) ----------------------------------- */
+.chat-slot-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-light);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  text-align: left;
+}
+
+.chat-slot-chip:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--color-primary);
+  transform: translateX(2px);
+}
+
+.chat-slot-chip__count {
+  margin-left: auto;
+  font-size: 0.73rem;
+  color: var(--color-text-muted);
 }

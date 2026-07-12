@@ -73,6 +73,8 @@ ${roomList || '(Chưa có phòng nào)'}
 - Khi đề xuất giờ kết thúc: nếu user không nêu → dự kiến 1 giờ sau giờ bắt đầu.
 - Nếu thiếu tiêu đề cuộc họp → tự đặt tiêu đề mặc định ngắn gọn (ví dụ: "Họp tại [Tên phòng]" hoặc "Họp team").
 - Trả lời cực kỳ NGẮN GỌN (tối đa 2 câu).
+- Khi action là query_rooms và CÓ phòng trống: reply chỉ 1 câu ngắn, ví dụ: "Tìm thấy X phòng trống lúc HH:MM ngày DD/MM:". Không liệt kê chi tiết phòng trong text.
+- Khi action là query_rooms và KHÔNG có phòng trống: reply ngắn thông báo không có phòng trống và nói hệ thống đã tìm giờ thay thế.
 - Tuyệt đối không lặp lại danh sách phòng họp hoặc các thông tin thiết bị chi tiết khi đề xuất đặt phòng (propose_booking) hoặc xác nhận (confirm_booking).
 - Không tự ý tạo booking — chỉ đề xuất (propose_booking), để user xác nhận`;
 }
@@ -105,6 +107,26 @@ async function saveMessage(userId, role, content, metadata = null) {
 /**
  * Find available rooms matching the given parameters.
  */
+/**
+ * Compute duration in minutes between two HH:MM strings.
+ */
+function diffMinutes(startTime, endTime) {
+  const [sh, sm] = startTime.split(':').map(Number);
+  const [eh, em] = endTime.split(':').map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+}
+
+/**
+ * Add minutes to an HH:MM string, capped at 22:00.
+ * Returns null if result is out of business hours (07:00–22:00).
+ */
+function addMinutesToTime(timeStr, minutes) {
+  const [h, m] = timeStr.split(':').map(Number);
+  const total = h * 60 + m + minutes;
+  if (total < 7 * 60 || total >= 22 * 60) return null;
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
 async function handleQueryRooms(params) {
   const { date, startTime, endTime, durationMinutes, capacity, equipment, location } = params || {};
 
@@ -114,12 +136,12 @@ async function handleQueryRooms(params) {
 
   // Resolve endTime
   let resolvedEnd = endTime;
+  const duration = durationMinutes || 60;
   if (!resolvedEnd && durationMinutes) {
     const [h, m] = startTime.split(':').map(Number);
     const totalMin = h * 60 + m + durationMinutes;
     resolvedEnd = `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
   } else if (!resolvedEnd) {
-    // Default 1 hour
     const [h, m] = startTime.split(':').map(Number);
     const totalMin = h * 60 + m + 60;
     resolvedEnd = `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`;
@@ -132,30 +154,78 @@ async function handleQueryRooms(params) {
     return { rooms: [] };
   }
 
-  // Build filters
-  const where = {
-    isActive: true,
-    bookings: {
-      none: {
-        status: { in: ['pending', 'approved'] },
-        startTime: { lt: end },
-        endTime: { gt: start },
+  // Actual duration from resolved times
+  const actualDuration = diffMinutes(startTime, resolvedEnd);
+
+  // Build base filter (capacity, equipment, location)
+  const baseFilter = { isActive: true };
+  if (capacity) baseFilter.capacity = { gte: Number(capacity) };
+  if (location) baseFilter.location = { contains: location, mode: 'insensitive' };
+  if (equipment && equipment.length > 0) baseFilter.equipment = { hasEvery: equipment };
+
+  // Query rooms available in the requested slot
+  const rooms = await prisma.room.findMany({
+    where: {
+      ...baseFilter,
+      bookings: {
+        none: {
+          status: { in: ['pending', 'approved'] },
+          startTime: { lt: end },
+          endTime: { gt: start },
+        },
       },
     },
-  };
-
-  if (capacity) where.capacity = { gte: Number(capacity) };
-  if (location) where.location = { contains: location, mode: 'insensitive' };
-  if (equipment && equipment.length > 0) {
-    where.equipment = { hasEvery: equipment };
-  }
-
-  const rooms = await prisma.room.findMany({
-    where,
     orderBy: { capacity: 'asc' },
   });
 
-  return { rooms, resolvedDate: date, resolvedStartTime: startTime, resolvedEndTime: resolvedEnd };
+  const requestedSlot = { date, startTime, endTime: resolvedEnd };
+
+  // If rooms found, return immediately
+  if (rooms.length > 0) {
+    return { rooms, requestedSlot, resolvedDate: date, resolvedStartTime: startTime, resolvedEndTime: resolvedEnd };
+  }
+
+  // ── No rooms found — find alternative slots ──────────────────────────────
+  const offsets = [30, 60, 90, 120, -30, -60]; // shift minutes to try
+  const suggestions = [];
+
+  for (const offset of offsets) {
+    if (suggestions.length >= 3) break;
+
+    const altStart = addMinutesToTime(startTime, offset);
+    if (!altStart) continue;
+    const altEnd = addMinutesToTime(altStart, actualDuration);
+    if (!altEnd) continue;
+
+    const altStartDt = new Date(`${date}T${altStart}:00`);
+    const altEndDt = new Date(`${date}T${altEnd}:00`);
+
+    const altRooms = await prisma.room.findMany({
+      where: {
+        ...baseFilter,
+        bookings: {
+          none: {
+            status: { in: ['pending', 'approved'] },
+            startTime: { lt: altEndDt },
+            endTime: { gt: altStartDt },
+          },
+        },
+      },
+      orderBy: { capacity: 'asc' },
+      take: 1, // just need to know at least 1 room is available
+    });
+
+    if (altRooms.length > 0) {
+      suggestions.push({
+        date,
+        startTime: altStart,
+        endTime: altEnd,
+        roomCount: altRooms.length,
+      });
+    }
+  }
+
+  return { rooms: [], suggestions, requestedSlot, resolvedDate: date, resolvedStartTime: startTime, resolvedEndTime: resolvedEnd };
 }
 
 /**
@@ -330,6 +400,18 @@ const aiService = {
         case 'query_rooms': {
           const result = await handleQueryRooms(mergedParameters);
           extraData = result;
+          // Override AI reply when rooms found for brevity
+          if (result.rooms && result.rooms.length > 0) {
+            const { resolvedStartTime, resolvedEndTime, resolvedDate } = result;
+            const dateStr = resolvedDate
+              ? new Date(`${resolvedDate}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+              : '';
+            finalReply = `Tìm thấy **${result.rooms.length} phòng trống** lúc ${resolvedStartTime}–${resolvedEndTime}${dateStr ? ` ngày ${dateStr}` : ''}:`;
+          } else if (result.suggestions && result.suggestions.length > 0) {
+            finalReply = `Không có phòng trống lúc ${result.requestedSlot?.startTime || ''} ngày ${result.requestedSlot?.date || ''}. Dưới đây là một số khung giờ thay thế còn trống:`;
+          } else {
+            finalReply = `Không tìm thấy phòng trống phù hợp cho khung giờ này. Bạn thử điều chỉnh thời gian hoặc số người không?`;
+          }
           break;
         }
 
