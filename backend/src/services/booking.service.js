@@ -93,49 +93,76 @@ const bookingService = {
       throw err;
     }
 
-    // 9. Create the booking with status=pending
+    // 9. Create the booking with status=pending (or approved if autoApprove is active)
+    const isAutoApprove = room.autoApprove === true;
     const booking = await bookingRepository.create({
       userId,
       roomId,
       title,
       startTime,
       endTime,
-      status: 'pending',
+      status: isAutoApprove ? 'approved' : 'pending',
+      approvedAt: isAutoApprove ? new Date() : null,
     });
 
-    // 10. Notify approvers about new pending booking (fire-and-forget)
-    emailService
-      .sendNewBookingNotification(booking)
-      .catch((err) => logger.error('[BookingService] Failed to send new booking notification:', err.message));
+    if (!isAutoApprove) {
+      // 10. Notify approvers about new pending booking (fire-and-forget)
+      emailService
+        .sendNewBookingNotification(booking)
+        .catch((err) => logger.error('[BookingService] Failed to send new booking notification:', err.message));
 
-    // 11. In-app notifications: notify all approvers + admins (fire-and-forget)
-    Promise.resolve().then(async () => {
-      try {
-        const startLabel = new Intl.DateTimeFormat('vi-VN', {
-          dateStyle: 'short', timeStyle: 'short',
-        }).format(startTime);
-        const notifyRoles = await Promise.all([
-          userRepository.findByRole('approver'),
-          userRepository.findByRole('admin'),
-        ]);
-        const recipients = [...notifyRoles[0], ...notifyRoles[1]];
-        // Deduplicate by id
-        const seen = new Set();
-        for (const u of recipients) {
-          if (seen.has(u.id)) continue;
-          seen.add(u.id);
+      // 11. In-app notifications: notify all approvers + admins (fire-and-forget)
+      Promise.resolve().then(async () => {
+        try {
+          const startLabel = new Intl.DateTimeFormat('vi-VN', {
+            dateStyle: 'short', timeStyle: 'short',
+          }).format(startTime);
+          const notifyRoles = await Promise.all([
+            userRepository.findByRole('approver'),
+            userRepository.findByRole('admin'),
+          ]);
+          const recipients = [...notifyRoles[0], ...notifyRoles[1]];
+          // Deduplicate by id
+          const seen = new Set();
+          for (const u of recipients) {
+            if (seen.has(u.id)) continue;
+            seen.add(u.id);
+            await notificationService.createNotification(
+              u.id,
+              'new_booking_pending',
+              'Có booking mới cần duyệt',
+              `${booking.user?.fullName || 'Một người dùng'} đặt phòng ${booking.room?.name || ''} lúc ${startLabel}`,
+              booking.id
+            );
+          }
+        } catch (err) {
+          logger.error('[BookingService] Failed to send in-app notifications to approvers:', err.message);
+        }
+      });
+    } else {
+      // Notify booker of automatic approval (fire-and-forget)
+      emailService
+        .sendBookingApproved(booking)
+        .catch((err) => logger.error('[BookingService] Failed to send approval email (auto-approve):', err.message));
+
+      // In-app notification to booker (fire-and-forget)
+      Promise.resolve().then(async () => {
+        try {
+          const startLabel = new Intl.DateTimeFormat('vi-VN', {
+            dateStyle: 'short', timeStyle: 'short',
+          }).format(new Date(booking.startTime));
           await notificationService.createNotification(
-            u.id,
-            'new_booking_pending',
-            'Có booking mới cần duyệt',
-            `${booking.user?.fullName || 'Một người dùng'} đặt phòng ${booking.room?.name || ''} lúc ${startLabel}`,
+            booking.userId,
+            'booking_approved',
+            'Booking đã được duyệt tự động',
+            `Phòng ${booking.room?.name || ''} lúc ${startLabel} đã được duyệt tự động`,
             booking.id
           );
+        } catch (err) {
+          logger.error('[BookingService] Failed to send in-app approval notification (auto-approve):', err.message);
         }
-      } catch (err) {
-        logger.error('[BookingService] Failed to send in-app notifications to approvers:', err.message);
-      }
-    });
+      });
+    }
 
     sseManager.broadcast({ event: 'bookings_changed', data: { bookingId: booking.id, action: 'create' } });
 

@@ -97,6 +97,15 @@ const roomService = {
     const { data } = await api.delete(`/rooms/${roomId}/favorite`);
     return data;
   },
+
+  /**
+   * Bulk toggle auto-approve setting for all rooms (admin only).
+   * @param {boolean} autoApprove
+   */
+  async bulkUpdateAutoApprove(autoApprove) {
+    const { data } = await api.put('/rooms/bulk-auto-approve', { autoApprove });
+    return data;
+  },
 };
 
 export default roomService;

@@ -34,11 +34,33 @@ function RoomCard({ room: rawRoom, onEdit, onDelete, onView, isAdmin, onFavorite
   const { t } = useTranslation();
   const room = translateRoom(rawRoom, t);
   const [isFavorite, setIsFavorite] = useState(room.isFavorite || false);
+  const [isAutoApprove, setIsAutoApprove] = useState(room.autoApprove || false);
+  const [toggleLoading, setToggleLoading] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
 
   useEffect(() => {
     setIsFavorite(room.isFavorite || false);
   }, [room.isFavorite]);
+
+  useEffect(() => {
+    setIsAutoApprove(room.autoApprove || false);
+  }, [room.autoApprove]);
+
+  const handleToggleAutoApprove = async (e) => {
+    e.stopPropagation();
+    if (toggleLoading) return;
+    setToggleLoading(true);
+    const newStatus = !isAutoApprove;
+    try {
+      await roomService.updateRoom(room.id, { autoApprove: newStatus });
+      setIsAutoApprove(newStatus);
+      toast.success(newStatus ? t('rooms.autoOnSuccess') : t('rooms.autoOffSuccess'));
+    } catch {
+      toast.error(t('rooms.autoToggleError') || 'Không thể cập nhật cấu hình tự động duyệt');
+    } finally {
+      setToggleLoading(false);
+    }
+  };
 
   const handleFavoriteClick = async (e) => {
     e.stopPropagation();
@@ -55,7 +77,7 @@ function RoomCard({ room: rawRoom, onEdit, onDelete, onView, isAdmin, onFavorite
       if (onFavoriteToggle) {
         onFavoriteToggle(room.id, newStatus);
       }
-    } catch (err) {
+    } catch {
       setIsFavorite(!newStatus);
       toast.error(t('rooms.favoriteError'));
     }
@@ -140,6 +162,19 @@ function RoomCard({ room: rawRoom, onEdit, onDelete, onView, isAdmin, onFavorite
 
         {isAdmin && (
           <>
+            <div
+              id={`toggle-auto-room-${room.id}`}
+              className={`room-card__auto-toggle ${isAutoApprove ? 'room-card__auto-toggle--active' : ''} ${toggleLoading ? 'loading' : ''}`}
+              onClick={handleToggleAutoApprove}
+              title={t('rooms.form.autoApproveHelp')}
+            >
+              <div className="room-card__auto-toggle-track">
+                <div className="room-card__auto-toggle-thumb" />
+              </div>
+              <span className="room-card__auto-toggle-label">
+                {isAutoApprove ? t('rooms.autoOn') : t('rooms.autoOff')}
+              </span>
+            </div>
             <button
               id={`edit-room-${room.id}`}
               className="btn btn--sm btn--primary"

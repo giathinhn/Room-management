@@ -76,6 +76,7 @@ model Room {
   location  String   @db.VarChar(200)
   equipment String[]
   isActive  Boolean  @default(true) @map("is_active")
+  autoApprove Boolean  @default(false) @map("auto_approve")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

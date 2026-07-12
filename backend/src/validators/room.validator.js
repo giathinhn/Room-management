@@ -37,6 +37,9 @@ const createRoomSchema = z.object({
   equipment: z
     .array(z.string())
     .default([]),
+  autoApprove: z
+    .boolean()
+    .default(false),
 });
 
 /**
@@ -68,6 +71,7 @@ const updateRoomSchema = z.object({
     .max(50, { message: 'Building must not exceed 50 characters' })
     .optional(),
   equipment: z.array(z.string()).optional(),
+  autoApprove: z.boolean().optional(),
 });
 
 /**

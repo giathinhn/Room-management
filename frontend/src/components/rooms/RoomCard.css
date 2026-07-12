@@ -122,6 +122,7 @@
 /* ─── Actions ────────────────────────────────────────────────────────────────── */
 .room-card__actions {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   margin-top: auto;
   padding-top: 0.5rem;
@@ -155,4 +156,96 @@
 
 .room-card__favorite-btn--active {
   color: #fbbf24 !important;
+}
+
+/* Auto-approve toggle switch styling */
+.room-card__auto-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.room-card__auto-toggle:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border-hover);
+}
+
+.room-card__auto-toggle-track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background: var(--color-border-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.room-card__auto-toggle-thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 14px;
+  height: 14px;
+  background: var(--color-text-muted);
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+}
+
+/* Active State (Light Mode default) */
+.room-card__auto-toggle--active {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10b981;
+}
+
+.room-card__auto-toggle--active:hover {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.room-card__auto-toggle--active .room-card__auto-toggle-track {
+  background: #10b981;
+  border-color: #059669;
+}
+
+.room-card__auto-toggle--active .room-card__auto-toggle-thumb {
+  transform: translateX(14px);
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+/* Active State (Dark Mode override) */
+html.dark .room-card__auto-toggle--active {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #4ade80;
+}
+
+html.dark .room-card__auto-toggle--active:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+html.dark .room-card__auto-toggle--active .room-card__auto-toggle-track {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+html.dark .room-card__auto-toggle--active .room-card__auto-toggle-thumb {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+}
+
+.room-card__auto-toggle.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

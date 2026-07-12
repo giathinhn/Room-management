@@ -122,6 +122,22 @@ function RoomsPage() {
     }
   }
 
+  async function handleBulkAutoApprove(status) {
+    const confirmMsg = status 
+      ? t('rooms.confirmBulkEnableAuto', 'Bạn có chắc chắn muốn BẬT tự động duyệt cho tất cả các phòng họp?')
+      : t('rooms.confirmBulkDisableAuto', 'Bạn có chắc chắn muốn TẮT tự động duyệt cho tất cả các phòng họp?');
+      
+    if (!window.confirm(confirmMsg)) return;
+    
+    try {
+      await roomService.bulkUpdateAutoApprove(status);
+      toast.success(t('rooms.bulkAutoSuccess') || 'Đã cập nhật chế độ tự động duyệt thành công');
+    } catch (err) {
+      const errorCode = err?.response?.data?.error?.code || 'INTERNAL_ERROR';
+      toast.error(t(`errors.${errorCode}`));
+    }
+  }
+
   // ── Delete ───────────────────────────────────────────────────────────────────
   function openDelete(room) {
     setDeleteRoom(room);
@@ -156,6 +172,8 @@ function RoomsPage() {
     });
   })();
 
+  const isAnyRoomAutoApprove = rooms.some((r) => r.autoApprove);
+
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="rooms-page">
@@ -169,13 +187,28 @@ function RoomsPage() {
           </p>
         </div>
         {isAdmin && (
-          <button
-            id="add-room-btn"
-            className="btn btn--primary"
-            onClick={openCreate}
-          >
-            {t('rooms.addRoom')}
-          </button>
+          <div className="rooms-page__header-actions" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div
+              id="bulk-toggle-auto-btn"
+              className={`room-card__auto-toggle ${isAnyRoomAutoApprove ? 'room-card__auto-toggle--active' : ''}`}
+              onClick={() => handleBulkAutoApprove(!isAnyRoomAutoApprove)}
+              style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem', height: '36px' }}
+            >
+              <div className="room-card__auto-toggle-track" style={{ width: '36px', height: '20px' }}>
+                <div className="room-card__auto-toggle-thumb" style={{ width: '16px', height: '16px', transform: isAnyRoomAutoApprove ? 'translateX(16px)' : 'none' }} />
+              </div>
+              <span style={{ fontWeight: '500' }}>
+                {t('rooms.bulkAutoApproveLabel')}: {isAnyRoomAutoApprove ? t('rooms.autoOnText') : t('rooms.autoOffText')}
+              </span>
+            </div>
+            <button
+              id="add-room-btn"
+              className="btn btn--primary"
+              onClick={openCreate}
+            >
+              {t('rooms.addRoom')}
+            </button>
+          </div>
         )}
       </div>
 

@@ -106,6 +106,14 @@ const recurringService = {
   async create(userId, data) {
     const { roomId, title, startDate, endDate, startTime, endTime, frequency, confirmedSlots } = data;
 
+    const room = await roomRepository.findById(roomId);
+    if (!room) {
+      const err = new Error('Room not found');
+      err.statusCode = 404;
+      throw err;
+    }
+    const isAutoApprove = room.autoApprove === true;
+
     // Generate or use confirmed slots
     let slotsToBook;
     if (confirmedSlots && confirmedSlots.length > 0) {
@@ -166,7 +174,8 @@ const recurringService = {
         title,
         startTime: slot.startTime,
         endTime: slot.endTime,
-        status: 'pending',
+        status: isAutoApprove ? 'approved' : 'pending',
+        approvedAt: isAutoApprove ? new Date() : null,
         recurringId: recurring.id,
       }));
 

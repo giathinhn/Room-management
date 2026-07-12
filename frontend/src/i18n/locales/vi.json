@@ -89,6 +89,17 @@
     "createSuccess": "Tạo phòng thành công!",
     "updateSuccess": "Cập nhật phòng thành công!",
     "deleteSuccess": "Đã vô hiệu hóa phòng \"{{name}}\"",
+    "autoOnSuccess": "Đã bật tự động duyệt cho phòng này",
+    "autoOffSuccess": "Đã tắt tự động duyệt cho phòng này",
+    "autoToggleError": "Không thể cập nhật cài đặt tự động duyệt",
+    "autoOn": "Auto duyệt",
+    "autoOff": "Auto duyệt",
+    "bulkAutoApproveLabel": "Tự động duyệt",
+    "autoOnText": "Bật",
+    "autoOffText": "Tắt",
+    "bulkAutoSuccess": "Đã cập nhật chế độ tự động duyệt cho tất cả các phòng",
+    "confirmBulkEnableAuto": "Bạn có chắc chắn muốn BẬT tự động duyệt cho tất cả các phòng họp?",
+    "confirmBulkDisableAuto": "Bạn có chắc chắn muốn TẮT tự động duyệt cho tất cả các phòng họp?",
     "inactive": "Không hoạt động",
     "favoriteAdded": "Đã thêm \"{{name}}\" vào danh sách yêu thích",
     "favoriteRemoved": "Đã xóa \"{{name}}\" khỏi danh sách yêu thích",
@@ -145,7 +156,9 @@
         "buildingMaxLength": "Tòa nhà tối đa 50 ký tự",
         "floorRequired": "Tầng là bắt buộc",
         "floorMaxLength": "Tầng tối đa 50 ký tự"
-      }
+      },
+      "autoApprove": "Tự động duyệt booking",
+      "autoApproveHelp": "Khi được bật, các yêu cầu đặt phòng họp này sẽ tự động chuyển sang trạng thái 'Đã duyệt' mà không cần admin hoặc người phê duyệt duyệt thủ công."
     }
   },
   "bookings": {
@@ -863,7 +876,10 @@
     "usageHistory": "Lịch sử dụng hôm nay",
     "usagePlaceholder": "Lịch đặt phòng sẽ hiển thị ở đây sau khi tích hợp hệ thống đặt phòng.",
     "disableTitle": "Vô hiệu hóa phòng",
-    "disableConfirm": "Bạn có chắc muốn vô hiệu hóa phòng \"{{name}}\"?"
+    "disableConfirm": "Bạn có chắc muốn vô hiệu hóa phòng \"{{name}}\"?",
+    "autoApprove": "Cơ chế duyệt",
+    "autoApproveActive": "Tự động duyệt",
+    "autoApproveInactive": "Yêu cầu phê duyệt thủ công"
   },
   "quickBook": {
     "quickMeetingTitle": "Họp nhanh - {{name}}",

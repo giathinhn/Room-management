@@ -215,6 +215,15 @@ function RoomDetailPage() {
               </span>
             </div>
           </div>
+          <div className="room-detail__meta-item">
+            <span className="room-detail__meta-icon">⚙️</span>
+            <div>
+              <span className="room-detail__meta-label">{t('roomDetail.autoApprove')}</span>
+              <span className="room-detail__meta-value">
+                {room.autoApprove ? t('roomDetail.autoApproveActive') : t('roomDetail.autoApproveInactive')}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Equipment */}

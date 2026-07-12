@@ -44,6 +44,7 @@ const options = {
               example: ['Projector', 'Whiteboard', 'Wifi'],
             },
             isActive: { type: 'boolean', example: true },
+            autoApprove: { type: 'boolean', example: false },
             building: { type: 'string', example: 'Building A' },
             floor: { type: 'integer', example: 2 },
             x: { type: 'number', example: 120.5 },

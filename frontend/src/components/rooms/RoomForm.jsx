@@ -9,6 +9,7 @@ const EMPTY_FORM = {
   floor: '',
   building: '',
   equipment: [],
+  autoApprove: false,
 };
 
 /**
@@ -45,6 +46,7 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
         floor:     room.floor     || '',
         building:  room.building  || '',
         equipment: room.equipment || [],
+        autoApprove: room.autoApprove || false,
       });
     } else {
       setForm(EMPTY_FORM);
@@ -113,6 +115,7 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
       floor:     form.floor.trim(),
       building:  form.building.trim(),
       equipment: form.equipment,
+      autoApprove: form.autoApprove,
     });
   }
 
@@ -225,6 +228,24 @@ function RoomForm({ isOpen, onClose, onSubmit, room = null, isLoading = false })
               );
             })}
           </div>
+        </div>
+
+        {/* Auto Approve setting */}
+        <div className="form-group form-group--checkbox" style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '20px' }}>
+          <label htmlFor="room-auto-approve" className="form-label" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px', fontWeight: '500', marginBottom: '4px' }}>
+            <input
+              id="room-auto-approve"
+              name="autoApprove"
+              type="checkbox"
+              checked={form.autoApprove}
+              onChange={(e) => setForm((prev) => ({ ...prev, autoApprove: e.target.checked }))}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            {t('rooms.form.autoApprove')}
+          </label>
+          <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginLeft: '26px' }}>
+            {t('rooms.form.autoApproveHelp')}
+          </span>
         </div>
 
         {/* Form actions */}

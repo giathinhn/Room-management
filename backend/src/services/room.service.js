@@ -95,6 +95,7 @@ const roomService = {
       building: finalBuilding,
       mapX,
       mapY,
+      autoApprove: parsed.data.autoApprove,
     });
 
     sseManager.broadcast({ event: 'rooms_changed', data: { roomId: room.id, action: 'create' } });
@@ -305,6 +306,15 @@ const roomService = {
       updateData.rows = rowsNum;
     }
     return roomRepository.upsertFloorSetting(building, floor, updateData);
+  },
+
+  async bulkUpdateAutoApprove(autoApprove) {
+    if (typeof autoApprove !== 'boolean') {
+      throw ApiError.badRequest('autoApprove must be a boolean');
+    }
+    const result = await roomRepository.updateAllAutoApprove(autoApprove);
+    sseManager.broadcast({ event: 'rooms_changed', data: { action: 'bulk-update' } });
+    return result;
   },
 };
 

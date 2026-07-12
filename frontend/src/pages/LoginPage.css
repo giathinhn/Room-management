@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f0f1a 0%, #1a0b2e 50%, #0f1a2e 100%);
+  background: var(--auth-page-bg);
   position: relative;
   overflow: hidden;
   padding: 24px;
@@ -63,15 +63,13 @@
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(30, 30, 53, 0.75);
+  background: var(--auth-card-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: 40px 36px;
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(99, 102, 241, 0.1) inset;
+  box-shadow: var(--shadow-lg);
   position: relative;
   z-index: 1;
 }
@@ -95,7 +93,7 @@
 .auth-logo-text {
   font-size: 20px;
   font-weight: 700;
-  background: linear-gradient(135deg, #c4b5fd, #818cf8);
+  background: var(--auth-logo-color);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -146,7 +144,7 @@
 }
 
 .auth-link:hover {
-  color: #c4b5fd;
+  color: var(--color-primary);
   text-decoration: underline;
 }
 

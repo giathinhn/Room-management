@@ -402,6 +402,13 @@ const roomRepository = {
       }
     });
   },
+
+  async updateAllAutoApprove(autoApprove) {
+    return prisma.room.updateMany({
+      where: { isActive: true },
+      data: { autoApprove },
+    });
+  },
 };
 
 module.exports = roomRepository;

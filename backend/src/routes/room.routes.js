@@ -101,6 +101,7 @@ router.get('/floor-map',  authenticate, roomController.getFloorMap);
 
 router.get('/floor-setting', authenticate, roomController.getFloorSetting);
 router.put('/floor-setting', authenticate, authorize('admin'), roomController.updateFloorSetting);
+router.put('/bulk-auto-approve', authenticate, authorize('admin'), roomController.bulkUpdateAutoApprove);
 
 // ⚠️  /available MUST be before /:id
 /**

@@ -89,6 +89,17 @@
     "createSuccess": "Room created successfully!",
     "updateSuccess": "Room updated successfully!",
     "deleteSuccess": "Room \"{{name}}\" has been deactivated",
+    "autoOnSuccess": "Auto-approve enabled for this room",
+    "autoOffSuccess": "Auto-approve disabled for this room",
+    "autoToggleError": "Failed to update auto-approve setting",
+    "autoOn": "Auto Approve",
+    "autoOff": "Auto Approve",
+    "bulkAutoApproveLabel": "Auto-Approve All",
+    "autoOnText": "ON",
+    "autoOffText": "OFF",
+    "bulkAutoSuccess": "Updated auto-approve setting for all rooms successfully",
+    "confirmBulkEnableAuto": "Are you sure you want to ENABLE auto-approve for all rooms?",
+    "confirmBulkDisableAuto": "Are you sure you want to DISABLE auto-approve for all rooms?",
     "inactive": "Inactive",
     "favoriteAdded": "Added \"{{name}}\" to favorites",
     "favoriteRemoved": "Removed \"{{name}}\" from favorites",
@@ -145,7 +156,9 @@
         "buildingMaxLength": "Building must be at most 50 characters",
         "floorRequired": "Floor is required",
         "floorMaxLength": "Floor must be at most 50 characters"
-      }
+      },
+      "autoApprove": "Auto Approve Bookings",
+      "autoApproveHelp": "When enabled, bookings for this room will be automatically approved without requiring manual approval by an admin or approver."
     }
   },
   "bookings": {
@@ -866,7 +879,10 @@
     "usageHistory": "Today's Usage Schedule",
     "usagePlaceholder": "Usage schedule will be displayed here after booking system integration.",
     "disableTitle": "Deactivate Room",
-    "disableConfirm": "Are you sure you want to deactivate room \"{{name}}\"?"
+    "disableConfirm": "Are you sure you want to deactivate room \"{{name}}\"?",
+    "autoApprove": "Approval Process",
+    "autoApproveActive": "Auto approve",
+    "autoApproveInactive": "Requires manual approval"
   },
   "quickBook": {
     "quickMeetingTitle": "Quick Meeting - {{name}}",

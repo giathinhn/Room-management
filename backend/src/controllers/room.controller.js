@@ -208,6 +208,20 @@ const roomController = {
       return next(err);
     }
   },
+
+  /**
+   * PUT /api/rooms/bulk-auto-approve
+   * Body: { autoApprove }
+   */
+  async bulkUpdateAutoApprove(req, res, next) {
+    try {
+      const { autoApprove } = req.body;
+      const result = await roomService.bulkUpdateAutoApprove(autoApprove);
+      return res.status(200).json({ success: true, count: result.count });
+    } catch (err) {
+      return next(err);
+    }
+  },
 };
 
 module.exports = roomController;

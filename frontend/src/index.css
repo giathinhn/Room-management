@@ -52,6 +52,9 @@
   --fc-button-text: var(--color-primary-light);
   --fc-button-bg: rgba(99, 102, 241, 0.08);
   --fc-button-hover-bg: rgba(99, 102, 241, 0.15);
+  --auth-page-bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e0e7ff 100%);
+  --auth-card-bg: rgba(255, 255, 255, 0.85);
+  --auth-logo-color: linear-gradient(135deg, #4f46e5, #7c3aed);
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -407,6 +410,17 @@ a:hover {
   border-color: rgba(239, 68, 68, 0.5);
 }
 
+.btn--success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn--success:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
 .btn--sm {
   padding: 6px 14px;
   font-size: var(--font-size-xs);
@@ -417,7 +431,8 @@ a:hover {
 .btn--primary:disabled,
 .btn--secondary:disabled,
 .btn--ghost:disabled,
-.btn--danger:disabled {
+.btn--danger:disabled,
+.btn--success:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
@@ -655,5 +670,8 @@ html.dark {
   --fc-button-text: #f1f5f9;
   --fc-button-bg: rgba(99, 102, 241, 0.15);
   --fc-button-hover-bg: rgba(99, 102, 241, 0.3);
+  --auth-page-bg: linear-gradient(135deg, #0f0f1a 0%, #1a0b2e 50%, #0f1a2e 100%);
+  --auth-card-bg: rgba(30, 30, 53, 0.75);
+  --auth-logo-color: linear-gradient(135deg, #c4b5fd, #818cf8);
 }
 
